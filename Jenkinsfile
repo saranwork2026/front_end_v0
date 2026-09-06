@@ -39,6 +39,18 @@ pipeline {
 
     stages {
 
+        // Start each build from an empty workspace. The `git` steps below do
+        // fetch + `checkout -f`, which resets TRACKED files but does NOT delete
+        // files that became untracked between commits. When pnpm-workspace.yaml
+        // was removed from the repo, the stale on-disk copy lingered and pnpm
+        // kept failing with "packages field missing or empty". A clean slate
+        // each run prevents any such leftover from affecting the build.
+        stage('Clean workspace') {
+            steps {
+                deleteDir()
+            }
+        }
+
         // Lay out both repos side-by-side so front_end_v0's file: link to
         // ../matrimony-frontend/packages/shared-core resolves.
         stage('Checkout front_end_v0') {
