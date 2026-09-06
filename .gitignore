@@ -1,0 +1,18 @@
+# Build output
+dist/
+dist-ssr/
+
+# Environment variables (local overrides only; committed defaults are .env.development etc.)
+.env*.local
+
+# Common ignores
+node_modules
+.DS_Store
+*.log
+logs
+.vite/
+
+# Editor
+.idea/
+.vscode/*
+!.vscode/extensions.json

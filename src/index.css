@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Font family names loaded via the Google Fonts <link> in index.html.
+   Tailwind's font-sans / font-serif utilities resolve to these variables. */
+:root {
+  --font-inter: 'Inter';
+  --font-playfair: 'Playfair Display';
+
+  color-scheme: light;
+  --radius: 0.75rem;
+
+  /* Warm ivory page, deep warm ink text */
+  --background: oklch(0.968 0.013 83);
+  --foreground: oklch(0.26 0.035 20);
+
+  /* Cards sit slightly brighter than the page */
+  --card: oklch(0.992 0.006 86);
+  --card-foreground: oklch(0.26 0.035 20);
+  --popover: oklch(0.992 0.006 86);
+  --popover-foreground: oklch(0.26 0.035 20);
+
+  /* Deep maroon / wine primary (#7A1533) */
+  --primary: oklch(0.37 0.126 8);
+  --primary-foreground: oklch(0.98 0.012 86);
+
+  /* Soft champagne secondary surface */
+  --secondary: oklch(0.93 0.024 82);
+  --secondary-foreground: oklch(0.37 0.126 8);
+
+  --muted: oklch(0.945 0.016 84);
+  --muted-foreground: oklch(0.48 0.03 26);
+
+  /* Champagne gold accent */
+  --accent: oklch(0.76 0.118 84);
+  --accent-foreground: oklch(0.3 0.05 45);
+
+  --destructive: oklch(0.55 0.19 25);
+  --destructive-foreground: oklch(0.98 0.01 86);
+
+  --border: oklch(0.885 0.02 82);
+  --input: oklch(0.885 0.02 82);
+  --ring: oklch(0.37 0.126 8);
+
+  /* Brand ramps */
+  --gold: oklch(0.76 0.118 84);
+  --gold-foreground: oklch(0.3 0.05 45);
+  --gold-soft: oklch(0.93 0.05 88);
+
+  --heart: oklch(0.56 0.17 12);
+  --heart-foreground: oklch(0.98 0.01 86);
+  --heart-soft: oklch(0.93 0.04 12);
+
+  --cream: oklch(0.968 0.013 83);
+  --cream-deep: oklch(0.93 0.022 82);
+
+  --success: oklch(0.58 0.12 150);
+  --success-foreground: oklch(0.99 0 0);
+  --success-soft: oklch(0.93 0.04 150);
+
+  --warning: oklch(0.72 0.13 70);
+  --warning-foreground: oklch(0.32 0.06 60);
+  --warning-soft: oklch(0.94 0.05 78);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    outline-color: color-mix(in oklch, var(--ring) 50%, transparent);
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+  /* Prevent iOS zoom on focus: 16px floor for form controls */
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
