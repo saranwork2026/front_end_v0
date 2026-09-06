@@ -1,0 +1,37 @@
+# Normalize line endings: store text files with LF in the repo. This stops the
+# Windows CRLF churn (git showing files as modified on checkout) and keeps the
+# tree consistent for the Linux Jenkins agent that builds/deploys.
+* text=auto eol=lf
+
+# Explicit LF for source, config, and shell/CI files (a stray CRLF in a shell
+# script or the Jenkinsfile can break on Linux).
+*.ts     text eol=lf
+*.tsx    text eol=lf
+*.js     text eol=lf
+*.jsx    text eol=lf
+*.cjs    text eol=lf
+*.mjs    text eol=lf
+*.json   text eol=lf
+*.css    text eol=lf
+*.scss   text eol=lf
+*.html   text eol=lf
+*.md     text eol=lf
+*.yaml   text eol=lf
+*.yml    text eol=lf
+*.svg    text eol=lf
+*.sh     text eol=lf
+*.env    text eol=lf
+Jenkinsfile text eol=lf
+
+# Binary assets — never touch line endings.
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.webp   binary
+*.ico    binary
+*.woff   binary
+*.woff2  binary
+*.ttf    binary
+*.eot    binary
+*.pdf    binary

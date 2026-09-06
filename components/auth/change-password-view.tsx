@@ -8,8 +8,10 @@ import { IconInput } from '@/components/auth/icon-input'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
 import { Toaster, type ToastItem } from '@/components/ui/toast'
-import { checkPassword, isPasswordValid, passwordRules } from '@/lib/auth-data'
+import { checkPassword, passwordRules } from '@/lib/auth-data'
+import { validateWithSchema } from '@/lib/validation'
 import type { ApiError } from '@matrimony/shared-core'
+import { changePasswordSchema } from '@matrimony/shared-core'
 import { authApi } from '@/src/lib/api'
 
 interface ChangePasswordViewProps {
@@ -35,12 +37,22 @@ export function ChangePasswordView({ forced = false }: ChangePasswordViewProps) 
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const next: Record<string, string> = {}
-    if (!current) next.current = 'Enter your current password.'
-    if (!isPasswordValid(password)) next.password = 'Password does not meet the requirements below.'
-    if (confirm !== password) next.confirm = 'Passwords do not match.'
-    setErrors(next)
-    if (Object.keys(next).length > 0) return
+    // Validate with the shared-core zod schema for cross-platform parity.
+    const parsed = validateWithSchema(changePasswordSchema, {
+      currentPassword: current,
+      newPassword: password,
+      confirmPassword: confirm,
+    })
+    if (!parsed.success) {
+      // Map schema field paths onto the local error keys used by the inputs.
+      const next: Record<string, string> = {}
+      if (parsed.errors.currentPassword) next.current = parsed.errors.currentPassword
+      if (parsed.errors.newPassword) next.password = parsed.errors.newPassword
+      if (parsed.errors.confirmPassword) next.confirm = parsed.errors.confirmPassword
+      setErrors(next)
+      return
+    }
+    setErrors({})
 
     setLoading(true)
     try {

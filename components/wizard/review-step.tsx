@@ -281,7 +281,7 @@ export function ReviewStep({ form, onChangeStep }: ReviewStepProps) {
                   </div>
                 ))}
               </dl>
-            ) : section.key === 'horoscope' && form.horoscopeImage ? null : (
+            ) : section.key === 'horoscope' && horoscopePhotos.length > 0 ? null : (
               <p className="text-sm text-muted-foreground">
                 Not provided yet.
               </p>

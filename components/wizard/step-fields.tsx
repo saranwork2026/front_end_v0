@@ -1,12 +1,10 @@
 'use client'
 
-import Image from 'next/image'
-
 import { Icon } from '@/components/ui/icon'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { SearchableSelect } from '@/components/ui/searchable-select'
-import { cn } from '@/lib/utils'
+import { HoroscopePhotoManager } from '@/components/photos/horoscope-photo-manager'
 import {
   bloodGroupOptions,
   bodyTypeOptions,
@@ -52,6 +50,12 @@ interface StepFieldsProps {
   form: WizardForm
   errors: FieldErrors
   onChange: (patch: Partial<WizardForm>) => void
+  /**
+   * Hide the horoscope-chart uploader. Set by admin-assisted registration —
+   * there the admin fills a member's profile fields, and photos (which upload
+   * to the CURRENT user's own account) must not appear.
+   */
+  hideHoroscopeUpload?: boolean
 }
 
 /** A responsive 2-column field grid (single column on mobile). */
@@ -112,7 +116,7 @@ function GroupLabel({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function StepFields({ step, form, errors, onChange }: StepFieldsProps) {
+export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }: StepFieldsProps) {
   switch (step) {
     case 'basic':
       return (
@@ -709,10 +713,7 @@ export function StepFields({ step, form, errors, onChange }: StepFieldsProps) {
             />
           </div>
 
-          <HoroscopeUpload
-            image={form.horoscopeImage}
-            onChange={(horoscopeImage) => onChange({ horoscopeImage })}
-          />
+          {form.horoscopeAvailable && !hideHoroscopeUpload && <HoroscopePhotoManager />}
 
           <div className="flex flex-col gap-1.5">
             <label
@@ -738,74 +739,4 @@ export function StepFields({ step, form, errors, onChange }: StepFieldsProps) {
   }
 }
 
-/**
- * Horoscope chart image upload. Stands in for the real file upload — selecting
- * "Upload chart" attaches a demo horoscope image so the flow can be exercised;
- * the attached chart can be previewed or removed. Optional, like the rest of
- * the horoscope step.
- */
-const demoHoroscopeImage = '/horoscope-chart.png'
 
-function HoroscopeUpload({
-  image,
-  onChange,
-}: {
-  image: string
-  onChange: (image: string) => void
-}) {
-  return (
-    <div className="flex flex-col gap-2">
-      <span className="text-sm font-medium text-foreground">
-        Horoscope chart
-        <span className="ml-1 font-normal text-muted-foreground">
-          (optional)
-        </span>
-      </span>
-
-      {image ? (
-        <div className="flex items-center gap-4 rounded-xl border border-border bg-card p-3">
-          <div className="relative size-24 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
-            <Image
-              src={image || '/placeholder.svg'}
-              alt="Uploaded horoscope chart"
-              fill
-              sizes="96px"
-              className="object-cover"
-            />
-          </div>
-          <div className="flex min-w-0 flex-col gap-1">
-            <span className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-              <Icon name="circle-check" size={15} className="text-primary" />
-              Chart attached
-            </span>
-            <p className="text-xs text-muted-foreground text-pretty">
-              Shared only with members you connect with.
-            </p>
-            <button
-              type="button"
-              onClick={() => onChange('')}
-              className="mt-1 self-start rounded-md text-sm font-medium text-destructive underline-offset-4 hover:underline"
-            >
-              Remove chart
-            </button>
-          </div>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => onChange(demoHoroscopeImage)}
-          className={cn(
-            'flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-card px-4 py-8 text-muted-foreground transition-colors',
-            'hover:border-primary/50 hover:bg-secondary hover:text-primary',
-          )}
-        >
-          <Icon name="upload" size={22} />
-          <span className="text-sm font-medium">Upload chart</span>
-          <span className="text-xs text-muted-foreground">
-            JPG or PNG of your horoscope / jathagam
-          </span>
-        </button>
-      )}
-    </div>
-  )
-}

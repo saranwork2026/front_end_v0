@@ -312,7 +312,13 @@ export function AdminAssistedProfileView({ profileId }: AdminAssistedProfileView
 
             {/* pb-24 keeps fields clear of the sticky footer on mobile */}
             <div className="pb-24 md:pb-0">
-              <StepFields step={step.key as StepKey} form={form} errors={errors} onChange={patchForm} />
+              <StepFields
+                step={step.key as StepKey}
+                form={form}
+                errors={errors}
+                onChange={patchForm}
+                hideHoroscopeUpload
+              />
             </div>
           </div>
 

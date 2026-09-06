@@ -127,7 +127,6 @@ export interface WizardForm {
   lagnam: string
   horoscopeAvailable: boolean
   willingToShareHoroscope: boolean
-  horoscopeImage: string
   aboutMe: string
 }
 
@@ -141,7 +140,7 @@ export const emptyForm: WizardForm = {
   familyType: '', familyValues: '', fatherStatus: '', fatherProfession: '', motherStatus: '', motherProfession: '',
   brothers: '', brothersMarried: '', sisters: '', sistersMarried: '', assetDetails: '',
   birthTime: '', birthCity: '', nakshatra: '', padam: '', raasi: '', dhosam: '', lagnam: '',
-  horoscopeAvailable: false, willingToShareHoroscope: false, horoscopeImage: '', aboutMe: '',
+  horoscopeAvailable: false, willingToShareHoroscope: false, aboutMe: '',
 }
 
 /* Retained for the ?state=empty preview only. */
@@ -460,7 +459,6 @@ export function seedFromProfile(p: UserProfile): WizardForm {
     lagnam: p.lagnam ?? '',
     horoscopeAvailable: p.horoscopeAvailable ?? false,
     willingToShareHoroscope: p.willingToShareHoroscope ?? false,
-    horoscopeImage: '',
     aboutMe: p.aboutMe ?? '',
   }
 }

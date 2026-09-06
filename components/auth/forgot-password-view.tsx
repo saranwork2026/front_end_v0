@@ -7,6 +7,8 @@ import { AuthShell } from '@/components/auth/auth-shell'
 import { IconInput } from '@/components/auth/icon-input'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
+import { validateWithSchema } from '@/lib/validation'
+import { forgotPasswordSchema } from '@matrimony/shared-core'
 import { authApi } from '@/src/lib/api'
 
 export function ForgotPasswordView() {
@@ -17,8 +19,10 @@ export function ForgotPasswordView() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!identifier.trim()) {
-      setError('Enter your mobile number or email.')
+    // Validate with the shared-core zod schema (mobile number) for parity.
+    const parsed = validateWithSchema(forgotPasswordSchema, { identifier: identifier.trim() })
+    if (!parsed.success) {
+      setError(parsed.errors.identifier)
       return
     }
     setError(undefined)
@@ -40,7 +44,7 @@ export function ForgotPasswordView() {
       subtitle={
         sent
           ? undefined
-          : 'Enter your mobile number or email and we will send a reset code.'
+          : 'Enter your registered mobile number and we will send a reset code.'
       }
       footer={
         <Link href="/login" className="font-medium text-primary hover:underline">
@@ -66,8 +70,9 @@ export function ForgotPasswordView() {
       ) : (
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
           <IconInput
-            label="Mobile number or email"
-            leadingIcon="user"
+            label="Mobile number"
+            leadingIcon="phone"
+            inputMode="numeric"
             placeholder="9876543210"
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}

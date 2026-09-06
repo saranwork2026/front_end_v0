@@ -79,7 +79,15 @@ export const maritalStatusLabel = (v: string) => maritalValueToLabel.get(v) ?? v
 const codeToLabel = new Map(educationOptions.map((o) => [o.code, o.label]))
 export const educationLabel = (code: string) => codeToLabel.get(code) ?? code
 
-/** Validate cross-field ranges (all fields optional). */
+/**
+ * Validate cross-field ranges + per-list caps. New-FE keeps the "leave blank =
+ * no limit" optional UX (so we don't force the shared partnerPreferenceSchema,
+ * which requires every numeric field), but we mirror its meaningful rules:
+ * min<=max ordering (age/height/income) and the max-20-items cap per multiselect.
+ */
+const MAX_PREF_ITEMS = 20
+const TOO_MANY = `You can select at most ${MAX_PREF_ITEMS} options.`
+
 export function validatePreference(p: PartnerPreference): Record<string, string> {
   const errors: Record<string, string> = {}
   if (p.minAge != null && p.maxAge != null && p.minAge > p.maxAge)
@@ -88,6 +96,13 @@ export function validatePreference(p: PartnerPreference): Record<string, string>
     errors.maxHeightCm = 'Max height must be greater than or equal to min height.'
   if (p.minAnnualIncome != null && p.maxAnnualIncome != null && p.minAnnualIncome > p.maxAnnualIncome)
     errors.maxAnnualIncome = 'Max income must be greater than or equal to min income.'
+  // Per-list caps (partnerPreferenceSchema enforces max 20 on each array).
+  if (p.religions.length > MAX_PREF_ITEMS) errors.religions = TOO_MANY
+  if (p.castes.length > MAX_PREF_ITEMS) errors.castes = TOO_MANY
+  if (p.maritalStatuses.length > MAX_PREF_ITEMS) errors.maritalStatuses = TOO_MANY
+  if (p.motherTongues.length > MAX_PREF_ITEMS) errors.motherTongues = TOO_MANY
+  if (p.educationCodes.length > MAX_PREF_ITEMS) errors.educationCodes = TOO_MANY
+  if (p.cities.length > MAX_PREF_ITEMS) errors.cities = TOO_MANY
   return errors
 }
 

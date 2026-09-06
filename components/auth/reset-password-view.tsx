@@ -9,8 +9,10 @@ import { IconInput } from '@/components/auth/icon-input'
 import { OtpInput } from '@/components/auth/otp-input'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
-import { checkPassword, isPasswordValid, OTP_RE, passwordRules } from '@/lib/auth-data'
+import { checkPassword, OTP_RE, passwordRules } from '@/lib/auth-data'
+import { validateWithSchema } from '@/lib/validation'
 import type { ApiError } from '@matrimony/shared-core'
+import { resetPasswordSchema } from '@matrimony/shared-core'
 import { authApi } from '@/src/lib/api'
 
 const errorMessages: Record<string, string> = {
@@ -38,14 +40,24 @@ export function ResetPasswordView({ profileId = '' }: ResetPasswordViewProps) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const next: Record<string, string> = {}
-    if (!pid.trim()) next.pid = 'Enter your profile ID.'
-    if (!OTP_RE.test(otp)) next.otp = 'Enter the 6-digit code.'
-    if (!isPasswordValid(password)) next.password = 'Password does not meet the requirements below.'
-    if (confirm !== password) next.confirm = 'Passwords do not match.'
-    setErrors(next)
     setBanner(null)
-    if (Object.keys(next).length > 0) return
+    // Validate with the shared-core zod schema for cross-platform parity.
+    const parsed = validateWithSchema(resetPasswordSchema, {
+      profileId: pid.trim(),
+      otp,
+      newPassword: password,
+      confirmPassword: confirm,
+    })
+    if (!parsed.success) {
+      const next: Record<string, string> = {}
+      if (parsed.errors.profileId) next.pid = parsed.errors.profileId
+      if (parsed.errors.otp) next.otp = parsed.errors.otp
+      if (parsed.errors.newPassword) next.password = parsed.errors.newPassword
+      if (parsed.errors.confirmPassword) next.confirm = parsed.errors.confirmPassword
+      setErrors(next)
+      return
+    }
+    setErrors({})
 
     setLoading(true)
     try {
