@@ -109,6 +109,12 @@ pipeline {
                     // (CI) and 11 (local), unlike the per-version config files.
                     sh '''#!/bin/bash
                         set -o pipefail
+                        # Safety net: this is a single-package app, not a pnpm
+                        # monorepo. A stray pnpm-workspace.yaml (tooling sometimes
+                        # regenerates it) forces workspace mode and fails install
+                        # with "packages field missing or empty". Remove it if it
+                        # ever reappears in a checkout.
+                        rm -f pnpm-workspace.yaml
                         pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true 2>&1 | tee ../front_end_v0-install.log
                     '''
                 }

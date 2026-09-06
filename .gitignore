@@ -16,3 +16,9 @@ logs
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# This is a standalone single-package app, NOT a pnpm monorepo. A
+# pnpm-workspace.yaml here forces pnpm into workspace mode and breaks
+# `pnpm install` with "packages field missing or empty" (esp. in CI).
+# pnpm/tooling sometimes regenerates this file — keep it out of the repo.
+pnpm-workspace.yaml
