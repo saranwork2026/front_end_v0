@@ -1,7 +1,2 @@
 allowBuilds:
   esbuild: set this to true or false
-onlyBuiltDependencies:
-  - esbuild
-# Don't re-run an install/deps check before `pnpm dev`/`pnpm build`; it was
-# tripping ERR_PNPM_IGNORED_BUILDS on every run. Deps are already installed.
-verifyDepsBeforeRun: false

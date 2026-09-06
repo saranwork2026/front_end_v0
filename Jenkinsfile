@@ -89,9 +89,15 @@ pipeline {
         stage('Install front_end_v0') {
             steps {
                 dir('front_end_v0') {
+                    // --config.dangerouslyAllowAllBuilds=true permits dependency
+                    // postinstall build scripts (here just esbuild@0.21.5, vite's
+                    // bundler — pinned and already trusted in the existing
+                    // frontend). Without it pnpm blocks the script and fails with
+                    // ERR_PNPM_IGNORED_BUILDS. This flag is honored across pnpm 9
+                    // (CI) and 11 (local), unlike the per-version config files.
                     sh '''#!/bin/bash
                         set -o pipefail
-                        pnpm install --frozen-lockfile 2>&1 | tee ../front_end_v0-install.log
+                        pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true 2>&1 | tee ../front_end_v0-install.log
                     '''
                 }
             }
