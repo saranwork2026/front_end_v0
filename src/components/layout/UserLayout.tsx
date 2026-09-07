@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
@@ -29,6 +29,10 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 
 export function UserLayout() {
   const navigate = useNavigate()
+  const location = useLocation()
+  // During the registration wizard the bottom tab bar is not needed — hiding it
+  // lets the wizard's Prev / Save & continue footer freeze flush to the bottom.
+  const hideBottomNav = location.pathname === '/profile/wizard'
   const [menuOpen, setMenuOpen] = useState(false)
   const [avatarOpen, setAvatarOpen] = useState(false)
   const avatarRef = useRef<HTMLDivElement>(null)
@@ -172,11 +176,17 @@ export function UserLayout() {
         </header>
 
         {/* Page content */}
-        <main className="relative min-h-0 flex-1 overflow-y-auto pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
+        <main
+          className={cn(
+            'relative min-h-0 flex-1 overflow-y-auto md:pb-0',
+            hideBottomNav ? 'pb-0' : 'pb-[calc(4rem+env(safe-area-inset-bottom))]',
+          )}
+        >
           <Outlet />
         </main>
 
-        {/* Mobile bottom nav */}
+        {/* Mobile bottom nav — hidden during the registration wizard */}
+        {!hideBottomNav && (
         <nav
           className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
           aria-label="Primary"
@@ -200,6 +210,7 @@ export function UserLayout() {
             ))}
           </div>
         </nav>
+        )}
       </div>
 
       {/* Mobile slide-over menu */}
