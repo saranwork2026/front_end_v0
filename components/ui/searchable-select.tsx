@@ -45,7 +45,13 @@ export function SearchableSelect({
   const [query, setQuery] = React.useState('')
   const [open, setOpen] = React.useState(false)
   const [highlight, setHighlight] = React.useState(-1)
+  // On touch devices focusing a text input immediately raises the keyboard.
+  // Keep the field read-only on the first tap (dropdown opens, first option
+  // highlighted, no keyboard); a second tap into the field enables typing and
+  // brings up the keyboard.
+  const [typing, setTyping] = React.useState(false)
   const containerRef = React.useRef<HTMLDivElement>(null)
+  const inputRef = React.useRef<HTMLInputElement>(null)
 
   const selected = options.find((o) => o.value === value)
   const displayValue = open ? query : selected?.label ?? ''
@@ -62,6 +68,7 @@ export function SearchableSelect({
         setOpen(false)
         setQuery('')
         setHighlight(-1)
+        setTyping(false)
       }
     }
     document.addEventListener('mousedown', onDoc)
@@ -72,7 +79,19 @@ export function SearchableSelect({
     if (disabled) return
     setOpen(true)
     setQuery('')
-    setHighlight(-1)
+    setHighlight(0)
+  }
+
+  // First tap: open the list without text focus (no keyboard). Second tap while
+  // already open: switch to typing mode and raise the keyboard for searching.
+  function handleInputClick() {
+    if (disabled) return
+    if (!open) {
+      openDropdown()
+    } else if (!typing) {
+      setTyping(true)
+      requestAnimationFrame(() => inputRef.current?.focus())
+    }
   }
 
   function select(opt: SearchableOption) {
@@ -80,6 +99,7 @@ export function SearchableSelect({
     setOpen(false)
     setQuery('')
     setHighlight(-1)
+    setTyping(false)
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -103,6 +123,7 @@ export function SearchableSelect({
       setOpen(false)
       setQuery('')
       setHighlight(-1)
+      setTyping(false)
     }
   }
 
@@ -116,6 +137,7 @@ export function SearchableSelect({
       <div className="relative">
         <input
           id={componentId}
+          ref={inputRef}
           type="text"
           role="combobox"
           aria-expanded={open}
@@ -124,9 +146,13 @@ export function SearchableSelect({
           aria-invalid={error ? true : undefined}
           autoComplete="off"
           disabled={disabled}
+          readOnly={!typing}
           placeholder={disabled ? emptyMessage : placeholder}
           value={displayValue}
-          onFocus={openDropdown}
+          onFocus={() => {
+            if (!open) openDropdown()
+          }}
+          onClick={handleInputClick}
           onChange={(e) => {
             setQuery(e.target.value)
             setOpen(true)

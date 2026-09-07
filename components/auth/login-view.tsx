@@ -190,22 +190,15 @@ export function LoginView() {
           {...register('identifier')}
         />
 
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-foreground">Password</span>
-            <Link href="/forgot-password" className="text-sm font-medium text-primary hover:underline">
-              Forgot password?
-            </Link>
-          </div>
-          <IconInput
-            password
-            leadingIcon="lock"
-            autoComplete="current-password"
-            placeholder="Enter your password"
-            error={fieldError(errors.password?.message)}
-            {...register('password')}
-          />
-        </div>
+        <IconInput
+          label="Password"
+          password
+          leadingIcon="lock"
+          autoComplete="current-password"
+          placeholder="Enter your password"
+          error={fieldError(errors.password?.message)}
+          {...register('password')}
+        />
 
         {!isCaptchaDisabled() && (
           <CaptchaField checked={captcha} onChange={setCaptcha} error={captchaError} />
@@ -214,6 +207,13 @@ export function LoginView() {
         <Button type="submit" size="lg" loading={isSubmitting} className="mt-1 w-full">
           {isSubmitting ? 'Signing in…' : 'Sign in'}
         </Button>
+
+        <Link
+          href="/forgot-password"
+          className="text-center text-sm font-medium text-primary hover:underline"
+        >
+          Forgot password?
+        </Link>
       </form>
     </AuthShell>
   )

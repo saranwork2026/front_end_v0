@@ -28,7 +28,6 @@ import {
   residencyStatusOptions,
   siblingCountOptions,
   weightOptions,
-  yesNoOptions,
   type FieldErrors,
   type StepKey,
   type WizardForm,
@@ -238,23 +237,28 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
               <option value="">Select</option>
               {optionList(manglikOptions)}
             </Select>
-            <Select
-              label="Open to other religion"
-              value={form.openToOtherReligion}
-              onChange={(e) => onChange({ openToOtherReligion: e.target.value })}
-            >
-              <option value="">Select</option>
-              {optionList(yesNoOptions)}
-            </Select>
-            <Select
-              label="Open to other caste"
-              value={form.openToOtherCaste}
-              onChange={(e) => onChange({ openToOtherCaste: e.target.value })}
-            >
-              <option value="">Select</option>
-              {optionList(yesNoOptions)}
-            </Select>
           </FieldGrid>
+
+          <div className="flex flex-col gap-2.5">
+            <CheckboxRow
+              id="open-other-religion"
+              label="Open to other religion"
+              hint="Show me matches from other religions too."
+              checked={form.openToOtherReligion === 'true'}
+              onChange={(checked) =>
+                onChange({ openToOtherReligion: checked ? 'true' : 'false' })
+              }
+            />
+            <CheckboxRow
+              id="open-other-caste"
+              label="Open to other caste"
+              hint="Show me matches from other castes / communities too."
+              checked={form.openToOtherCaste === 'true'}
+              onChange={(checked) =>
+                onChange({ openToOtherCaste: checked ? 'true' : 'false' })
+              }
+            />
+          </div>
         </div>
       )
     }
@@ -319,74 +323,16 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
       return (
         <div className="flex flex-col gap-5">
           <div className="flex flex-col gap-3">
-            <GroupLabel>Native place</GroupLabel>
+            <GroupLabel>Current location</GroupLabel>
             <FieldGrid>
               <SearchableSelect
-                label="Native country"
-                value={form.nativeCountry}
-                onChange={(nativeCountry) => onChange({ nativeCountry })}
+                label="Current country"
+                value={form.currentCountry}
+                onChange={(currentCountry) => onChange({ currentCountry })}
                 options={COUNTRIES}
                 placeholder="Search country"
               />
-              {form.nativeCountry === 'India' ? (
-                <SearchableSelect
-                  label="Native state"
-                  value={form.nativeState}
-                  onChange={(nativeState) => onChange({ nativeState })}
-                  options={INDIAN_STATES}
-                  placeholder="Search state"
-                />
-              ) : (
-                <Input
-                  label="Native state"
-                  value={form.nativeState}
-                  onChange={(e) => onChange({ nativeState: e.target.value })}
-                />
-              )}
-              <Input
-                label="Native city"
-                value={form.nativeCity}
-                onChange={(e) => onChange({ nativeCity: e.target.value })}
-              />
-            </FieldGrid>
-          </div>
-
-          <CheckboxRow
-            id="same-as-native"
-            label="Current address same as native"
-            hint="Copies your native place into the current-location fields."
-            checked={form.currentSameAsNative}
-            onChange={(checked) =>
-              onChange(
-                checked
-                  ? {
-                      currentSameAsNative: true,
-                      currentCountry: form.nativeCountry,
-                      currentState: form.nativeState,
-                      currentCity: form.nativeCity,
-                    }
-                  : { currentSameAsNative: false },
-              )
-            }
-          />
-
-          <div className="flex flex-col gap-3">
-            <GroupLabel>Current location</GroupLabel>
-            <FieldGrid>
-              {form.currentSameAsNative ? (
-                <Input label="Current country" value={form.currentCountry} disabled />
-              ) : (
-                <SearchableSelect
-                  label="Current country"
-                  value={form.currentCountry}
-                  onChange={(currentCountry) => onChange({ currentCountry })}
-                  options={COUNTRIES}
-                  placeholder="Search country"
-                />
-              )}
-              {form.currentSameAsNative ? (
-                <Input label="Current state" value={form.currentState} disabled />
-              ) : form.currentCountry === 'India' ? (
+              {form.currentCountry === 'India' ? (
                 <SearchableSelect
                   label="Current state"
                   value={form.currentState}
@@ -405,9 +351,67 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
                 label="Current city"
                 value={form.currentCity}
                 error={errors.currentCity}
-                disabled={form.currentSameAsNative}
                 onChange={(e) => onChange({ currentCity: e.target.value })}
                 autoComplete="address-level2"
+              />
+            </FieldGrid>
+          </div>
+
+          <CheckboxRow
+            id="native-same-as-current"
+            label="Native place same as current"
+            hint="Copies your current location into the native-place fields."
+            checked={form.currentSameAsNative}
+            onChange={(checked) =>
+              onChange(
+                checked
+                  ? {
+                      currentSameAsNative: true,
+                      nativeCountry: form.currentCountry,
+                      nativeState: form.currentState,
+                      nativeCity: form.currentCity,
+                    }
+                  : { currentSameAsNative: false },
+              )
+            }
+          />
+
+          <div className="flex flex-col gap-3">
+            <GroupLabel>Native place</GroupLabel>
+            <FieldGrid>
+              {form.currentSameAsNative ? (
+                <Input label="Native country" value={form.nativeCountry} disabled />
+              ) : (
+                <SearchableSelect
+                  label="Native country"
+                  value={form.nativeCountry}
+                  onChange={(nativeCountry) => onChange({ nativeCountry })}
+                  options={COUNTRIES}
+                  placeholder="Search country"
+                />
+              )}
+              {form.currentSameAsNative ? (
+                <Input label="Native state" value={form.nativeState} disabled />
+              ) : form.nativeCountry === 'India' ? (
+                <SearchableSelect
+                  label="Native state"
+                  value={form.nativeState}
+                  onChange={(nativeState) => onChange({ nativeState })}
+                  options={INDIAN_STATES}
+                  placeholder="Search state"
+                />
+              ) : (
+                <Input
+                  label="Native state"
+                  value={form.nativeState}
+                  onChange={(e) => onChange({ nativeState: e.target.value })}
+                />
+              )}
+              <Input
+                label="Native city"
+                value={form.nativeCity}
+                disabled={form.currentSameAsNative}
+                onChange={(e) => onChange({ nativeCity: e.target.value })}
               />
             </FieldGrid>
           </div>

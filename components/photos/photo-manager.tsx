@@ -5,7 +5,6 @@ import type { PhotoResponse, PhotoVisibility } from '@matrimony/shared-core'
 
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
-import { Select } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { StatusBadge } from '@/components/ui/status-badge'
 import { Toaster, type ToastItem } from '@/components/ui/toast'
@@ -261,21 +260,7 @@ export function PhotoManager() {
         {/* Upload control */}
         <div className="mt-5 border-t border-border/70 pt-5">
           {canUploadProfile ? (
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-              <div className="sm:max-w-xs sm:flex-1">
-                <Select
-                  label="Who can see this photo?"
-                  value={visibility}
-                  onChange={(e) => setVisibility(e.target.value as PhotoVisibility)}
-                  disabled={uploadingProfile}
-                >
-                  {VISIBILITY_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </Select>
-              </div>
+            <div className="flex flex-col gap-4">
               <div>
                 <input
                   ref={profileInputRef}
@@ -293,6 +278,27 @@ export function PhotoManager() {
                   Upload photo
                 </Button>
               </div>
+              <fieldset className="flex flex-col gap-2" disabled={uploadingProfile}>
+                <legend className="mb-1 text-sm font-medium text-foreground">
+                  Who can see this photo?
+                </legend>
+                {VISIBILITY_OPTIONS.map((opt) => (
+                  <label
+                    key={opt.value}
+                    className="flex cursor-pointer items-start gap-2.5 text-sm text-foreground"
+                  >
+                    <input
+                      type="radio"
+                      name="photo-visibility"
+                      value={opt.value}
+                      checked={visibility === opt.value}
+                      onChange={() => setVisibility(opt.value)}
+                      className="mt-0.5 size-4 shrink-0 cursor-pointer accent-primary"
+                    />
+                    <span>{opt.label}</span>
+                  </label>
+                ))}
+              </fieldset>
             </div>
           ) : (
             <p className="flex items-center gap-2 text-sm text-muted-foreground">

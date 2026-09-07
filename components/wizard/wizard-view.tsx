@@ -75,6 +75,7 @@ export function WizardView({
   const [errors, setErrors] = useState<FieldErrors>({})
   const [saving, setSaving] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
   const [toasts, setToasts] = useState<ToastItem[]>([])
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -159,6 +160,7 @@ export function WizardView({
     setSubmitting(true)
     try {
       await submitProfile(form)
+      setSubmitted(true)
       // Reflect the submission in the in-memory session so ProfileStatusGuard
       // lets the user proceed to partner preferences instead of bouncing back.
       authStore.getState().updateProfileProgress({ profileStatus: 'COMPLETED' })
@@ -242,11 +244,12 @@ export function WizardView({
                 variant="primary"
                 size="lg"
                 loading={submitting}
+                disabled={submitted}
                 onClick={handleSubmit}
                 className="sm:w-auto"
               >
                 <Icon name="circle-check" size={18} />
-                Submit for review
+                {submitted ? 'Submitted' : 'Submit for review'}
               </Button>
             </div>
           )}

@@ -34,6 +34,7 @@ export function RegisterView() {
   const [captcha, setCaptcha] = useState(isCaptchaDisabled())
   const [captchaError, setCaptchaError] = useState<string | undefined>()
   const [banner, setBanner] = useState<string | null>(null)
+  const [passwordFocused, setPasswordFocused] = useState(false)
 
   const {
     register,
@@ -52,9 +53,10 @@ export function RegisterView() {
     },
   })
 
+  const passwordRegister = register('password')
   const passwordValue = watch('password') ?? ''
   const checks = checkPassword(passwordValue)
-  const showChecklist = passwordValue.length > 0
+  const showChecklist = passwordFocused && passwordValue.length > 0
 
   const onSubmit = async (data: RegisterFormValues) => {
     setBanner(null)
@@ -155,6 +157,7 @@ export function RegisterView() {
           />
           <IconInput
             label="Last name"
+            leadingIcon="user"
             autoComplete="family-name"
             error={fieldError(errors.lastName?.message)}
             {...register('lastName')}
@@ -190,7 +193,12 @@ export function RegisterView() {
             leadingIcon="lock"
             autoComplete="new-password"
             error={fieldError(errors.password?.message)}
-            {...register('password')}
+            {...passwordRegister}
+            onFocus={() => setPasswordFocused(true)}
+            onBlur={(e) => {
+              passwordRegister.onBlur(e)
+              setPasswordFocused(false)
+            }}
           />
           {showChecklist && (
             <ul className="grid grid-cols-1 gap-1 rounded-lg bg-muted/60 p-3 sm:grid-cols-2">
