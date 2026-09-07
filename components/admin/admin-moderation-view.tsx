@@ -557,8 +557,13 @@ function ReviewDialog({
         description={description}
         className="max-w-3xl"
         footer={
-          <div className="flex w-full flex-col gap-2 sm:flex-row sm:justify-end">
-            <Button variant="ghost" onClick={onClose} disabled={busy !== null}>
+          <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
+            <Button
+              variant="ghost"
+              onClick={onClose}
+              disabled={busy !== null}
+              className="w-full sm:w-auto"
+            >
               Cancel
             </Button>
             <Button
@@ -566,7 +571,7 @@ function ReviewDialog({
               onClick={() => submit('reject')}
               loading={busy === 'reject'}
               disabled={busy !== null}
-              className="sm:min-w-32"
+              className="w-full sm:w-auto sm:min-w-32"
             >
               <Icon name="x" size={16} />
               Raise reject
@@ -575,7 +580,7 @@ function ReviewDialog({
               onClick={() => submit('approve')}
               loading={busy === 'approve'}
               disabled={busy !== null}
-              className="sm:min-w-32"
+              className="w-full sm:w-auto sm:min-w-32"
             >
               <Icon name="check" size={16} />
               Raise approve
@@ -966,14 +971,24 @@ function ApproverDetailDialog({
         description={`Target: ${targetLabel(item)}`}
         className="max-w-3xl"
         footer={
-          <div className="flex w-full flex-col gap-2 sm:flex-row sm:justify-end">
-            <Button variant="ghost" onClick={onClose} disabled={busy}>
+          <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
+            <Button
+              variant="ghost"
+              onClick={onClose}
+              disabled={busy}
+              className="w-full sm:w-auto"
+            >
               Close
             </Button>
-            <Button variant="danger" onClick={onReject} disabled={busy} className="sm:min-w-28">
+            <Button
+              variant="danger"
+              onClick={onReject}
+              disabled={busy}
+              className="w-full sm:w-auto sm:min-w-28"
+            >
               Reject
             </Button>
-            <Button onClick={onApprove} disabled={busy} className="sm:min-w-28">
+            <Button onClick={onApprove} disabled={busy} className="w-full sm:w-auto sm:min-w-28">
               Approve
             </Button>
           </div>
