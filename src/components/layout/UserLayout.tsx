@@ -188,7 +188,7 @@ export function UserLayout() {
         {/* Mobile bottom nav — hidden during the registration wizard */}
         {!hideBottomNav && (
         <nav
-          className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
+          className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_12px_rgba(0,0,0,0.10)] md:hidden"
           aria-label="Primary"
         >
           <div className="flex items-center justify-around px-2 py-1">
