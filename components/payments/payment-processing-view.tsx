@@ -33,6 +33,8 @@ interface PaymentProcessingViewProps {
 interface PaymentLocationState {
   amount?: number
   paymentType?: PaymentType
+  /** True when this payment is part of the post-submission onboarding flow. */
+  onboarding?: boolean
 }
 
 /**
@@ -47,6 +49,7 @@ export function PaymentProcessingView({ paymentId }: PaymentProcessingViewProps)
   const state = (location.state as PaymentLocationState | null) ?? {}
   const amount = state.amount
   const paymentType = state.paymentType
+  const onboarding = state.onboarding === true
 
   const [phase, setPhase] = useState<Phase>('payment')
   const [paying, setPaying] = useState(false)
@@ -85,7 +88,9 @@ export function PaymentProcessingView({ paymentId }: PaymentProcessingViewProps)
       pushToast('Payment cancelled.', 'info')
       if (paymentType === 'WALLET_RECHARGE') navigate('/wallet')
       else if (paymentType === 'CONTACT_UNLOCK') navigate('/')
-      else navigate('/plans')
+      // Onboarding subscription: back to packages (still skippable) rather than
+      // the generic plans page, so the user keeps the onboarding skip path.
+      else navigate(onboarding ? '/plans?onboarding=1' : '/plans')
     } catch (err) {
       setError(messageOf(err, 'The payment could not be cancelled. Please try again.'))
     } finally {
@@ -141,9 +146,23 @@ export function PaymentProcessingView({ paymentId }: PaymentProcessingViewProps)
             <p className="text-sm text-muted-foreground">Amount: {INR.format(amount)}</p>
           )}
         </div>
-        <Link href="/" className={buttonVariants()}>
-          Go to dashboard
-        </Link>
+        {onboarding ? (
+          <div className="flex w-full max-w-xs flex-col gap-2 sm:flex-row">
+            <Link href="/profile/status" className={buttonVariants({ className: 'flex-1' })}>
+              Continue
+            </Link>
+            <Link
+              href="/subscriptions"
+              className={buttonVariants({ variant: 'secondary', className: 'flex-1' })}
+            >
+              View subscription
+            </Link>
+          </div>
+        ) : (
+          <Link href="/" className={buttonVariants()}>
+            Go to dashboard
+          </Link>
+        )}
         <Toaster toasts={toasts} onDismiss={(id) => setToasts((t) => t.filter((x) => x.id !== id))} />
       </div>
     )

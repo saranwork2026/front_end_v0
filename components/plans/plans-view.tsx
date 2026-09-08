@@ -143,7 +143,7 @@ export function PlansView(_props: PlansViewProps) {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
             {plans.map((plan) => (
-              <PlanCard key={plan.planId} plan={plan} />
+              <PlanCard key={plan.planId} plan={plan} onboarding={onboarding} />
             ))}
           </div>
         )}
@@ -160,7 +160,7 @@ export function PlansView(_props: PlansViewProps) {
   )
 }
 
-function PlanCard({ plan }: { plan: SubscriptionPlan }) {
+function PlanCard({ plan, onboarding }: { plan: SubscriptionPlan; onboarding: boolean }) {
   const tier = plan.name.toUpperCase()
   const isBase = tier === 'BASE'
   const isTopTier = tier === 'GOLD' || tier === 'PLATINUM'
@@ -241,7 +241,7 @@ function PlanCard({ plan }: { plan: SubscriptionPlan }) {
           </span>
         ) : (
           <Link
-            href={`/payment?planId=${plan.planId}`}
+            href={onboarding ? `/payment?planId=${plan.planId}&onboarding=1` : `/payment?planId=${plan.planId}`}
             className={cn(
               buttonVariants({
                 variant: isTopTier ? 'primary' : 'secondary',

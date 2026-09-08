@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { useNavigate } from 'react-router-dom'
 import type { PaymentMethod, SubscriptionPlan } from '@matrimony/shared-core'
 
@@ -70,6 +71,10 @@ function includedFeatures(plan: SubscriptionPlan): PlanFeature[] {
  */
 export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps) {
   const navigate = useNavigate()
+  const searchParams = useSearchParams()
+  // Carried through the post-submission onboarding flow so the success screens
+  // send the user back to their profile status instead of the dashboard.
+  const onboarding = searchParams.get('onboarding') === '1'
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [plan, setPlan] = useState<SubscriptionPlan | null>(null)
@@ -106,7 +111,7 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
     try {
       const res = await paymentsApi.initSubscription({ planId: plan.planId, paymentGateway: 'MOCK' })
       navigate(`/payments/${res.data.paymentId}`, {
-        state: { amount: res.data.amount, paymentType: res.data.paymentType },
+        state: { amount: res.data.amount, paymentType: res.data.paymentType, onboarding },
       })
     } catch (err) {
       const message =
@@ -233,15 +238,31 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
           </div>
 
           <div className="flex w-full flex-col gap-2 sm:flex-row">
-            <Link href="/subscriptions" className={buttonVariants({ className: 'flex-1' })}>
-              View subscription
-            </Link>
-            <Link
-              href="/"
-              className={buttonVariants({ variant: 'secondary', className: 'flex-1' })}
-            >
-              Go to dashboard
-            </Link>
+            {onboarding ? (
+              <>
+                <Link href="/profile/status" className={buttonVariants({ className: 'flex-1' })}>
+                  Continue
+                </Link>
+                <Link
+                  href="/subscriptions"
+                  className={buttonVariants({ variant: 'secondary', className: 'flex-1' })}
+                >
+                  View subscription
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/subscriptions" className={buttonVariants({ className: 'flex-1' })}>
+                  View subscription
+                </Link>
+                <Link
+                  href="/"
+                  className={buttonVariants({ variant: 'secondary', className: 'flex-1' })}
+                >
+                  Go to dashboard
+                </Link>
+              </>
+            )}
           </div>
         </div>
         <Toaster toasts={toasts} onDismiss={(id) => setToasts((t) => t.filter((x) => x.id !== id))} />
