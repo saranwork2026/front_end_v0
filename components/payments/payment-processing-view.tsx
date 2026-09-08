@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import type { PaymentMethod, PaymentType } from '@matrimony/shared-core'
+import { getApiError, type PaymentMethod, type PaymentType } from '@matrimony/shared-core'
 
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
@@ -55,6 +55,8 @@ export function PaymentProcessingView({ paymentId }: PaymentProcessingViewProps)
   const [paying, setPaying] = useState(false)
   const [cancelling, setCancelling] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // True when this payment is already terminal-failed and cannot be retried.
+  const [terminated, setTerminated] = useState(false)
   const [claiming, setClaiming] = useState(false)
   const [toasts, setToasts] = useState<ToastItem[]>([])
 
@@ -74,6 +76,20 @@ export function PaymentProcessingView({ paymentId }: PaymentProcessingViewProps)
       await paymentsApi.paymentSuccess({ paymentId, transactionId: `txn_mock_${Date.now()}` })
       setPhase('success')
     } catch (err) {
+      const code = getApiError(err)?.errorCode
+      // Idempotency: this payment was already completed (e.g. the user came
+      // back to this screen, refreshed, or double-submitted). Treat it as a
+      // success rather than a scary error — the plan is already active.
+      if (code === 'PAYMENT_ALREADY_SUCCESS') {
+        setPhase('success')
+        return
+      }
+      // This payment attempt is terminal (already cancelled/failed). The user
+      // must start a NEW payment — retrying this paymentId will never work.
+      if (code === 'PAYMENT_ALREADY_FAILED') {
+        setTerminated(true)
+        return
+      }
       setError(messageOf(err, 'The payment could not be processed. Please try again.'))
     } finally {
       setPaying(false)
@@ -92,6 +108,17 @@ export function PaymentProcessingView({ paymentId }: PaymentProcessingViewProps)
       // the generic plans page, so the user keeps the onboarding skip path.
       else navigate(onboarding ? '/plans?onboarding=1' : '/plans')
     } catch (err) {
+      const code = getApiError(err)?.errorCode
+      // Can't cancel a payment that already went through — show it as done.
+      if (code === 'PAYMENT_ALREADY_SUCCESS') {
+        setPhase('success')
+        return
+      }
+      // Already failed/cancelled — this attempt is closed.
+      if (code === 'PAYMENT_ALREADY_FAILED') {
+        setTerminated(true)
+        return
+      }
       setError(messageOf(err, 'The payment could not be cancelled. Please try again.'))
     } finally {
       setCancelling(false)
@@ -117,6 +144,43 @@ export function PaymentProcessingView({ paymentId }: PaymentProcessingViewProps)
     } finally {
       setClaiming(false)
     }
+  }
+
+  // Terminal: this payment attempt already failed/cancelled and can't be
+  // retried. Point the user at starting a fresh payment from plans.
+  if (terminated) {
+    return (
+      <div className="mx-auto flex max-w-md flex-col items-center gap-5 px-4 py-12 text-center">
+        <span className="flex size-16 items-center justify-center rounded-full bg-muted text-muted-foreground">
+          <Icon name="alert-circle" size={34} />
+        </span>
+        <div className="flex flex-col gap-1.5">
+          <h1 className="text-balance font-serif text-2xl text-foreground">
+            This payment is closed
+          </h1>
+          <p className="text-pretty text-sm text-muted-foreground">
+            This payment attempt was already cancelled or did not go through, so
+            it can&apos;t be completed. Please start a new payment to continue.
+          </p>
+          <p className="mt-1 font-mono text-xs text-muted-foreground">Payment ID: {paymentId}</p>
+        </div>
+        <div className="flex w-full max-w-xs flex-col gap-2 sm:flex-row">
+          <Link
+            href={onboarding ? '/plans?onboarding=1' : '/plans'}
+            className={buttonVariants({ className: 'flex-1' })}
+          >
+            Back to plans
+          </Link>
+          <Link
+            href={onboarding ? '/profile/status' : '/'}
+            className={buttonVariants({ variant: 'secondary', className: 'flex-1' })}
+          >
+            {onboarding ? 'Continue' : 'Go to dashboard'}
+          </Link>
+        </div>
+        <Toaster toasts={toasts} onDismiss={(id) => setToasts((t) => t.filter((x) => x.id !== id))} />
+      </div>
+    )
   }
 
   if (phase === 'success' || phase === 'claim-submitted') {

@@ -3,14 +3,28 @@
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
-import type { SubscriptionPlan } from '@matrimony/shared-core'
+import { getApiError, type SubscriptionPlan } from '@matrimony/shared-core'
 
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { Icon, type IconName } from '@/components/ui/icon'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import { plansApi } from '@/src/lib/api'
+import { apiClient, plansApi } from '@/src/lib/api'
+
+/** Minimal shape from GET /user/subscriptions/active (see SubscriptionsView). */
+interface ActiveSubscriptionInfo {
+  planName: string
+  expiryDate: string
+}
+
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-IN', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
 
 const INR = new Intl.NumberFormat('en-IN', {
   style: 'currency',
@@ -80,6 +94,10 @@ export function PlansView(_props: PlansViewProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [plans, setPlans] = useState<SubscriptionPlan[]>([])
+  // A non-BASE active subscription means buying again STACKS (extends validity
+  // + adds quota) rather than replacing — we surface that so the user knows a
+  // second purchase is an intentional top-up, not an accidental double-charge.
+  const [activeSub, setActiveSub] = useState<ActiveSubscriptionInfo | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -100,6 +118,32 @@ export function PlansView(_props: PlansViewProps) {
   useEffect(() => {
     void load()
   }, [load])
+
+  // Fetch the current active subscription (best-effort — no active paid plan
+  // just means no banner). SUBSCRIPTION_NOT_FOUND / the free BASE plan are
+  // both treated as "nothing to warn about".
+  useEffect(() => {
+    let cancelled = false
+    apiClient
+      .get<ActiveSubscriptionInfo>('/user/subscriptions/active')
+      .then((res) => {
+        if (cancelled) return
+        const sub = res.data
+        if (sub && sub.planName && sub.planName.toUpperCase() !== 'BASE') {
+          setActiveSub({ planName: sub.planName, expiryDate: sub.expiryDate })
+        }
+      })
+      .catch((err) => {
+        // SUBSCRIPTION_NOT_FOUND (no paid plan) is expected — ignore silently.
+        const code = getApiError(err)?.errorCode
+        if (code !== 'SUBSCRIPTION_NOT_FOUND') {
+          // Non-fatal: the plans grid still works without the banner.
+        }
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
@@ -132,6 +176,25 @@ export function PlansView(_props: PlansViewProps) {
             You can upgrade any time from{' '}
             <span className="font-medium text-foreground">Plans</span> in the menu.
           </p>
+        </div>
+      )}
+
+      {activeSub && (
+        <div className="mx-auto mt-6 flex max-w-2xl items-start gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4">
+          <Icon name="star" className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
+          <div className="text-sm">
+            <p className="font-medium text-foreground">
+              You already have {activeSub.planName} active until {formatDate(activeSub.expiryDate)}.
+            </p>
+            <p className="mt-0.5 text-muted-foreground">
+              Buying another plan won&apos;t charge you twice — it extends your
+              membership and adds its quota on top of what you have.{' '}
+              <Link href="/subscriptions" className="text-primary underline-offset-2 hover:underline">
+                View your subscription
+              </Link>
+              .
+            </p>
+          </div>
         </div>
       )}
 
