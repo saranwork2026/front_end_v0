@@ -258,7 +258,7 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
 
   /* ----------------------------- render ----------------------------- */
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 pb-28 pt-5 sm:px-6 lg:pb-12">
+    <main className="mx-auto w-full max-w-6xl px-4 pb-36 pt-5 sm:px-6 lg:pb-12">
       <button
         type="button"
         onClick={() => navigate(-1)}
@@ -500,7 +500,7 @@ function ReadyContent({
       </div>
 
       {showActions && (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 backdrop-blur lg:hidden">
+        <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-40 border-t border-border bg-card px-4 py-3 shadow-[0_-2px_12px_rgba(0,0,0,0.10)] lg:hidden">
           <div className="mx-auto flex max-w-6xl items-center gap-2.5">
             <Button
               variant="secondary"
