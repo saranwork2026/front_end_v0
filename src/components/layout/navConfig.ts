@@ -26,6 +26,7 @@ export const navItems: NavItem[] = [
   { to: '/shortlist', label: 'Shortlist', icon: 'star' },
   { to: '/interests', label: 'Interests', icon: 'mail' },
   { to: '/profile-views', label: 'Profile Views', icon: 'eye' },
+  { to: '/plans', label: 'Plans', icon: 'sparkles' },
   { to: '/referrals', label: 'Refer & Earn', icon: 'handshake' },
   { to: '/profile', label: 'Profile', icon: 'user' },
   { to: '/photos', label: 'Photos', icon: 'photo' },

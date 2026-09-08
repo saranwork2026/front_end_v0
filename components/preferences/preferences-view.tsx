@@ -136,7 +136,10 @@ export function PreferencesView({
         'Preferences saved. We will use these to refine your matches.',
         'success',
       )
-      router.push('/profile/status')
+      // Onboarding step after profile submission: surface membership packages
+      // next (skippable). The ?onboarding=1 flag tells the plans page to show a
+      // "skip / continue" path back to the profile status screen.
+      router.push('/plans?onboarding=1')
     } catch {
       pushToast(
         'Could not save preferences. Please try again in a moment.',

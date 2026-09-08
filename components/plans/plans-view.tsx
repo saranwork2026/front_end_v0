@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import type { SubscriptionPlan } from '@matrimony/shared-core'
 
@@ -70,6 +71,12 @@ interface PlansViewProps {
 }
 
 export function PlansView(_props: PlansViewProps) {
+  const searchParams = useSearchParams()
+  // Reached as the final step of the post-submission onboarding flow
+  // (partner preferences → packages → status). Packages are optional here —
+  // the free BASE plan is already active — so we surface a clear skip path.
+  const onboarding = searchParams.get('onboarding') === '1'
+
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [plans, setPlans] = useState<SubscriptionPlan[]>([])
@@ -98,17 +105,35 @@ export function PlansView(_props: PlansViewProps) {
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
       <header className="mx-auto max-w-2xl text-center">
         <p className="text-sm font-medium uppercase tracking-wide text-gold-foreground">
-          Membership
+          {onboarding ? 'Last step (optional)' : 'Membership'}
         </p>
         <h1 className="mt-2 text-pretty font-serif text-3xl font-semibold text-foreground sm:text-4xl">
-          Choose the plan that fits your search
+          {onboarding ? 'Pick a package to get noticed faster' : 'Choose the plan that fits your search'}
         </h1>
         <p className="mt-3 text-pretty leading-relaxed text-muted-foreground">
-          Upgrade anytime to unlock contacts, chat, and priority visibility.
-          Every plan is a one-time purchase for its full validity — no
-          auto-renewal.
+          {onboarding
+            ? 'Your profile is in for review and the free Base plan is already active. Upgrade now for more contacts, chat, and priority visibility — or skip and do it later.'
+            : 'Upgrade anytime to unlock contacts, chat, and priority visibility. Every plan is a one-time purchase for its full validity — no auto-renewal.'}
         </p>
       </header>
+
+      {onboarding && (
+        <div className="mx-auto mt-6 flex max-w-2xl flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          <Link
+            href="/profile/status"
+            className={cn(
+              buttonVariants({ variant: 'secondary', size: 'lg' }),
+              'w-full sm:w-auto',
+            )}
+          >
+            Skip for now
+          </Link>
+          <p className="text-center text-xs text-muted-foreground sm:text-left">
+            You can upgrade any time from{' '}
+            <span className="font-medium text-foreground">Plans</span> in the menu.
+          </p>
+        </div>
+      )}
 
       <div className="mt-8 sm:mt-10">
         {loading ? (
