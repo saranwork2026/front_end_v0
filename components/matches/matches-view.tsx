@@ -99,7 +99,7 @@ export function MatchesView({ preview }: MatchesViewProps) {
 
       <div className="mt-4">
         {isLoading ? (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
               <ProfileCardSkeleton key={i} />
             ))}
@@ -120,7 +120,7 @@ export function MatchesView({ preview }: MatchesViewProps) {
           />
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {content.map((result) => (
                 <ProfileCard
                   key={result.profileId}

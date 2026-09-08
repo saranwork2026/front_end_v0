@@ -167,7 +167,7 @@ export function DashboardView({ preview }: DashboardViewProps) {
           {dailyCards.length > 0 && (
             <section aria-labelledby="todays-matches" className="mb-10">
               <SectionHeading id="todays-matches" eyebrow="Today's matches" title="Handpicked for you today" icon="sparkles" />
-              <div className="mt-4 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+              <div className="mt-4 grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {dailyCards.map((profileItem) => (
                   <ProfileCard
                     key={`daily-${profileItem.profileId}`}
@@ -185,7 +185,7 @@ export function DashboardView({ preview }: DashboardViewProps) {
               {loadingResults ? (
                 <DashboardSkeleton />
               ) : (
-                <div className="mt-4 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+                <div className="mt-4 grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {matchContent.map((profileItem) => (
                     <ProfileCard
                       key={profileItem.profileId}
@@ -245,7 +245,7 @@ function SectionHeading({
 
 function DashboardSkeleton() {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: 6 }).map((_, i) => (
         <ProfileCardSkeleton key={i} />
       ))}
