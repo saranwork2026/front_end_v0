@@ -150,7 +150,7 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
 
   if (loading) {
     return (
-      <div className="mx-auto flex max-w-lg flex-col gap-6">
+      <div className="mx-auto flex w-full max-w-lg px-4 flex-col gap-6">
         <Skeleton className="h-8 w-56" />
         <Skeleton className="h-48 w-full rounded-2xl" />
         <Skeleton className="h-32 w-full rounded-2xl" />
@@ -160,7 +160,7 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
 
   if (error) {
     return (
-      <div className="mx-auto flex max-w-lg flex-col items-center gap-4 rounded-2xl border border-destructive/30 bg-destructive/5 p-8 text-center">
+      <div className="mx-auto flex w-full max-w-lg px-4 flex-col items-center gap-4 rounded-2xl border border-destructive/30 bg-destructive/5 p-8 text-center">
         <span className="flex size-14 items-center justify-center rounded-full bg-destructive/10 text-destructive">
           <Icon name="alert-circle" size={26} />
         </span>
@@ -179,7 +179,7 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
   // Guard: unknown / missing plan.
   if (!plan) {
     return (
-      <div className="mx-auto flex max-w-lg flex-col items-center gap-4 rounded-2xl border border-border bg-card p-8 text-center">
+      <div className="mx-auto flex w-full max-w-lg px-4 flex-col items-center gap-4 rounded-2xl border border-border bg-card p-8 text-center">
         <span className="flex size-14 items-center justify-center rounded-full bg-muted text-muted-foreground">
           <Icon name="alert-circle" size={26} />
         </span>
@@ -201,7 +201,7 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
     const submitted = phase === 'claim-submitted'
     return (
       <>
-        <div className="mx-auto flex max-w-lg flex-col items-center gap-5 rounded-2xl border border-border bg-card p-8 text-center">
+        <div className="mx-auto flex w-full max-w-lg px-4 flex-col items-center gap-5 rounded-2xl border border-border bg-card p-8 text-center">
           <span
             className={
               submitted
@@ -272,7 +272,7 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
 
   return (
     <>
-      <div className="mx-auto flex max-w-lg flex-col gap-6">
+      <div className="mx-auto flex w-full max-w-lg px-4 flex-col gap-6">
         <div className="flex flex-col gap-1">
           <Link
             href="/plans"
