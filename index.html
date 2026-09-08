@@ -13,13 +13,45 @@
       rel="stylesheet"
     />
     <style>
-      /* Anti-FOUC guard: hold the page on the theme background and keep it
-         hidden until the app stylesheet applies, so raw unstyled HTML never
-         flashes before CSS loads. index.css reveals the body once ready. */
+      /* Anti-FOUC guard: hold the page on the theme background and keep the
+         body hidden until the app stylesheet is confirmed applied, so raw
+         unstyled HTML never flashes before CSS loads (common on very slow
+         connections). The inline script below performs the reveal. */
       html { background-color: oklch(0.968 0.013 83); }
       body { visibility: hidden; }
     </style>
-    <noscript><style>body { visibility: visible; }</style></noscript>
+    <noscript><style>body { visibility: visible !important; }</style></noscript>
+    <script>
+      // Reveal the page only once the app stylesheet has actually applied.
+      // index.css sets the sentinel custom property `--app-css-ready: 1` on
+      // <html>; before the stylesheet loads, reading it returns "". Poll on
+      // animation frames and reveal as soon as it resolves. A failsafe timeout
+      // guarantees the page is never left hidden if the stylesheet fails.
+      (function () {
+        var revealed = false;
+        function reveal() {
+          if (revealed) return;
+          revealed = true;
+          if (document.body) document.body.style.visibility = 'visible';
+        }
+        function cssReady() {
+          try {
+            var v = getComputedStyle(document.documentElement)
+              .getPropertyValue('--app-css-ready');
+            return v && v.trim() === '1';
+          } catch (e) {
+            return false;
+          }
+        }
+        function tick() {
+          if (document.body && cssReady()) { reveal(); return; }
+          requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+        // Failsafe: never keep the page hidden longer than 5s.
+        setTimeout(reveal, 5000);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

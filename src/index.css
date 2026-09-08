@@ -91,9 +91,12 @@
   }
 }
 
-/* Pairs with the anti-FOUC guard in index.html: once this stylesheet has
-   applied, reveal the body. !important guarantees it wins regardless of
-   where the bundler injects this file relative to the inline guard. */
+/* Sentinel read by the anti-FOUC guard's inline script in index.html: it polls
+   for this custom property and reveals the page only once this stylesheet has
+   applied. The body rule is a belt-and-suspenders reveal for the no-JS path. */
+html {
+  --app-css-ready: 1;
+}
 body {
   visibility: visible !important;
 }
