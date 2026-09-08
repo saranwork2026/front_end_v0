@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { SearchFilters, SearchResult, PaginatedResponse } from '@matrimony/shared-core'
 
@@ -13,7 +13,7 @@ import { ProfileCardSkeleton } from '@/components/ui/skeleton'
 import { ProfileCard } from '@/components/shared/profile-card'
 import { FilterChip } from '@/components/shared/filter-bar'
 import { FilterFields } from '@/components/search/filter-fields'
-import { searchApi } from '@/src/lib/api'
+import { profileApi, searchApi } from '@/src/lib/api'
 import { toProfileCard } from '@/src/lib/adapters'
 import {
   buildActiveChips,
@@ -40,6 +40,32 @@ export function SearchView() {
   const [sheetOpen, setSheetOpen] = useState(false)
 
   const { isShortlisted, toggle } = useShortlist()
+
+  // Seed a sensible default age bound from the user's OWN age/gender:
+  // a male member defaults to strictly younger women (maxAge = age - 1); a
+  // female member defaults to strictly older men (minAge = age + 1). The user
+  // can still widen/clear it — this is only the starting filter, not a cap.
+  // (Opposite-gender itself is enforced server-side, so we don't send gender.)
+  useEffect(() => {
+    let cancelled = false
+    profileApi
+      .getProfile()
+      .then((res) => {
+        if (cancelled) return
+        const { gender, age } = res.data
+        if (!age || (gender !== 'MALE' && gender !== 'FEMALE')) return
+        const seeded: SearchFilters =
+          gender === 'MALE' ? { maxAge: age - 1 } : { minAge: age + 1 }
+        // Only seed fields the user hasn't touched yet (draft is still empty here).
+        setDraft((d) => ({ ...seeded, ...d }))
+      })
+      .catch(() => {
+        // No profile / not fetchable — just skip the default; search still works.
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const chips = buildActiveChips(applied)
   const activeCount = countActiveFilters(applied)
