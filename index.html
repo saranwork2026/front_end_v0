@@ -12,6 +12,14 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
+    <style>
+      /* Anti-FOUC guard: hold the page on the theme background and keep it
+         hidden until the app stylesheet applies, so raw unstyled HTML never
+         flashes before CSS loads. index.css reveals the body once ready. */
+      html { background-color: oklch(0.968 0.013 83); }
+      body { visibility: hidden; }
+    </style>
+    <noscript><style>body { visibility: visible; }</style></noscript>
   </head>
   <body>
     <div id="root"></div>

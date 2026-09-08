@@ -90,3 +90,10 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Pairs with the anti-FOUC guard in index.html: once this stylesheet has
+   applied, reveal the body. !important guarantees it wins regardless of
+   where the bundler injects this file relative to the inline guard. */
+body {
+  visibility: visible !important;
+}
