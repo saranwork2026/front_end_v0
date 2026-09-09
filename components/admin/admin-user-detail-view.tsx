@@ -68,6 +68,18 @@ function shortDate(iso: string | null | undefined): string {
   return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+/** Date + time, for the account "last login" line (—/Never when absent). */
+function dateTime(iso: string | null | undefined, fallback = '—'): string {
+  if (!iso) return fallback
+  return new Date(iso).toLocaleString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  })
+}
+
 function fullName(p: UserProfile): string {
   return [p.firstName, p.lastName].filter(Boolean).join(' ').trim() || p.profileId
 }
@@ -374,6 +386,18 @@ export function AdminUserDetailView({ profileId }: AdminUserDetailViewProps) {
               {featured && <Badge variant="gold">Featured</Badge>}
               {boosted && <Badge variant="gold">Boosted</Badge>}
             </div>
+            <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm">
+              <div className="flex items-center gap-1.5">
+                <Icon name="clock" size={14} className="text-muted-foreground" />
+                <dt className="text-muted-foreground">Joined</dt>
+                <dd className="font-medium text-foreground">{shortDate(profile.createdAt)}</dd>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Icon name="bell" size={14} className="text-muted-foreground" />
+                <dt className="text-muted-foreground">Last login</dt>
+                <dd className="font-medium text-foreground">{dateTime(profile.lastLoginAt, 'Never')}</dd>
+              </div>
+            </dl>
           </div>
         </div>
 
