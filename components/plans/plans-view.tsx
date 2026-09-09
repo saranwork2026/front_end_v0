@@ -2,15 +2,17 @@
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { useNavigate } from 'react-router-dom'
 import { useCallback, useEffect, useState } from 'react'
 import { getApiError, type SubscriptionPlan } from '@matrimony/shared-core'
 
 import { Badge } from '@/components/ui/badge'
-import { buttonVariants } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Icon, type IconName } from '@/components/ui/icon'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { apiClient, plansApi } from '@/src/lib/api'
+import { setSubscriptionRemindLater } from '@/src/stores/landing'
 
 /** Minimal shape from GET /user/subscriptions/active (see SubscriptionsView). */
 interface ActiveSubscriptionInfo {
@@ -85,6 +87,7 @@ interface PlansViewProps {
 }
 
 export function PlansView(_props: PlansViewProps) {
+  const navigate = useNavigate()
   const searchParams = useSearchParams()
   // Reached as the final step of the post-submission onboarding flow
   // (partner preferences → packages → status). Packages are optional here —
@@ -163,15 +166,19 @@ export function PlansView(_props: PlansViewProps) {
 
       {onboarding && (
         <div className="mx-auto mt-6 flex max-w-2xl flex-col items-center gap-3 sm:flex-row sm:justify-center">
-          <Link
-            href="/profile/status"
-            className={cn(
-              buttonVariants({ variant: 'secondary', size: 'lg' }),
-              'w-full sm:w-auto',
-            )}
+          <Button
+            variant="secondary"
+            size="lg"
+            className="w-full sm:w-auto"
+            onClick={() => {
+              // "Remind me later": persist per-device so the onboarding funnel
+              // stops sending the user here, then take them straight to matches.
+              setSubscriptionRemindLater()
+              navigate('/', { replace: true })
+            }}
           >
-            Skip for now
-          </Link>
+            Remind me later
+          </Button>
           <p className="text-center text-xs text-muted-foreground sm:text-left">
             You can upgrade any time from{' '}
             <span className="font-medium text-foreground">Plans</span> in the menu.

@@ -31,6 +31,7 @@ import {
   createSuccessStoryApi,
   createVerificationApi,
 } from '@matrimony/shared-core'
+import { landingStore } from '@/src/stores/landing'
 
 // Singleton auth store for the web app.
 export const authStore = createAuthStore()
@@ -45,6 +46,7 @@ const apiClient = createApiClient({
   baseURL,
   onAuthFailure: () => {
     authStore.getState().clearAuth()
+    landingStore.getState().clearLanding()
     // Preserve where the user was so login can send them back.
     if (window.location.pathname !== '/login') {
       window.location.href = '/login'

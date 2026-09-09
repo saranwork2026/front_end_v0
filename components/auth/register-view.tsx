@@ -95,6 +95,8 @@ export function RegisterView() {
         state: {
           profileId: response.data.profileId,
           otpChannels: response.data.otpChannels,
+          maskedMobile: (response.data as unknown as { maskedMobile?: string }).maskedMobile,
+          maskedEmail: (response.data as unknown as { maskedEmail?: string }).maskedEmail,
         },
       })
     } catch (err: unknown) {

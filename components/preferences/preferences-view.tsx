@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
 
+import { landingStore } from '@/src/stores/landing'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
 import { Input } from '@/components/ui/input'
@@ -132,13 +133,16 @@ export function PreferencesView({
     setSaving(true)
     try {
       await savePartnerPreference(form)
+      // Reflect that preferences now exist so the landing funnel advances to
+      // the plans step instead of bouncing the user back to preferences.
+      landingStore.getState().setLandingSignals({ hasPartnerPreferences: true })
       pushToast(
         'Preferences saved. We will use these to refine your matches.',
         'success',
       )
       // Onboarding step after profile submission: surface membership packages
       // next (skippable). The ?onboarding=1 flag tells the plans page to show a
-      // "skip / continue" path back to the profile status screen.
+      // "remind me later" path to matches.
       router.push('/plans?onboarding=1')
     } catch {
       pushToast(

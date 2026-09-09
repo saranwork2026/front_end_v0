@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../stores/auth'
+import { useLandingStore, isSubscriptionRemindLater } from '../stores/landing'
 
 /**
  * Enforces the business rule: only APPROVED profiles get full app access.
@@ -40,13 +41,41 @@ export default function ProfileStatusGuard() {
   const userStatus = useAuthStore((s) => s.userStatus)
   const profileStatus = useAuthStore((s) => s.profileStatus)
   const profileCompletionPct = useAuthStore((s) => s.profileCompletionPct)
+  const hasPartnerPreferences = useLandingStore((s) => s.hasPartnerPreferences)
+  const hasActiveSubscription = useLandingStore((s) => s.hasActiveSubscription)
 
   if (userStatus === 'DEACTIVATED') {
     return <Navigate to="/account/reactivate" state={{ from: location.pathname }} replace />
   }
 
-  // APPROVED → full app regardless of completion %.
+  // APPROVED → run the post-approval onboarding funnel (items 5, 6):
+  //   1. no partner preferences yet        → /partner-preferences
+  //   2. prefs set, no subscription, and
+  //      "remind me later" not chosen       → /plans
+  //   3. otherwise                          → full app (matches/dashboard)
+  // Preferences/plans/onboarding + the account-management allow-list stay
+  // reachable so the user can complete each step (and revisit later).
   if (profileStatus === 'APPROVED') {
+    const path = location.pathname
+
+    // Step 1 — must set partner preferences first. null = unknown (signals not
+    // loaded yet, e.g. a hard nav before bootstrap) → don't redirect.
+    if (hasPartnerPreferences === false && path !== '/partner-preferences' && !isAllowedPath(path)) {
+      return <Navigate to="/partner-preferences" replace />
+    }
+
+    // Step 2 — prefs set but no paid plan and the user hasn't deferred it.
+    // Send to plans, but only from the app entry (dashboard/root) so we don't
+    // trap them on every navigation; once they can browse, Plans stays in nav.
+    if (
+      hasPartnerPreferences === true &&
+      hasActiveSubscription === false &&
+      !isSubscriptionRemindLater() &&
+      path === '/' 
+    ) {
+      return <Navigate to="/plans?onboarding=1" replace />
+    }
+
     return <Outlet />
   }
 

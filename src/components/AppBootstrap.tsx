@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { authApi, authStore } from '../lib/api'
+import { landingStore } from '../stores/landing'
 
 interface AppBootstrapProps {
   children: React.ReactNode
@@ -30,6 +31,16 @@ export function AppBootstrap({ children }: AppBootstrapProps) {
           userStatus,
           profileStatus,
           profileCompletionPct,
+        })
+
+        // Landing-decision signals (not in the shared-core type yet).
+        const landing = response.data as unknown as {
+          hasPartnerPreferences?: boolean
+          hasActiveSubscription?: boolean
+        }
+        landingStore.getState().setLandingSignals({
+          hasPartnerPreferences: landing.hasPartnerPreferences,
+          hasActiveSubscription: landing.hasActiveSubscription,
         })
       })
       .catch(() => {

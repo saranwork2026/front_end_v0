@@ -13,6 +13,7 @@ import { IconInput } from '@/components/auth/icon-input'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
 import { authApi, authStore } from '@/src/lib/api'
+import { landingStore } from '@/src/stores/landing'
 import { isCaptchaDisabled } from '@/src/lib/captcha'
 import { fieldError } from '@/src/lib/field-error'
 
@@ -93,6 +94,17 @@ export function LoginView() {
         userStatus,
         profileStatus,
         profileCompletionPct,
+      })
+
+      // Landing-decision signals (not part of the shared-core LoginResponse
+      // type yet, so read them defensively). Drives the post-login step.
+      const landing = response.data as unknown as {
+        hasPartnerPreferences?: boolean
+        hasActiveSubscription?: boolean
+      }
+      landingStore.getState().setLandingSignals({
+        hasPartnerPreferences: landing.hasPartnerPreferences,
+        hasActiveSubscription: landing.hasActiveSubscription,
       })
 
       // Priority-based redirect (mirrors the existing app).

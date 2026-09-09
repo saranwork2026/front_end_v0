@@ -10,6 +10,7 @@ import { Icon } from '@/components/ui/icon'
 import { Toaster, type ToastItem } from '@/components/ui/toast'
 import { ManualPaymentForm } from '@/components/payments/manual-payment-form'
 import { paymentsApi } from '@/src/lib/api'
+import { landingStore, clearSubscriptionRemindLater } from '@/src/stores/landing'
 
 const INR = new Intl.NumberFormat('en-IN', {
   style: 'currency',
@@ -74,6 +75,7 @@ export function PaymentProcessingView({ paymentId }: PaymentProcessingViewProps)
     setError(null)
     try {
       await paymentsApi.paymentSuccess({ paymentId, transactionId: `txn_mock_${Date.now()}` })
+      markSubscriptionActiveIfApplicable()
       setPhase('success')
     } catch (err) {
       const code = getApiError(err)?.errorCode
@@ -81,6 +83,7 @@ export function PaymentProcessingView({ paymentId }: PaymentProcessingViewProps)
       // back to this screen, refreshed, or double-submitted). Treat it as a
       // success rather than a scary error — the plan is already active.
       if (code === 'PAYMENT_ALREADY_SUCCESS') {
+        markSubscriptionActiveIfApplicable()
         setPhase('success')
         return
       }
@@ -93,6 +96,16 @@ export function PaymentProcessingView({ paymentId }: PaymentProcessingViewProps)
       setError(messageOf(err, 'The payment could not be processed. Please try again.'))
     } finally {
       setPaying(false)
+    }
+  }
+
+  // On a successful SUBSCRIPTION payment, reflect it in the landing signals so
+  // the onboarding funnel treats the user as subscribed (stops routing to
+  // plans) and clear any "remind me later" flag.
+  function markSubscriptionActiveIfApplicable() {
+    if (paymentType === 'SUBSCRIPTION') {
+      landingStore.getState().setLandingSignals({ hasActiveSubscription: true })
+      clearSubscriptionRemindLater()
     }
   }
 

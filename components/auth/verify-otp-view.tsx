@@ -18,7 +18,9 @@ const OTP_RE = /^\d{6}$/
 const errorMessages: Record<string, string> = {
   INVALID_OTP: 'The code you entered is incorrect. Please check and try again.',
   OTP_EXPIRED: 'This code has expired. Please request a new one.',
+  OTP_INVALID_REQUEST_NEW: 'This code is no longer valid. Please request a new one.',
   OTP_ATTEMPTS_EXCEEDED: 'Too many incorrect attempts. Please request a new code.',
+  OTP_NOT_FOUND: 'This code is no longer valid. Please request a new one.',
   RATE_LIMITED: 'Too many requests. Please wait a moment and try again.',
 }
 
@@ -28,6 +30,8 @@ interface LocationState {
   profileId?: string
   otpChannels?: string[]
   identifier?: string
+  maskedMobile?: string
+  maskedEmail?: string
 }
 
 /** Per-channel resend state: how many resends used + seconds left on cooldown. */
@@ -46,6 +50,13 @@ export function VerifyOtpView() {
   const [profileId, setProfileId] = useState<string | undefined>(state.profileId)
   const [otpChannels, setOtpChannels] = useState<string[]>(state.otpChannels ?? ['SMS', 'EMAIL'])
   const emailChannel = otpChannels.some((c) => c.toUpperCase() === 'EMAIL')
+
+  // Masked destinations for display ("******3210", "jo****@gmail.com"), from
+  // the register/pending-verification response. May be absent (e.g. arriving
+  // via the login "verify account" link before lookup) — the labels degrade
+  // gracefully to the generic wording.
+  const [maskedMobile, setMaskedMobile] = useState<string | undefined>(state.maskedMobile)
+  const [maskedEmail, setMaskedEmail] = useState<string | undefined>(state.maskedEmail)
 
   const [smsOtp, setSmsOtp] = useState(testBypass)
   const [emailOtp, setEmailOtp] = useState(emailChannel ? testBypass : '')
@@ -161,6 +172,9 @@ export function VerifyOtpView() {
       const response = await authApi.getPendingVerification({ identifier: lookupIdentifier.trim() })
       setProfileId(response.data.profileId)
       setOtpChannels(response.data.otpChannels ?? ['SMS'])
+      const masked = response.data as unknown as { maskedMobile?: string; maskedEmail?: string }
+      setMaskedMobile(masked.maskedMobile)
+      setMaskedEmail(masked.maskedEmail)
       setLookupNeeded(false)
     } catch (err: unknown) {
       const apiError = (err as { response?: { data?: ApiError } })?.response?.data
@@ -237,8 +251,8 @@ export function VerifyOtpView() {
       title="Verify your account"
       subtitle={
         emailChannel
-          ? 'Enter the codes we sent to your mobile and email to confirm it is really you.'
-          : 'Enter the code we sent to your mobile to confirm it is really you.'
+          ? `We've sent a verification code by SMS${maskedMobile ? ` to ${maskedMobile}` : ''} and by email${maskedEmail ? ` to ${maskedEmail}` : ''}. Enter both to confirm it's really you.`
+          : `We've sent a verification code by SMS${maskedMobile ? ` to ${maskedMobile}` : ''}. Enter it to confirm it's really you.`
       }
       footer={
         <>
@@ -292,7 +306,14 @@ export function VerifyOtpView() {
             <div className="flex flex-col gap-2.5">
               <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                 <Icon name="phone" size={16} className="text-primary" />
-                SMS code
+                <span>
+                  SMS code
+                  {maskedMobile && (
+                    <span className="ml-1 font-normal text-muted-foreground">
+                      sent to {maskedMobile}
+                    </span>
+                  )}
+                </span>
                 {smsVerified && (
                   <span className="ml-auto inline-flex items-center gap-1 text-xs font-medium text-success">
                     <Icon name="circle-check" size={14} />
@@ -315,7 +336,14 @@ export function VerifyOtpView() {
               <div className="flex flex-col gap-2.5">
                 <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                   <Icon name="mail" size={16} className="text-primary" />
-                  Email code
+                  <span>
+                    Email code
+                    {maskedEmail && (
+                      <span className="ml-1 font-normal text-muted-foreground">
+                        sent to {maskedEmail}
+                      </span>
+                    )}
+                  </span>
                   {emailVerified && (
                     <span className="ml-auto inline-flex items-center gap-1 text-xs font-medium text-success">
                       <Icon name="circle-check" size={14} />
