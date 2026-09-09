@@ -27,6 +27,7 @@ import {
   type StepKey,
   type WizardForm,
 } from '@/lib/wizard-data'
+import { flattenProfileResponse } from '@/src/lib/adapters'
 import { profileApi } from '@/src/lib/api'
 import { authStore } from '@/src/lib/api'
 
@@ -58,7 +59,7 @@ export function WizardView({
     profileApi
       .getProfile()
       .then((res) => {
-        if (!cancelled) setForm(seedFromProfile(res.data))
+        if (!cancelled) setForm(seedFromProfile(flattenProfileResponse(res.data as unknown as Record<string, unknown>)))
       })
       .catch(() => {
         /* Start blank if no profile yet. */

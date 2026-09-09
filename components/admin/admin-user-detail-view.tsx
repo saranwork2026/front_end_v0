@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import type {
   AdminEditableField,
   AdminPayment,
@@ -26,6 +26,7 @@ import { ProfileDetailSections } from '@/components/shared/profile-detail-sectio
 import { buildProfileSections } from '@/components/admin/profile-review-sections'
 import { ImageLightbox } from '@/components/profile/image-lightbox'
 import { cn } from '@/lib/utils'
+import { flattenProfileResponse } from '@/src/lib/adapters'
 import { adminApi, plansApi } from '@/src/lib/api'
 import { useAuthStore } from '@/src/stores/auth'
 
@@ -78,6 +79,7 @@ function limit(total: number | null, remaining: number | null): string {
 }
 
 export function AdminUserDetailView({ profileId }: AdminUserDetailViewProps) {
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
@@ -136,8 +138,11 @@ export function AdminUserDetailView({ profileId }: AdminUserDetailViewProps) {
     ])
 
     if (profileRes.status === 'fulfilled') {
-      setProfile(profileRes.value.data)
-      setBlocked(profileRes.value.data.status === 'REJECTED')
+      // The backend returns a nested/sectioned profile; flatten it so the
+      // detail sections (Religious/Career/Location/…) render, not just gender.
+      const flat = flattenProfileResponse(profileRes.value.data as unknown as Record<string, unknown>)
+      setProfile(flat)
+      setBlocked(flat.status === 'REJECTED')
     } else {
       setNotFound(true)
     }
@@ -281,10 +286,18 @@ export function AdminUserDetailView({ profileId }: AdminUserDetailViewProps) {
       await adminApi.purgeUser(profile.profileId)
       pushToast('Member permanently deleted.', 'success')
       setModal(null)
-      // Send the admin back to the list — this member no longer exists.
-      window.location.assign('/admin/users')
-    } catch {
-      pushToast('Could not delete this member.', 'error')
+      // Send the admin back to the list via SPA navigation (no full reload, so
+      // the in-memory admin session is preserved). This member no longer exists.
+      navigate('/admin/users', { replace: true })
+    } catch (err) {
+      const code =
+        (err as { response?: { data?: { errorCode?: string } } })?.response?.data?.errorCode
+      pushToast(
+        code === 'CANNOT_DELETE_SELF'
+          ? 'You cannot delete your own admin account.'
+          : 'Could not delete this member.',
+        'error',
+      )
     } finally {
       setBusy(false)
     }
@@ -1391,7 +1404,7 @@ function ViewAsMemberDialog({
     adminApi
       .viewAsMember(profileId)
       .then((res) => {
-        if (active) setProfile(res.data)
+        if (active) setProfile(flattenProfileResponse(res.data as unknown as Record<string, unknown>))
       })
       .catch(() => {
         if (active) {

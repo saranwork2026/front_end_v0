@@ -10,6 +10,7 @@ import { Icon, type IconName } from '@/components/ui/icon'
 import { Skeleton } from '@/components/ui/skeleton'
 import { StatusBadge } from '@/components/ui/status-badge'
 import { cn } from '@/lib/utils'
+import { flattenProfileResponse } from '@/src/lib/adapters'
 import { photoApi, profileApi } from '@/src/lib/api'
 
 type FieldValue = string | number | boolean | null | undefined
@@ -184,7 +185,7 @@ export function MyProfileView() {
         photoApi.listPhotos(),
         photoApi.listHoroscopePhotos(),
       ])
-      setProfile(profileRes.data)
+      setProfile(flattenProfileResponse(profileRes.data as unknown as Record<string, unknown>))
       setPhotos((photosRes.data ?? []).filter((p) => !p.isDeleted))
       setHoroscopePhotos((horoscopeRes.data ?? []).filter((p) => !p.isDeleted))
     } catch {

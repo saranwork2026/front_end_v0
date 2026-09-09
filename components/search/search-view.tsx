@@ -14,7 +14,7 @@ import { ProfileCard } from '@/components/shared/profile-card'
 import { FilterChip } from '@/components/shared/filter-bar'
 import { FilterFields } from '@/components/search/filter-fields'
 import { profileApi, searchApi } from '@/src/lib/api'
-import { toProfileCard } from '@/src/lib/adapters'
+import { toProfileCard, flattenProfileResponse } from '@/src/lib/adapters'
 import {
   buildActiveChips,
   countActiveFilters,
@@ -52,7 +52,7 @@ export function SearchView() {
       .getProfile()
       .then((res) => {
         if (cancelled) return
-        const { gender, age } = res.data
+        const { gender, age } = flattenProfileResponse(res.data as unknown as Record<string, unknown>)
         if (!age || (gender !== 'MALE' && gender !== 'FEMALE')) return
         const seeded: SearchFilters =
           gender === 'MALE' ? { maxAge: age - 1 } : { minAge: age + 1 }

@@ -19,7 +19,7 @@ import { ProfileCard } from '@/components/shared/profile-card'
 import { ProfileStrengthWidget } from '@/components/shared/profile-strength-widget'
 import { cn } from '@/lib/utils'
 import { profileApi, searchApi } from '@/src/lib/api'
-import { toProfileCard, missingSectionLabels } from '@/src/lib/adapters'
+import { toProfileCard, missingSectionLabels, flattenProfileResponse } from '@/src/lib/adapters'
 
 /** Preview states retained so the loading/empty views can be forced via ?preview=. */
 export type DashboardPreview = 'loading' | 'empty'
@@ -49,7 +49,7 @@ export function DashboardView({ preview }: DashboardViewProps) {
     profileApi
       .getProfile()
       .then((res) => {
-        if (!cancelled) setProfile(res.data)
+        if (!cancelled) setProfile(flattenProfileResponse(res.data as unknown as Record<string, unknown>))
       })
       .catch(() => {})
       .finally(() => {

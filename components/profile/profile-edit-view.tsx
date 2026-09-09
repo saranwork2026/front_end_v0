@@ -16,6 +16,7 @@ import {
   type FieldErrors,
   type WizardForm,
 } from '@/lib/wizard-data'
+import { flattenProfileResponse } from '@/src/lib/adapters'
 import { profileApi } from '@/src/lib/api'
 
 /**
@@ -80,8 +81,9 @@ export function ProfileEditView({ section }: ProfileEditViewProps) {
     setError(false)
     try {
       const res = await profileApi.getProfile()
-      setForm(seedFromProfile(res.data))
-      setApproved(res.data.status === 'APPROVED')
+      const flat = flattenProfileResponse(res.data as unknown as Record<string, unknown>)
+      setForm(seedFromProfile(flat))
+      setApproved(flat.status === 'APPROVED')
     } catch {
       setError(true)
     } finally {
