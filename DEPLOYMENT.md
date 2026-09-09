@@ -25,25 +25,21 @@ bucket is reused with those settings unchanged.
 
 Repo: `https://github.com/saranwork2026/front_end_v0.git` (branch `main`).
 
-## shared-core dependency (why CI checks out two repos)
+## shared-core is vendored — single-repo build
 
-front_end_v0 consumes `@matrimony/shared-core` via a filesystem link in
-`package.json`:
+`@matrimony/shared-core` (API clients, types, zod schemas, zustand stores) is
+**vendored into this repo** at `packages/shared-core/`. It is resolved directly
+from its TypeScript source via aliases, so there is **no separate build step**
+and **no dependency on the `matrimony-frontend` repo**:
 
-```
-"@matrimony/shared-core": "file:../matrimony-frontend/packages/shared-core"
-```
+- `package.json`: `"@matrimony/shared-core": "file:./packages/shared-core"`
+- `vite.config.ts`: alias `@matrimony/shared-core` → `packages/shared-core/src/index.ts`
+- `tsconfig.json`: `paths` maps `@matrimony/shared-core` → the same source, and
+  `include` covers `packages/shared-core/src` (test files excluded).
 
-shared-core is a **private** package (not published to npm). It lives in the
-`matrimony-frontend` repo and must be built (`tsc` -> `dist/`) before
-front_end_v0 can build. Any build environment must lay the two repos out
-side-by-side:
-
-```
-<workspace>/
-  front_end_v0/           <- this repo
-  matrimony-frontend/     <- sibling; provides shared-core
-```
+To change shared logic (an API call, a type, a schema), edit files under
+`packages/shared-core/src/` — changes are live in dev and picked up by the
+build with no rebuild of a separate package.
 
 ## Prerequisites before the Jenkins pipeline can run
 
@@ -52,24 +48,22 @@ side-by-side:
    - `aws-credentials` — S3 sync + CloudFront invalidation
 2. **Node/pnpm + AWS CLI** available on the Jenkins agent (already true for the
    existing frontend pipeline on the shared Lightsail instance).
-3. Create a new Jenkins Pipeline job pointing at front_end_v0's `Jenkinsfile`.
+3. Create a Jenkins Pipeline job pointing at front_end_v0's `Jenkinsfile`.
 
 ## Pipeline stages (see `Jenkinsfile`)
 
-1. Checkout front_end_v0 into `front_end_v0/`
-2. Checkout `matrimony-frontend` into `matrimony-frontend/` (sibling)
-3. Build shared-core (`pnpm --filter shared-core build`)
-4. `pnpm install` + `pnpm build` in front_end_v0 (typecheck-gated)
-5. `aws s3 sync dist/ s3://magizhmatrimony/ --delete`
-6. CloudFront invalidation (`E39BG4XMB7DKLB`, `/*`)
+1. Checkout front_end_v0 (this repo only — no sibling checkout)
+2. `pnpm install --frozen-lockfile`
+3. `pnpm build` (`tsc --noEmit && vite build`, typecheck-gated; the vendored
+   shared-core src is typechecked + bundled here)
+4. `aws s3 sync dist/ s3://magizhmatrimony/ --delete`
+5. CloudFront invalidation (`E39BG4XMB7DKLB`, `/*`)
 
-## Manual deploy (works today, from a machine with both repos side-by-side)
+## Manual deploy (single repo)
 
 ```powershell
-# from matrimony-frontend: ensure shared-core is built
-pnpm --filter shared-core build
-
 # from New-FE
+pnpm install
 pnpm build
 aws s3 sync dist/ s3://magizhmatrimony/ --region ap-south-1 --delete --profile admin
 aws cloudfront create-invalidation --distribution-id E39BG4XMB7DKLB --paths "/*" --profile admin

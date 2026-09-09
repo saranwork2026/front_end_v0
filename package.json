@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "4.1.3",
-    "@matrimony/shared-core": "file:../matrimony-frontend/packages/shared-core",
+    "@matrimony/shared-core": "file:./packages/shared-core",
     "@stomp/stompjs": "7.0.0",
     "axios": "1.7.9",
     "class-variance-authority": "^0.7.0",

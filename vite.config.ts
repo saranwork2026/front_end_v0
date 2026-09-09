@@ -20,6 +20,13 @@ export default defineConfig(({ mode }) => {
         { find: 'next/link', replacement: path.resolve(__dirname, 'src/compat/next-link.tsx') },
         { find: 'next/navigation', replacement: path.resolve(__dirname, 'src/compat/next-navigation.ts') },
         { find: 'next/image', replacement: path.resolve(__dirname, 'src/compat/next-image.tsx') },
+        // Vendored in-repo shared-core: resolve to the TS source so edits are
+        // live with no separate build step (the package is no longer pulled
+        // from ../matrimony-frontend).
+        {
+          find: '@matrimony/shared-core',
+          replacement: path.resolve(__dirname, 'packages/shared-core/src/index.ts'),
+        },
         { find: '@', replacement: path.resolve(__dirname, '.') },
       ],
     },

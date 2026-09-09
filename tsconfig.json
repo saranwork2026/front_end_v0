@@ -17,11 +17,17 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
+      "@matrimony/shared-core": ["./packages/shared-core/src/index.ts"],
       "next/link": ["./src/compat/next-link.tsx"],
       "next/navigation": ["./src/compat/next-navigation.ts"],
       "next/image": ["./src/compat/next-image.tsx"]
     }
   },
-  "include": ["src", "components", "lib", "hooks"],
+  "include": ["src", "components", "lib", "hooks", "packages/shared-core/src"],
+  "exclude": [
+    "packages/shared-core/src/**/__tests__/**",
+    "packages/shared-core/src/**/*.test.ts",
+    "packages/shared-core/src/**/*.spec.ts"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
