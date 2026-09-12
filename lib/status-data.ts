@@ -67,17 +67,21 @@ export const statusConfig: Record<ProfileStatus, StatusConfig> = {
     ],
     helper: 'Profiles become visible to matches only after admin approval.',
   },
+  // COMPLETED is the status a profile has AFTER it has been submitted for
+  // review (submitProfile: DRAFT -> COMPLETED). So there is no "Submit for
+  // review" action here — the profile is already in the review queue awaiting
+  // admin approval. It mirrors the UNDER_REVIEW messaging.
   COMPLETED: {
     status: 'COMPLETED',
-    icon: 'circle-check',
-    tone: 'success',
-    eyebrow: 'Almost there',
-    title: 'Your profile is complete',
-    body: "Thanks for filling everything in. Submit your profile for review and our team will verify the details before it goes live to matches.",
-    timeline: reviewTimeline('submitted'),
+    icon: 'clock',
+    tone: 'warning',
+    eyebrow: 'In progress',
+    title: 'Your profile is submitted for review',
+    body: "Thanks for completing your profile. Our team is verifying your details and will approve it before it goes live to matches. You'll get a notification as soon as it's approved — no action needed right now.",
+    timeline: reviewTimeline('review'),
     actions: [
-      { label: 'Submit for review', href: '/profile/status?state=UNDER_REVIEW', variant: 'primary' },
-      { label: 'Review my profile', href: '/profile/wizard', variant: 'secondary' },
+      { label: 'Edit my profile', href: '/profile/wizard', variant: 'secondary' },
+      { label: 'Explore membership plans', href: '/plans', variant: 'ghost' },
     ],
     helper: 'Verification usually takes less than 24 hours.',
   },

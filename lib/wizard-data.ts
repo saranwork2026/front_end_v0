@@ -221,6 +221,7 @@ export const bloodGroupOptions: Opt[] = [
   { value: 'B_POSITIVE', label: 'B+' }, { value: 'B_NEGATIVE', label: 'B-' },
   { value: 'O_POSITIVE', label: 'O+' }, { value: 'O_NEGATIVE', label: 'O-' },
   { value: 'AB_POSITIVE', label: 'AB+' }, { value: 'AB_NEGATIVE', label: 'AB-' },
+  { value: 'DONT_KNOW', label: "Don't Know" },
 ]
 export const complexionOptions: Opt[] = [
   { value: 'VERY_FAIR', label: 'Very Fair' },

@@ -17,11 +17,18 @@ const TYPING_STOP_DELAY_MS = 3_000
 const MESSAGE_MAX = 2000
 
 // The WebSocket handshake goes to the backend origin directly (not through the
-// /api/v1 REST prefix) — strip that suffix off the configured API base URL. In
-// dev this resolves to '' (same-origin) and the SockJS handshake to the Vite
-// dev server has no WS route, so the client stays disconnected and the REST
-// polling fallback drives delivery — exactly the designed resilience path.
-const WS_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api/v1').replace(/\/api\/v1\/?$/, '')
+// REST /api/v1 prefix). In production the REST base URL is now the relative
+// same-origin '/api/v1' (routed by CloudFront), so we can no longer derive the
+// backend origin by stripping '/api/v1' off it — that would yield '' (the www
+// host), which can't serve the WS. Prefer an explicit VITE_WS_BASE_URL
+// (absolute api. host) when set; otherwise fall back to stripping the REST
+// base (covers dev, where this resolves to '' / same-origin and the SockJS
+// handshake to the Vite dev server has no WS route, so the client stays
+// disconnected and the REST polling fallback drives delivery — the designed
+// resilience path).
+const WS_BASE_URL =
+  import.meta.env.VITE_WS_BASE_URL ||
+  (import.meta.env.VITE_API_BASE_URL || '/api/v1').replace(/\/api\/v1\/?$/, '')
 
 interface Props {
   profileId: string

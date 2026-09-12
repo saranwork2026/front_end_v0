@@ -23,6 +23,7 @@ import { ImageLightbox } from '@/components/profile/image-lightbox'
 import { ProfileDetailSections } from '@/components/shared/profile-detail-sections'
 import { cn } from '@/lib/utils'
 import { adminApi } from '@/src/lib/api'
+import { flattenProfileResponse } from '@/src/lib/adapters'
 import { useAuthStore } from '@/src/stores/auth'
 import { buildProfileSections } from '@/components/admin/profile-review-sections'
 
@@ -485,7 +486,10 @@ function ReviewDialog({
     adminApi
       .getProfileForReview(target.item.profileId)
       .then((res) => {
-        if (active) setProfile(res.data)
+        // The backend returns a nested/sectioned profile; flatten it so all
+        // detail sections render (not just age). Same pattern as
+        // admin-user-detail-view.tsx.
+        if (active) setProfile(flattenProfileResponse(res.data as unknown as Record<string, unknown>))
       })
       .catch(() => {
         /* surfaced below via the empty profile state */
@@ -579,6 +583,7 @@ function ReviewDialog({
               Raise reject
             </Button>
             <Button
+              variant="success"
               onClick={() => submit('approve')}
               loading={busy === 'approve'}
               disabled={busy !== null}
@@ -867,6 +872,7 @@ function ApproverQueue({
                         </Button>
                       )}
                       <Button
+                        variant="success"
                         size="sm"
                         onClick={() => decide(item.id, 'approve')}
                         loading={actionId === item.id}
@@ -937,7 +943,11 @@ function ApproverDetailDialog({
     if (kind === 'profile' && item.targetProfileId) {
       adminApi
         .getProfileForReview(item.targetProfileId)
-        .then((res) => active && setProfile(res.data))
+        .then(
+          (res) =>
+            active &&
+            setProfile(flattenProfileResponse(res.data as unknown as Record<string, unknown>)),
+        )
         .catch(() => {})
         .finally(() => active && setLoading(false))
     } else if (kind === 'photo' && item.targetProfileId) {
@@ -990,7 +1000,7 @@ function ApproverDetailDialog({
             >
               Reject
             </Button>
-            <Button onClick={onApprove} disabled={busy} className="w-full sm:w-auto sm:min-w-28">
+            <Button variant="success" onClick={onApprove} disabled={busy} className="w-full sm:w-auto sm:min-w-28">
               Approve
             </Button>
           </div>

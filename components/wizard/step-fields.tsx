@@ -50,6 +50,7 @@ import {
 import { COUNTRIES } from '@/src/data/countryData'
 import { INDIAN_STATES } from '@/src/data/indianStatesData'
 import { getRaasiForNakshatraPadham } from '@/src/data/horoscopeData'
+import { COURSE_OPTIONS } from '@/src/data/courseOptions'
 
 interface StepFieldsProps {
   step: StepKey
@@ -337,11 +338,12 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
               </option>
             ))}
           </Select>
-          <Input
-            label="Education detail"
+          <SearchableSelect
+            label="Education detail (course)"
+            options={COURSE_OPTIONS}
             value={form.educationDetail}
-            onChange={(e) => onChange({ educationDetail: e.target.value })}
-            placeholder="e.g. B.E. Computer Science, Anna University"
+            onChange={(educationDetail) => onChange({ educationDetail })}
+            placeholder="Search your course…"
           />
           <Input
             label="Profession"

@@ -189,6 +189,8 @@ export function flattenProfileResponse(res: Record<string, unknown>): import('@m
     familyType: pick(family, 'familyType'),
     familyStatus: pick(family, 'familyStatus'),
     assetDetails: pick(family, 'assetDetails'),
+    birthOrder: pick(family, 'birthOrder'),
+    ownHouse: pick(family, 'ownHouse'),
     nativePlace: pick(family, 'nativePlace'),
     // Horoscope
     raasi: pick(horoscope, 'raasi'),
@@ -199,5 +201,9 @@ export function flattenProfileResponse(res: Record<string, unknown>): import('@m
     birthCity: pick(horoscope, 'birthCity'),
     horoscopeAvailable: pick(horoscope, 'horoscopeAvailable'),
     willingToShareHoroscope: pick(horoscope, 'willingToShareHoroscope'),
+    tamilYear: pick(horoscope, 'tamilYear'),
+    tamilMonth: pick(horoscope, 'tamilMonth'),
+    tamilDate: pick(horoscope, 'tamilDate'),
+    kilamai: pick(horoscope, 'kilamai'),
   } as unknown as import('@matrimony/shared-core').UserProfile
 }

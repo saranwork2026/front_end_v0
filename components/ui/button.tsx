@@ -19,6 +19,8 @@ const buttonVariants = cva(
           'bg-heart text-heart-foreground shadow-sm hover:bg-heart/90',
         danger:
           'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',
+        success:
+          'bg-success text-success-foreground shadow-sm hover:bg-success/90',
         ghost: 'text-foreground hover:bg-secondary',
         link: 'text-primary underline-offset-4 hover:underline',
       },
