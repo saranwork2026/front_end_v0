@@ -37,6 +37,7 @@ export interface SearchResult {
   profession: string;
   currentCity: string;
   heightCm: number;
+  weightKg?: number | null;
   primaryPhotoUrl: string | null;
   /** DP crop focal point (object-position %, 0–100); null → center. */
   photoFocalX?: number | null;

@@ -1,4 +1,4 @@
-import type { SearchResult, ActivityStatus, ProfileSection, ProfileView } from '@matrimony/shared-core'
+import type { SearchResult, ActivityStatus, ProfileSection, ProfileView, Interest } from '@matrimony/shared-core'
 import type { ProfileCardProfile } from '@/components/shared/profile-card'
 
 /**
@@ -33,6 +33,7 @@ export function toProfileCard(r: SearchResult): ProfileCardProfile {
     age: r.age,
     currentCity: r.currentCity,
     heightCm: r.heightCm,
+    weightKg: r.weightKg ?? undefined,
     highestEducation: r.highestEducation,
     profession: r.profession,
     religion: r.religion,
@@ -63,6 +64,25 @@ export function toCardFromView(v: ProfileView): ProfileCardProfile {
     photoFocalX: v.viewerPhotoFocalX ?? undefined,
     photoFocalY: v.viewerPhotoFocalY ?? undefined,
     age: Number.isFinite(age) ? age : undefined,
+  }
+}
+
+/**
+ * Adapt an Interest (sent / received entry) into the ProfileCard shape so the
+ * Matches "you sent interest" / "other sent interest" filters render the SAME
+ * card as matches. Interest carries the "other" party's summary fields; the
+ * rest degrade gracefully to undefined.
+ */
+export function toCardFromInterest(i: Interest): ProfileCardProfile {
+  return {
+    profileId: i.otherProfileId,
+    firstName: i.otherFirstName ?? i.otherProfileId,
+    lastName: i.otherLastName ?? undefined,
+    age: i.otherAge ?? undefined,
+    currentCity: i.otherCity ?? undefined,
+    primaryPhotoUrl: i.otherPrimaryPhotoUrl ?? undefined,
+    photoFocalX: i.otherPhotoFocalX ?? undefined,
+    photoFocalY: i.otherPhotoFocalY ?? undefined,
   }
 }
 

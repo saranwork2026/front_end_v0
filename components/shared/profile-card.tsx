@@ -13,6 +13,7 @@ export interface ProfileCardProfile {
   age?: number
   currentCity?: string
   heightCm?: number
+  weightKg?: number
   highestEducation?: string
   profession?: string
   religion?: string
@@ -89,7 +90,7 @@ export function ProfileCard({
   return (
     <Wrapper>
       <div className="relative">
-        <div className="relative h-52 w-full overflow-hidden bg-secondary sm:h-56">
+        <div className="relative aspect-[4/5] w-full overflow-hidden bg-secondary">
           {profile.primaryPhotoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -154,14 +155,16 @@ export function ProfileCard({
       </div>
 
       <div className="flex flex-col gap-1.5 p-4">
+        {/* Line 1: Name, Age · Location */}
         <div className="flex items-center gap-1.5">
           <h3 className="truncate font-semibold text-foreground">
             {name}
             {profile.age ? `, ${profile.age}` : ''}
+            {profile.currentCity ? ` · ${profile.currentCity}` : ''}
           </h3>
           {profile.verified && (
             <span
-              className="text-[oklch(0.6_0.13_240)]"
+              className="shrink-0 text-[oklch(0.6_0.13_240)]"
               title="Verified profile"
               aria-label="Verified profile"
             >
@@ -170,23 +173,12 @@ export function ProfileCard({
           )}
         </div>
 
-        {(profile.currentCity || height) && (
-          <p className="truncate text-sm text-muted-foreground">
-            {[profile.currentCity, height].filter(Boolean).join(' • ')}
-          </p>
-        )}
-
-        {(profile.highestEducation || profile.profession) && (
-          <p className="truncate text-sm text-muted-foreground">
-            {[profile.highestEducation, profile.profession]
+        {/* Line 2: Height · Weight · Caste — wraps to next line when long. */}
+        {(height || profile.weightKg || profile.caste) && (
+          <p className="text-sm text-muted-foreground text-pretty">
+            {[height, profile.weightKg ? `${profile.weightKg} kg` : null, profile.caste]
               .filter(Boolean)
-              .join(' • ')}
-          </p>
-        )}
-
-        {(profile.religion || profile.caste) && (
-          <p className="truncate text-sm text-muted-foreground">
-            {[profile.religion, profile.caste].filter(Boolean).join(', ')}
+              .join(' · ')}
           </p>
         )}
 
