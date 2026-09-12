@@ -19,7 +19,7 @@ import { ProfileCard } from '@/components/shared/profile-card'
 import { ProfileStrengthWidget } from '@/components/shared/profile-strength-widget'
 import { cn } from '@/lib/utils'
 import { profileApi, searchApi, profileViewsApi, adBannerApi } from '@/src/lib/api'
-import { toProfileCard, missingSectionLabels, flattenProfileResponse } from '@/src/lib/adapters'
+import { toProfileCard, toCardFromView, missingSectionLabels, flattenProfileResponse } from '@/src/lib/adapters'
 import type { ProfileView, AdBanner } from '@matrimony/shared-core'
 
 /** Preview states retained so the loading/empty views can be forced via ?preview=. */
@@ -265,7 +265,15 @@ export function DashboardView({ preview }: DashboardViewProps) {
       {!isLoading && viewedMe.length > 0 && (
         <section aria-labelledby="viewed-me" className="mt-10">
           <SectionHeading id="viewed-me" eyebrow="Profile views" title="Who viewed your profile" icon="eye" />
-          <ViewedGrid views={viewedMe} />
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {viewedMe.map((v) => (
+              <ProfileCard
+                key={`viewed-me-${v.viewerProfileId}`}
+                profile={toCardFromView(v)}
+                href={`/profile/${v.viewerProfileId}`}
+              />
+            ))}
+          </div>
           <div className="mt-4">
             <Link
               href="/profile-views"
@@ -280,7 +288,15 @@ export function DashboardView({ preview }: DashboardViewProps) {
       {!isLoading && iViewed.length > 0 && (
         <section aria-labelledby="i-viewed" className="mt-10">
           <SectionHeading id="i-viewed" eyebrow="Recently viewed" title="Profiles you viewed" icon="eye" />
-          <ViewedGrid views={iViewed} />
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {iViewed.map((v) => (
+              <ProfileCard
+                key={`i-viewed-${v.viewerProfileId}`}
+                profile={toCardFromView(v)}
+                href={`/profile/${v.viewerProfileId}`}
+              />
+            ))}
+          </div>
         </section>
       )}
 
@@ -441,37 +457,6 @@ function AdCarousel({ banners }: { banners: AdBanner[] }) {
         )}
       </div>
     </section>
-  )
-}
-
-/** Compact grid of profile-view entries (reused for "who viewed me" + "I viewed"). */
-function ViewedGrid({ views }: { views: ProfileView[] }) {
-  return (
-    <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-      {views.map((v) => (
-        <Link
-          key={`${v.viewerProfileId}-${v.viewedAt ?? ''}`}
-          href={`/profile/${v.viewerProfileId}`}
-          className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 transition-colors hover:border-primary/30"
-        >
-          <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary text-sm font-semibold text-muted-foreground">
-            {v.viewerPrimaryPhotoUrl ? (
-              <img src={v.viewerPrimaryPhotoUrl} alt="" className="h-full w-full object-cover" />
-            ) : (
-              (v.viewerFirstName?.charAt(0) ?? '?').toUpperCase()
-            )}
-          </span>
-          <span className="min-w-0">
-            <span className="block truncate text-sm font-medium text-foreground">
-              {v.viewerFirstName ?? v.viewerProfileId}
-            </span>
-            <span className="block truncate text-xs text-muted-foreground">
-              {[v.viewerAge, v.viewerCity].filter(Boolean).join(' · ') || v.viewerProfileId}
-            </span>
-          </span>
-        </Link>
-      ))}
-    </div>
   )
 }
 

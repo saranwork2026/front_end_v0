@@ -1,4 +1,4 @@
-import type { SearchResult, ActivityStatus, ProfileSection } from '@matrimony/shared-core'
+import type { SearchResult, ActivityStatus, ProfileSection, ProfileView } from '@matrimony/shared-core'
 import type { ProfileCardProfile } from '@/components/shared/profile-card'
 
 /**
@@ -42,6 +42,23 @@ export function toProfileCard(r: SearchResult): ProfileCardProfile {
     featured: r.featured ?? undefined,
     matchScore: r.matchScore ?? undefined,
     activityStatus: toCardActivity(r.activityStatus),
+  }
+}
+
+/**
+ * Adapt a ProfileView (who-viewed-me / I-viewed entry) into the ProfileCard
+ * shape so the dashboard's profile-view sections render with the SAME card as
+ * "Recommended matches". ProfileView carries only a subset of fields; the rest
+ * are left undefined and the card degrades gracefully.
+ */
+export function toCardFromView(v: ProfileView): ProfileCardProfile {
+  const age = v.viewerAge != null && v.viewerAge !== '' ? Number(v.viewerAge) : undefined
+  return {
+    profileId: v.viewerProfileId,
+    firstName: v.viewerFirstName ?? v.viewerProfileId,
+    currentCity: v.viewerCity ?? undefined,
+    primaryPhotoUrl: v.viewerPrimaryPhotoUrl ?? undefined,
+    age: Number.isFinite(age) ? age : undefined,
   }
 }
 
