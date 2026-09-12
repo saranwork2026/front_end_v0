@@ -18,11 +18,15 @@ export function createSearchApi(client: AxiosInstance) {
       return client.post<PaginatedResponse<SearchResult>>(url, filters);
     },
 
+    /**
+     * Preference matches. {@code sort} accepts `newest` (newly-joined matching
+     * profiles first) or the default best-match-score ordering when omitted.
+     */
     getMatches(params: SearchParams = {}) {
-      const { page = 0, size = 10 } = params;
-      return client.get<PaginatedResponse<SearchResult>>(
-        `/user/matches?page=${page}&size=${size}`
-      );
+      const { page = 0, size = 10, sort } = params;
+      let url = `/user/matches?page=${page}&size=${size}`;
+      if (sort) url += `&sort=${sort}`;
+      return client.get<PaginatedResponse<SearchResult>>(url);
     },
 
     /** A small, curated "Today's matches" set (deterministic per day). */

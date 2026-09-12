@@ -23,5 +23,13 @@ export function createShortlistApi(client: AxiosInstance) {
         `/user/shortlist?page=${page}&size=${size}`
       );
     },
+
+    /** Profiles that have shortlisted the current user ("who shortlisted me"). */
+    getWhoShortlistedMe(params: ShortlistListParams = {}) {
+      const { page = 0, size = 10 } = params;
+      return client.get<PaginatedResponse<SearchResult>>(
+        `/user/shortlist/received?page=${page}&size=${size}`
+      );
+    },
   };
 }
