@@ -12,6 +12,7 @@ import { StatusBadge } from '@/components/ui/status-badge'
 import { cn } from '@/lib/utils'
 import { flattenProfileResponse } from '@/src/lib/adapters'
 import { photoApi, profileApi } from '@/src/lib/api'
+import { BIRTH_ORDER_OPTIONS } from '@/src/data/panchangamData'
 
 type FieldValue = string | number | boolean | null | undefined
 
@@ -38,6 +39,12 @@ function formatValue(value: FieldValue): string {
   if (typeof value === 'boolean') return value ? 'Yes' : 'No'
   if (typeof value === 'number') return value.toString()
   return String(value).replace(/_/g, ' ')
+}
+
+/** Human label for a stored birth-order token (FIRST → "First"), or null. */
+function birthOrderLabel(value: string | null | undefined): string | null {
+  if (!value) return null
+  return BIRTH_ORDER_OPTIONS.find((o) => o.value === value)?.label ?? value
 }
 
 /** "2 (1 married)" style sibling summary, or null when there are none listed. */
@@ -138,9 +145,11 @@ function buildSections(profile: UserProfile): ProfileSection[] {
         { label: "Mother's profession", value: profile.motherProfession },
         { label: 'Brothers', value: siblingSummary(profile.noOfBrothers, profile.brothersMarried) },
         { label: 'Sisters', value: siblingSummary(profile.noOfSisters, profile.sistersMarried) },
+        { label: 'Birth order', value: birthOrderLabel(profile.birthOrder) },
         { label: 'Family type', value: profile.familyType },
         { label: 'Family status', value: profile.familyStatus },
         { label: 'Assets', value: profile.assetDetails },
+        { label: 'Own house', value: profile.ownHouse ? 'Yes' : null },
         { label: 'Native place', value: profile.nativePlace },
       ],
     },
@@ -156,6 +165,10 @@ function buildSections(profile: UserProfile): ProfileSection[] {
         { label: 'Lagnam', value: profile.lagnam },
         { label: 'Birth time', value: profile.birthTime },
         { label: 'Birth city', value: profile.birthCity },
+        { label: 'Tamil year', value: profile.tamilYear },
+        { label: 'Tamil month', value: profile.tamilMonth },
+        { label: 'Tamil date', value: profile.tamilDate },
+        { label: 'Kilamai', value: profile.kilamai },
         { label: 'Horoscope available', value: profile.horoscopeAvailable },
         { label: 'Willing to share horoscope', value: profile.willingToShareHoroscope },
       ],

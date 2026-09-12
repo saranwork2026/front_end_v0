@@ -8,6 +8,7 @@ import type {
   PhysicalSectionRequest,
   FamilySectionRequest,
   HoroscopeSectionRequest,
+  TamilCalendarSuggestion,
 } from '../types/profile.types';
 
 /**
@@ -110,6 +111,18 @@ export function createProfileApi(client: AxiosInstance) {
 
     saveHoroscope(data: HoroscopeSectionRequest) {
       return client.post<{ message: string }>('/user/profile/horoscope', data);
+    },
+
+    /**
+     * Derive Tamil-calendar coordinates (year/month/date/weekday) from a
+     * Gregorian DOB (YYYY-MM-DD) to pre-fill the Horoscope dropdowns. The Tamil
+     * calendar is solar, so the date alone is enough — no birth time/place.
+     * Suggestions only; the member may override before saving.
+     */
+    getTamilCalendar(dob: string) {
+      return client.get<TamilCalendarSuggestion>('/user/profile/horoscope/tamil-calendar', {
+        params: { dob },
+      });
     },
 
     /**

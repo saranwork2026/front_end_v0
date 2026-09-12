@@ -15,6 +15,13 @@ import { HIGHEST_EDUCATION_OPTIONS } from '@/src/data/educationOptions'
 import { RELIGIONS, MOTHER_TONGUES } from '@/src/data/religionCasteData'
 import { NAKSHATRA_OPTIONS, RAASI_OPTIONS } from '@/src/data/horoscopeData'
 import { HEIGHT_CM_OPTIONS, WEIGHT_KG_OPTIONS, SIBLING_COUNT_OPTIONS } from '@/src/data/numericOptions'
+import {
+  TAMIL_YEARS,
+  TAMIL_MONTHS,
+  TAMIL_DATES,
+  KILAMAI_OPTIONS,
+  BIRTH_ORDER_OPTIONS,
+} from '@/src/data/panchangamData'
 
 /**
  * Profile-wizard domain model for /profile/wizard, wired to the real per-section
@@ -118,6 +125,8 @@ export interface WizardForm {
   sisters: string
   sistersMarried: string
   assetDetails: string
+  birthOrder: string
+  ownHouse: boolean
   birthTime: string
   birthCity: string
   nakshatra: string
@@ -127,6 +136,10 @@ export interface WizardForm {
   lagnam: string
   horoscopeAvailable: boolean
   willingToShareHoroscope: boolean
+  tamilYear: string
+  tamilMonth: string
+  tamilDate: string
+  kilamai: string
   aboutMe: string
 }
 
@@ -138,9 +151,10 @@ export const emptyForm: WizardForm = {
   currentCountry: '', currentState: '', currentCity: '', citizenshipCountry: '', residencyStatus: '',
   heightCm: '', weightKg: '', bloodGroup: '', complexion: '', physicalStatus: '', bodyType: '',
   familyType: '', familyValues: '', fatherStatus: '', fatherProfession: '', motherStatus: '', motherProfession: '',
-  brothers: '', brothersMarried: '', sisters: '', sistersMarried: '', assetDetails: '',
+  brothers: '', brothersMarried: '', sisters: '', sistersMarried: '', assetDetails: '', birthOrder: '', ownHouse: false,
   birthTime: '', birthCity: '', nakshatra: '', padam: '', raasi: '', dhosam: '', lagnam: '',
-  horoscopeAvailable: false, willingToShareHoroscope: false, aboutMe: '',
+  horoscopeAvailable: false, willingToShareHoroscope: false,
+  tamilYear: '', tamilMonth: '', tamilDate: '', kilamai: '', aboutMe: '',
 }
 
 /* Retained for the ?state=empty preview only. */
@@ -242,6 +256,11 @@ export const heightOptions: Opt[] = HEIGHT_CM_OPTIONS.map((o) => ({ value: o.val
 export const weightOptions: Opt[] = WEIGHT_KG_OPTIONS.map((o) => ({ value: o.value, label: o.label }))
 export const nakshatraOptions: Opt[] = NAKSHATRA_OPTIONS.map((o) => ({ value: o.value, label: o.label }))
 export const raasiOptions: Opt[] = RAASI_OPTIONS.map((o) => ({ value: o.value, label: o.label }))
+export const birthOrderOptions: Opt[] = BIRTH_ORDER_OPTIONS.map((o) => ({ value: o.value, label: o.label }))
+export const tamilYearOptions: Opt[] = TAMIL_YEARS.map((o) => ({ value: o.value, label: o.label }))
+export const tamilMonthOptions: Opt[] = TAMIL_MONTHS.map((o) => ({ value: o.value, label: o.label }))
+export const tamilDateOptions: Opt[] = TAMIL_DATES.map((o) => ({ value: o.value, label: o.label }))
+export const kilamaiOptions: Opt[] = KILAMAI_OPTIONS.map((o) => ({ value: o.value, label: o.label }))
 export const dhosamOptions: Opt[] = [
   { value: 'NONE', label: 'No Dhosam' },
   { value: 'SEVVAI', label: 'Sevvai (Mars)' },
@@ -344,6 +363,8 @@ function familyDto(f: WizardForm): FamilySectionRequest {
     familyType: (str(f.familyType) as FamilySectionRequest['familyType']) ?? undefined,
     familyStatus: (str(f.familyValues) as FamilySectionRequest['familyStatus']) ?? undefined,
     assetDetails: str(f.assetDetails),
+    birthOrder: str(f.birthOrder),
+    ownHouse: f.ownHouse,
     nativePlace: str(f.nativeCity),
   }
 }
@@ -357,6 +378,10 @@ function horoscopeDto(f: WizardForm): HoroscopeSectionRequest {
     birthCity: str(f.birthCity),
     horoscopeAvailable: f.horoscopeAvailable,
     willingToShareHoroscope: f.willingToShareHoroscope,
+    tamilYear: str(f.tamilYear),
+    tamilMonth: str(f.tamilMonth),
+    tamilDate: str(f.tamilDate),
+    kilamai: str(f.kilamai),
   }
 }
 
@@ -450,6 +475,8 @@ export function seedFromProfile(p: UserProfile): WizardForm {
     sisters: p.noOfSisters != null ? String(p.noOfSisters) : '',
     sistersMarried: p.sistersMarried != null ? String(p.sistersMarried) : '',
     assetDetails: p.assetDetails ?? '',
+    birthOrder: p.birthOrder ?? '',
+    ownHouse: p.ownHouse ?? false,
     birthTime: p.birthTime ?? '',
     birthCity: p.birthCity ?? '',
     nakshatra: p.nakshatra ?? '',
@@ -459,6 +486,10 @@ export function seedFromProfile(p: UserProfile): WizardForm {
     lagnam: p.lagnam ?? '',
     horoscopeAvailable: p.horoscopeAvailable ?? false,
     willingToShareHoroscope: p.willingToShareHoroscope ?? false,
+    tamilYear: p.tamilYear ?? '',
+    tamilMonth: p.tamilMonth ?? '',
+    tamilDate: p.tamilDate ?? '',
+    kilamai: p.kilamai ?? '',
     aboutMe: p.aboutMe ?? '',
   }
 }

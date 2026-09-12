@@ -102,8 +102,10 @@ export function buildProfileSections(p: UserProfile): DetailSectionGroup[] {
         { label: "Mother's status", value: humanize(p.motherStatus) },
         { label: 'Brothers', value: p.noOfBrothers != null ? `${p.noOfBrothers}` : '—' },
         { label: 'Sisters', value: p.noOfSisters != null ? `${p.noOfSisters}` : '—' },
+        { label: 'Birth order', value: humanize(p.birthOrder) },
         { label: 'Family type', value: humanize(p.familyType) },
         { label: 'Family status', value: humanize(p.familyStatus) },
+        { label: 'Own house', value: p.ownHouse ? 'Yes' : '—' },
       ],
     },
     {
@@ -115,6 +117,10 @@ export function buildProfileSections(p: UserProfile): DetailSectionGroup[] {
         { label: 'Dhosam', value: humanize(p.dhosam) },
         { label: 'Birth time', value: label(p.birthTime) },
         { label: 'Birth city', value: label(p.birthCity) },
+        { label: 'Tamil year', value: label(p.tamilYear) },
+        { label: 'Tamil month', value: label(p.tamilMonth) },
+        { label: 'Tamil date', value: label(p.tamilDate) },
+        { label: 'Kilamai', value: label(p.kilamai) },
       ],
     },
   ]

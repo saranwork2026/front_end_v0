@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
+import { profileApi } from '@/src/lib/api'
 import { Icon } from '@/components/ui/icon'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
@@ -22,6 +24,11 @@ import {
   nakshatraOptions,
   padamOptions,
   parentStatusOptions,
+  birthOrderOptions,
+  tamilYearOptions,
+  tamilMonthOptions,
+  tamilDateOptions,
+  kilamaiOptions,
   physicalStatusOptions,
   raasiOptions,
   religionOptions,
@@ -113,6 +120,58 @@ function GroupLabel({ children }: { children: React.ReactNode }) {
       {children}
     </h3>
   )
+}
+
+/**
+ * Invisible helper that auto-derives the Tamil-calendar dropdowns from the
+ * member's date of birth (the Tamil calendar is solar, so the date alone is
+ * enough — no birth time/place needed). It pre-fills ONLY the fields that are
+ * still empty, so a member's own selection or edit is never overwritten
+ * (override wins). Re-runs when the DOB changes; fails silently so manual entry
+ * always works even if the endpoint is unavailable. Rendered inside the
+ * Horoscope step, so its hook runs unconditionally within this component.
+ */
+function TamilCalendarPrefill({
+  form,
+  onChange,
+}: {
+  form: WizardForm
+  onChange: (patch: Partial<WizardForm>) => void
+}) {
+  const lastDob = useRef<string | null>(null)
+
+  useEffect(() => {
+    const dob = form.dob
+    if (!dob || dob === lastDob.current) return
+    lastDob.current = dob
+
+    let cancelled = false
+    profileApi
+      .getTamilCalendar(dob)
+      .then((res) => {
+        if (cancelled) return
+        const s = res.data
+        // Only fill fields the member hasn't already set (override wins).
+        const patch: Partial<WizardForm> = {}
+        if (!form.tamilYear && s.tamilYear) patch.tamilYear = s.tamilYear
+        if (!form.tamilMonth && s.tamilMonth) patch.tamilMonth = s.tamilMonth
+        if (!form.tamilDate && s.tamilDate) patch.tamilDate = s.tamilDate
+        if (!form.kilamai && s.kilamai) patch.kilamai = s.kilamai
+        if (Object.keys(patch).length > 0) onChange(patch)
+      })
+      .catch(() => {
+        // Non-fatal — manual dropdown entry still works.
+      })
+
+    return () => {
+      cancelled = true
+    }
+    // Intentionally keyed on DOB only; we read the current field values inside
+    // but do not want edits to those fields to re-trigger a fetch.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.dob])
+
+  return null
 }
 
 export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }: StepFieldsProps) {
@@ -603,23 +662,40 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
                 <option value="">Select</option>
                 {optionList(siblingCountOptions)}
               </Select>
+              <Select
+                label="Birth order"
+                value={form.birthOrder}
+                onChange={(e) => onChange({ birthOrder: e.target.value })}
+              >
+                <option value="">Select</option>
+                {optionList(birthOrderOptions)}
+              </Select>
             </FieldGrid>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="asset-details"
-              className="text-sm font-medium text-foreground"
-            >
-              Asset details
-            </label>
-            <textarea
-              id="asset-details"
-              rows={3}
-              value={form.assetDetails}
-              onChange={(e) => onChange({ assetDetails: e.target.value })}
-              placeholder="Property, investments or other family assets (optional)."
-              className="w-full rounded-lg border border-input bg-card px-3.5 py-2.5 text-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/40"
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
+              <label
+                htmlFor="asset-details"
+                className="text-sm font-medium text-foreground"
+              >
+                Asset details
+              </label>
+              <textarea
+                id="asset-details"
+                rows={3}
+                value={form.assetDetails}
+                onChange={(e) => onChange({ assetDetails: e.target.value })}
+                placeholder="Property, investments or other family assets (optional)."
+                className="w-full rounded-lg border border-input bg-card px-3.5 py-2.5 text-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/40"
+              />
+            </div>
+            <CheckboxRow
+              id="own-house"
+              label="Own house"
+              hint="The family owns their house (சொந்த வீடு)."
+              checked={form.ownHouse}
+              onChange={(ownHouse) => onChange({ ownHouse })}
             />
           </div>
         </div>
@@ -628,6 +704,7 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
     case 'horoscope':
       return (
         <div className="flex flex-col gap-5">
+          <TamilCalendarPrefill form={form} onChange={onChange} />
           <FieldGrid>
             <Input
               label="Birth time"
@@ -694,6 +771,38 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
               value={form.lagnam}
               onChange={(e) => onChange({ lagnam: e.target.value })}
             />
+            <Select
+              label="Tamil year (தமிழ் வருடம்)"
+              value={form.tamilYear}
+              onChange={(e) => onChange({ tamilYear: e.target.value })}
+            >
+              <option value="">Select (auto-filled from date of birth)</option>
+              {optionList(tamilYearOptions)}
+            </Select>
+            <Select
+              label="Tamil month (மாதம்)"
+              value={form.tamilMonth}
+              onChange={(e) => onChange({ tamilMonth: e.target.value })}
+            >
+              <option value="">Select (auto-filled from date of birth)</option>
+              {optionList(tamilMonthOptions)}
+            </Select>
+            <Select
+              label="Tamil date (தேதி)"
+              value={form.tamilDate}
+              onChange={(e) => onChange({ tamilDate: e.target.value })}
+            >
+              <option value="">Select (auto-filled from date of birth)</option>
+              {optionList(tamilDateOptions)}
+            </Select>
+            <Select
+              label="Kilamai (கிழமை)"
+              value={form.kilamai}
+              onChange={(e) => onChange({ kilamai: e.target.value })}
+            >
+              <option value="">Select (auto-filled from date of birth)</option>
+              {optionList(kilamaiOptions)}
+            </Select>
           </FieldGrid>
 
           <div className="flex flex-col gap-2.5">

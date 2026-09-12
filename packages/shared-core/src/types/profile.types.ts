@@ -120,6 +120,8 @@ export interface UserProfile {
   familyType: FamilyType;
   familyStatus: FamilyStatus;
   assetDetails: string;
+  birthOrder: string | null;
+  ownHouse: boolean;
   nativePlace: string;
   // Horoscope
   raasi: string;
@@ -130,6 +132,10 @@ export interface UserProfile {
   birthCity: string;
   horoscopeAvailable: boolean;
   willingToShareHoroscope: boolean;
+  tamilYear: string | null;
+  tamilMonth: string | null;
+  tamilDate: string | null;
+  kilamai: string | null;
   // Computed
   matchScore: number | null;
 }
@@ -200,6 +206,8 @@ export interface FamilySectionRequest {
   familyType?: FamilyType;
   familyStatus?: FamilyStatus;
   assetDetails?: string;
+  birthOrder?: string;
+  ownHouse?: boolean;
   nativePlace?: string;
 }
 
@@ -212,4 +220,16 @@ export interface HoroscopeSectionRequest {
   birthCity?: string;
   horoscopeAvailable?: boolean;
   willingToShareHoroscope?: boolean;
+  tamilYear?: string;
+  tamilMonth?: string;
+  tamilDate?: string;
+  kilamai?: string;
+}
+
+/** Suggested Tamil-calendar values derived from a DOB (GET .../tamil-calendar). */
+export interface TamilCalendarSuggestion {
+  tamilYear: string;
+  tamilMonth: string;
+  tamilDate: string;
+  kilamai: string;
 }

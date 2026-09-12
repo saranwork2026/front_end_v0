@@ -84,6 +84,7 @@ export type {
   PhysicalSectionRequest,
   FamilySectionRequest,
   HoroscopeSectionRequest,
+  TamilCalendarSuggestion,
 } from './types/profile.types';
 
 // Search types

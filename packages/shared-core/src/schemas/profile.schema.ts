@@ -128,6 +128,8 @@ export const familySectionSchema = z.object({
   familyType: z.enum(familyTypeValues).optional(),
   familyStatus: z.enum(familyStatusValues).optional(),
   assetDetails: z.string().max(200, 'validation.assetDetails.max').optional(),
+  birthOrder: z.string().optional(),
+  ownHouse: z.boolean().optional(),
   nativePlace: z.string().optional(),
 });
 
@@ -140,6 +142,10 @@ export const horoscopeSectionSchema = z.object({
   birthCity: z.string().optional(),
   horoscopeAvailable: z.boolean().optional(),
   willingToShareHoroscope: z.boolean().optional(),
+  tamilYear: z.string().optional(),
+  tamilMonth: z.string().optional(),
+  tamilDate: z.string().optional(),
+  kilamai: z.string().optional(),
 });
 
 // Inferred types
