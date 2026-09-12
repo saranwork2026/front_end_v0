@@ -260,7 +260,7 @@ function AccessRow({
               className="size-14 rounded-full object-cover"
               style={{
                 objectPosition:
-                  party.focalX != null && party.focalY != null ? `${party.focalX}% ${party.focalY}%` : '50% 30%',
+                  party.focalX != null && party.focalY != null ? `${party.focalX}% ${party.focalY}%` : 'top',
               }}
             />
           ) : (

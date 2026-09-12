@@ -260,7 +260,7 @@ function InterestRow({
                 objectPosition:
                   interest.otherPhotoFocalX != null && interest.otherPhotoFocalY != null
                     ? `${interest.otherPhotoFocalX}% ${interest.otherPhotoFocalY}%`
-                    : '50% 30%',
+                    : 'top',
               }}
             />
           ) : (

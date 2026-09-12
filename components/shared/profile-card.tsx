@@ -101,7 +101,7 @@ export function ProfileCard({
                 objectPosition:
                   profile.photoFocalX != null && profile.photoFocalY != null
                     ? `${profile.photoFocalX}% ${profile.photoFocalY}%`
-                    : '50% 20%',
+                    : 'top',
               }}
             />
           ) : (

@@ -43,7 +43,7 @@ export function UserLayout() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   // Member-set DP focal point (object-position %) so the header avatar shows
   // the same face-centered crop the user positioned on /photos.
-  const [avatarPos, setAvatarPos] = useState('50% 50%')
+  const [avatarPos, setAvatarPos] = useState('top')
 
   // Load the member's primary photo for the header avatar (falls back to the
   // profileId initial when there's no approved primary photo). Best-effort.

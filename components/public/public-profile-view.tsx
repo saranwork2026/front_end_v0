@@ -81,7 +81,7 @@ export function PublicProfileView({ profileId }: { profileId: string }) {
                   objectPosition:
                     preview.photoFocalX != null && preview.photoFocalY != null
                       ? `${preview.photoFocalX}% ${preview.photoFocalY}%`
-                      : '50% 20%',
+                      : 'top',
                 }}
                 loading="lazy"
               />

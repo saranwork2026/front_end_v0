@@ -337,7 +337,7 @@ export function ChatConversationView({ profileId, state = 'ready' }: Props) {
                   objectPosition:
                     conversation.otherPhotoFocalX != null && conversation.otherPhotoFocalY != null
                       ? `${conversation.otherPhotoFocalX}% ${conversation.otherPhotoFocalY}%`
-                      : '50% 30%',
+                      : 'top',
                 }}
               />
             ) : (

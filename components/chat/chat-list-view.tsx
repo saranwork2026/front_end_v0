@@ -156,7 +156,7 @@ function Avatar({
             src={photoUrl}
             alt=""
             className="size-full object-cover"
-            style={{ objectPosition: focalX != null && focalY != null ? `${focalX}% ${focalY}%` : '50% 30%' }}
+            style={{ objectPosition: focalX != null && focalY != null ? `${focalX}% ${focalY}%` : 'top' }}
           />
         ) : (
           <span className="flex size-full items-center justify-center font-serif text-lg text-muted-foreground">
