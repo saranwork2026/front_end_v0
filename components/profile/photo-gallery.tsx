@@ -11,10 +11,11 @@ import { ImageLightbox } from '@/components/profile/image-lightbox'
  * How to explain an empty gallery (no visible photos):
  *  - 'owner-pending'  — the owner is looking at their own profile and has a
  *                       photo still awaiting admin approval.
+ *  - 'owner-rejected' — the owner's photo was rejected → prompt to re-upload.
  *  - 'owner-none'     — the owner has no photo at all → prompt to upload.
  *  - 'viewer-none'    — another member's profile has no approved photo yet.
  */
-export type PhotoEmptyState = 'owner-pending' | 'owner-none' | 'viewer-none'
+export type PhotoEmptyState = 'owner-pending' | 'owner-rejected' | 'owner-none' | 'viewer-none'
 
 interface PhotoGalleryProps {
   name: string
@@ -50,24 +51,37 @@ export function PhotoGallery({
 
   // No photos to show (and not privacy-locked) → explain why, in the same box.
   if (visible && photos.length === 0) {
-    const copy: Record<PhotoEmptyState, { icon: 'clock' | 'camera' | 'user'; title: string; body: string }> = {
+    const copy: Record<
+      PhotoEmptyState,
+      { icon: 'clock' | 'camera' | 'user' | 'alert-circle'; tone: 'neutral' | 'danger'; title: string; body: string }
+    > = {
       'owner-pending': {
         icon: 'clock',
+        tone: 'neutral',
         title: 'Photo pending approval',
         body: 'Your photo has been uploaded and is awaiting admin approval. It will be visible to other members once approved.',
       },
+      'owner-rejected': {
+        icon: 'alert-circle',
+        tone: 'danger',
+        title: 'Photo not approved',
+        body: "Your photo wasn't approved as it didn't meet our photo guidelines. Please upload a clear photo that follows the guidelines.",
+      },
       'owner-none': {
         icon: 'camera',
+        tone: 'neutral',
         title: 'Add a profile photo',
         body: 'Profiles with photos get far more interest. Upload a photo to help members recognise you.',
       },
       'viewer-none': {
         icon: 'user',
+        tone: 'neutral',
         title: 'No photo yet',
         body: `${name.split(' ')[0]} hasn't added an approved photo yet.`,
       },
     }
     const c = copy[emptyState]
+    const isOwnerCta = emptyState === 'owner-none' || emptyState === 'owner-pending' || emptyState === 'owner-rejected'
     return (
       <section
         aria-label="Photos"
@@ -76,17 +90,24 @@ export function PhotoGallery({
         <div className="relative flex aspect-[4/3] w-full items-center justify-center bg-secondary sm:aspect-[16/10]">
           <div className="absolute inset-0 bg-gradient-to-br from-secondary to-muted" aria-hidden="true" />
           <div className="relative flex flex-col items-center gap-3 px-6 text-center">
-            <span className="flex size-14 items-center justify-center rounded-full bg-card text-primary shadow-sm">
+            <span
+              className={cn(
+                'flex size-14 items-center justify-center rounded-full bg-card shadow-sm',
+                c.tone === 'danger' ? 'text-destructive' : 'text-primary',
+              )}
+            >
               <Icon name={c.icon} size={26} />
             </span>
             <div>
-              <p className="font-medium text-foreground">{c.title}</p>
+              <p className={cn('font-medium', c.tone === 'danger' ? 'text-destructive' : 'text-foreground')}>
+                {c.title}
+              </p>
               <p className="mt-1 max-w-sm text-sm text-muted-foreground text-pretty">{c.body}</p>
             </div>
-            {(emptyState === 'owner-none' || emptyState === 'owner-pending') && onManagePhotos && (
+            {isOwnerCta && onManagePhotos && (
               <Button variant="secondary" size="sm" onClick={onManagePhotos}>
                 <Icon name="camera" size={16} />
-                {emptyState === 'owner-none' ? 'Upload photo' : 'Manage photos'}
+                {emptyState === 'owner-none' ? 'Upload photo' : emptyState === 'owner-rejected' ? 'Re-upload photo' : 'Manage photos'}
               </Button>
             )}
           </div>

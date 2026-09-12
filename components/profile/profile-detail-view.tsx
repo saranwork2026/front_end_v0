@@ -57,10 +57,10 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
   const [blocked, setBlocked] = useState(false)
   const [interestState, setInterestState] = useState<'idle' | 'sending' | 'sent'>('idle')
   const [photoAccess, setPhotoAccess] = useState<'none' | 'requested' | 'granted'>('none')
-  // For the owner viewing their own profile: 'pending' when a photo is
-  // awaiting approval, 'none' when no photo exists at all. Drives the
-  // empty-gallery message (viewers always see the neutral "no photo yet").
-  const [ownPhotoEmpty, setOwnPhotoEmpty] = useState<'pending' | 'none'>('none')
+  // For the owner viewing their own profile: 'rejected' when a photo was
+  // rejected, 'pending' when awaiting approval, 'none' when no photo exists at
+  // all. Drives the empty-gallery message (viewers always see "no photo yet").
+  const [ownPhotoEmpty, setOwnPhotoEmpty] = useState<'rejected' | 'pending' | 'none'>('none')
   const [horoscopeRequested, setHoroscopeRequested] = useState(false)
   const [contactState, setContactState] = useState<'locked' | 'requested' | 'unlocking' | 'unlocked'>('locked')
   const [revealedContact, setRevealedContact] = useState<{ phone: string; email: string }>({ phone: '', email: '' })
@@ -143,11 +143,18 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
         if (ownProfileId === profileId && photoUrls.length === 0) {
           try {
             // listPhotos() returns the owner's own PROFILE photos (all
-            // statuses). Any non-deleted photo here means one exists but
-            // isn't APPROVED yet → "pending approval".
+            // statuses). We reach here only when there's no APPROVED photo, so
+            // classify what the owner does have: a REJECTED photo (actionable,
+            // re-upload) takes priority, else PENDING approval, else nothing.
             const own = await photoApi.listPhotos()
             const live = own.data.filter((p) => !p.isDeleted)
-            setOwnPhotoEmpty(live.length > 0 ? 'pending' : 'none')
+            if (live.some((p) => p.status === 'REJECTED')) {
+              setOwnPhotoEmpty('rejected')
+            } else if (live.length > 0) {
+              setOwnPhotoEmpty('pending')
+            } else {
+              setOwnPhotoEmpty('none')
+            }
           } catch {
             setOwnPhotoEmpty('none')
           }
@@ -317,7 +324,13 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
           interestState={interestState}
           photoAccess={photoAccess}
           photoEmptyState={
-            isOwnProfile ? (ownPhotoEmpty === 'pending' ? 'owner-pending' : 'owner-none') : 'viewer-none'
+            isOwnProfile
+              ? ownPhotoEmpty === 'rejected'
+                ? 'owner-rejected'
+                : ownPhotoEmpty === 'pending'
+                  ? 'owner-pending'
+                  : 'owner-none'
+              : 'viewer-none'
           }
           horoscopeRequested={horoscopeRequested}
           contactState={unlocking ? 'unlocking' : contactState}
@@ -461,6 +474,22 @@ function ReadyContent({
   return (
     <div className="space-y-6">
       <ProfileHero profile={profile} photoVisible={photosVisible} />
+
+      {/* Prominent alert when the owner's photo was rejected — shown up top so
+          they don't miss it (also mirrored inside the photo box below). */}
+      {isOwnProfile && photoEmptyState === 'owner-rejected' && (
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm">
+          <Icon name="alert-circle" size={18} className="shrink-0 text-destructive" />
+          <span className="min-w-0 flex-1 text-foreground">
+            Your photo wasn&apos;t approved as it didn&apos;t meet our photo guidelines. Please
+            re-upload a clear photo that follows the guidelines.
+          </span>
+          <Button variant="secondary" size="sm" onClick={onManagePhotos}>
+            <Icon name="camera" size={16} />
+            Re-upload photo
+          </Button>
+        </div>
+      )}
 
       {blocked && (
         <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-secondary/60 px-4 py-3 text-sm text-muted-foreground">
