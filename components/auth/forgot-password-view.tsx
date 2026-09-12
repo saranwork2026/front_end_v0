@@ -28,11 +28,18 @@ export function ForgotPasswordView() {
     setError(undefined)
     setLoading(true)
     // Errors are intentionally swallowed (no account-existence disclosure) —
-    // always show the success state. Mirrors the existing app.
+    // always show the success state. The one exception is the once-per-day
+    // reset limit, which we surface so the user understands why no code arrives.
     try {
       await authApi.forgotPassword({ identifier: identifier.trim() })
-    } catch {
-      // Ignore — privacy: never reveal whether the account exists.
+    } catch (err: unknown) {
+      const code = (err as { response?: { data?: { errorCode?: string } } })?.response?.data?.errorCode
+      if (code === 'PASSWORD_RESET_TOO_FREQUENT') {
+        setError('A password reset was already requested today. Please try again after 24 hours.')
+        setLoading(false)
+        return
+      }
+      // Otherwise ignore — privacy: never reveal whether the account exists.
     }
     setLoading(false)
     setSent(true)

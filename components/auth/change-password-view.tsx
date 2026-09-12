@@ -8,7 +8,7 @@ import { IconInput } from '@/components/auth/icon-input'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
 import { Toaster, type ToastItem } from '@/components/ui/toast'
-import { checkPassword, passwordRules } from '@/lib/auth-data'
+import { checkPassword, isPasswordValid, passwordRules } from '@/lib/auth-data'
 import { validateWithSchema } from '@/lib/validation'
 import type { ApiError } from '@matrimony/shared-core'
 import { changePasswordSchema } from '@matrimony/shared-core'
@@ -29,7 +29,9 @@ export function ChangePasswordView({ forced = false }: ChangePasswordViewProps) 
   const [toasts, setToasts] = useState<ToastItem[]>([])
 
   const checks = checkPassword(password)
-  const showChecklist = password.length > 0
+  // Show the rules only while the password is being built up; once every rule
+  // is met, hide them so they don't linger while the user moves to Confirm.
+  const showChecklist = password.length > 0 && !isPasswordValid(password)
 
   function pushToast(message: string, variant: ToastItem['variant']) {
     setToasts((t) => [...t, { id: Date.now() + t.length, message, variant }])
@@ -58,12 +60,12 @@ export function ChangePasswordView({ forced = false }: ChangePasswordViewProps) 
     try {
       await authApi.changePassword({ currentPassword: current, newPassword: password })
       pushToast('Password updated successfully.', 'success')
-      if (forced) setTimeout(() => router.push('/'), 700)
-      else {
-        setCurrent('')
-        setPassword('')
-        setConfirm('')
-      }
+      setCurrent('')
+      setPassword('')
+      setConfirm('')
+      // Forced-first-login → home; otherwise return to Settings (this page has
+      // no app chrome/nav, so we must navigate back rather than sit here).
+      setTimeout(() => router.push(forced ? '/' : '/account'), 700)
     } catch (err: unknown) {
       const apiError = (err as { response?: { data?: ApiError } })?.response?.data
       if (apiError?.errorCode === 'INVALID_CREDENTIALS') {

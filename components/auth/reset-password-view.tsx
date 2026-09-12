@@ -9,7 +9,7 @@ import { IconInput } from '@/components/auth/icon-input'
 import { OtpInput } from '@/components/auth/otp-input'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
-import { checkPassword, OTP_RE, passwordRules } from '@/lib/auth-data'
+import { checkPassword, isPasswordValid, OTP_RE, passwordRules } from '@/lib/auth-data'
 import { validateWithSchema } from '@/lib/validation'
 import type { ApiError } from '@matrimony/shared-core'
 import { resetPasswordSchema } from '@matrimony/shared-core'
@@ -36,7 +36,9 @@ export function ResetPasswordView({ profileId = '' }: ResetPasswordViewProps) {
   const [loading, setLoading] = useState(false)
 
   const checks = checkPassword(password)
-  const showChecklist = password.length > 0
+  // Hide the rules once all are met (they'd otherwise linger while the user
+  // fills the Confirm field below).
+  const showChecklist = password.length > 0 && !isPasswordValid(password)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
