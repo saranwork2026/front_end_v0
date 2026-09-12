@@ -88,11 +88,12 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
 
     async function load() {
       try {
-        const [profileRes, photosRes, horoscopeRes, blockedRes] = await Promise.allSettled([
+        const [profileRes, photosRes, horoscopeRes, blockedRes, sentInterestsRes] = await Promise.allSettled([
           profileApi.getProfileById(profileId),
           photoApi.getPhotosForProfile(profileId),
           photoApi.getHoroscopePhotosForProfile(profileId),
           blockApi.getBlockedUsers(),
+          interestsApi.getSentInterests({ status: 'PENDING', size: 100 }),
         ])
 
         if (!active) return
@@ -118,6 +119,16 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
         if (blockedRes.status === 'fulfilled') {
           setBlocked(blockedRes.value.data.some((b) => b.profileId === profileId))
         }
+
+        // Reflect an already-sent interest so the Connect button shows
+        // "Interest sent" on load (interest state isn't on the profile DTO).
+        if (
+          sentInterestsRes.status === 'fulfilled' &&
+          sentInterestsRes.value.data.content.some((i) => i.otherProfileId === profileId)
+        ) {
+          setInterestState('sent')
+        }
+
         setStatus('ready')
       } catch {
         if (active) setStatus('error')
@@ -474,17 +485,22 @@ function ReadyContent({
 
         <aside className="space-y-6">
           <div className="space-y-6 lg:sticky lg:top-24">
+            {/* Desktop-only: on mobile the fixed bottom action bar provides
+                Send interest / Shortlist / Share, so hide this card there to
+                avoid a duplicate "Send interest" button. */}
             {showActions && (
-              <ConnectPanel
-                interestState={interestState}
-                shortlisted={shortlisted}
-                photosLocked={profile.photosLocked}
-                photoAccessState={photoAccess}
-                onSendInterest={onSendInterest}
-                onShortlistToggle={onShortlistToggle}
-                onShare={onShare}
-                onRequestPhotoAccess={onRequestPhotoAccess}
-              />
+              <div className="hidden lg:block">
+                <ConnectPanel
+                  interestState={interestState}
+                  shortlisted={shortlisted}
+                  photosLocked={profile.photosLocked}
+                  photoAccessState={photoAccess}
+                  onSendInterest={onSendInterest}
+                  onShortlistToggle={onShortlistToggle}
+                  onShare={onShare}
+                  onRequestPhotoAccess={onRequestPhotoAccess}
+                />
+              </div>
             )}
             {showActions && (
               <ContactPanel
