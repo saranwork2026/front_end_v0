@@ -5,9 +5,11 @@ import type { GenerateChartResponse } from '@matrimony/shared-core'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { SearchableSelect } from '@/components/ui/searchable-select'
 import { profileApi } from '@/src/lib/api'
 import type { WizardForm } from '@/lib/wizard-data'
 import { SouthIndianChart } from '@/components/horoscope/south-indian-chart'
+import { BIRTH_PLACE_OPTIONS, findBirthPlace } from '@/src/data/birthPlaceData'
 
 /**
  * Birth-chart generation panel for the Horoscope step.
@@ -32,6 +34,25 @@ export function HoroscopeChartPanel({
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
   const [ownCharts, setOwnCharts] = useState<GenerateChartResponse | null>(null)
+  const [showManual, setShowManual] = useState(false)
+
+  // When the member picks a place from the list, auto-fill coordinates + timezone.
+  const selectPlace = useCallback(
+    (label: string) => {
+      const place = findBirthPlace(label)
+      if (place) {
+        onChange({
+          birthPlaceLabel: place.label,
+          birthLatitude: String(place.lat),
+          birthLongitude: String(place.lon),
+          birthTimezone: place.timezone,
+        })
+      } else {
+        onChange({ birthPlaceLabel: label })
+      }
+    },
+    [onChange],
+  )
 
   // Load any previously-confirmed charts so the member sees them without
   // regenerating.
@@ -136,35 +157,60 @@ export function HoroscopeChartPanel({
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Input
+      <div className="flex flex-col gap-3">
+        <SearchableSelect
           label="Birth place"
+          options={BIRTH_PLACE_OPTIONS}
           value={form.birthPlaceLabel}
-          onChange={(e) => onChange({ birthPlaceLabel: e.target.value })}
-          placeholder="e.g. Thanjavur, Tamil Nadu"
+          onChange={selectPlace}
+          placeholder="Search your birth city / town…"
         />
-        <Input
-          label="Timezone"
-          value={form.birthTimezone}
-          onChange={(e) => onChange({ birthTimezone: e.target.value })}
-          placeholder={timezone}
-        />
-        <Input
-          label="Latitude"
-          type="number"
-          inputMode="decimal"
-          value={form.birthLatitude}
-          onChange={(e) => onChange({ birthLatitude: e.target.value })}
-          placeholder="e.g. 10.79"
-        />
-        <Input
-          label="Longitude"
-          type="number"
-          inputMode="decimal"
-          value={form.birthLongitude}
-          onChange={(e) => onChange({ birthLongitude: e.target.value })}
-          placeholder="e.g. 79.13"
-        />
+
+        {form.birthPlaceLabel && !showManual && (
+          <p className="text-xs text-muted-foreground">
+            {form.birthLatitude && form.birthLongitude ? (
+              <>
+                Coordinates: {form.birthLatitude}, {form.birthLongitude} · {form.birthTimezone || timezone}.{' '}
+              </>
+            ) : (
+              <>Place not in the list — please enter coordinates manually. </>
+            )}
+            <button
+              type="button"
+              className="underline underline-offset-2 hover:text-foreground"
+              onClick={() => setShowManual(true)}
+            >
+              Enter coordinates manually
+            </button>
+          </p>
+        )}
+
+        {(showManual || (!!form.birthPlaceLabel && !findBirthPlace(form.birthPlaceLabel))) && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Input
+              label="Latitude"
+              type="number"
+              inputMode="decimal"
+              value={form.birthLatitude}
+              onChange={(e) => onChange({ birthLatitude: e.target.value })}
+              placeholder="e.g. 10.79"
+            />
+            <Input
+              label="Longitude"
+              type="number"
+              inputMode="decimal"
+              value={form.birthLongitude}
+              onChange={(e) => onChange({ birthLongitude: e.target.value })}
+              placeholder="e.g. 79.13"
+            />
+            <Input
+              label="Timezone"
+              value={form.birthTimezone}
+              onChange={(e) => onChange({ birthTimezone: e.target.value })}
+              placeholder={timezone}
+            />
+          </div>
+        )}
       </div>
 
       {!canGenerate && (
