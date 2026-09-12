@@ -429,7 +429,7 @@ function AdCarousel({ banners }: { banners: AdBanner[] }) {
   return (
     <section aria-label="Sponsored" className="mb-8">
       <div className="relative overflow-hidden rounded-2xl border border-border bg-muted">
-        <div className="aspect-[4/1] w-full">
+        <div className="aspect-[5/2] w-full sm:aspect-[3/1]">
           {current.linkUrl ? (
             <a href={current.linkUrl} target="_blank" rel="noopener noreferrer" className="block h-full w-full">
               {inner}

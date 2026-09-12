@@ -90,7 +90,7 @@ export function ProfileCard({
   return (
     <Wrapper>
       <div className="relative">
-        <div className="relative aspect-[4/5] w-full overflow-hidden bg-secondary">
+        <div className="relative aspect-[3/2] w-full overflow-hidden bg-secondary sm:aspect-[4/5]">
           {profile.primaryPhotoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -154,7 +154,7 @@ export function ProfileCard({
         )}
       </div>
 
-      <div className="flex flex-col gap-1.5 p-4">
+      <div className="flex flex-col gap-1 p-3 sm:gap-1.5 sm:p-4">
         {/* Line 1: Name, Age · Location */}
         <div className="flex items-center gap-1.5">
           <h3 className="truncate font-semibold text-foreground">
@@ -182,24 +182,18 @@ export function ProfileCard({
           </p>
         )}
 
-        <div className="mt-1 flex items-center justify-between">
-          <span className="font-mono text-xs text-muted-foreground/80">
-            {profile.profileId}
+        {/* Activity status only — the matrimony ID lives on the detail screen. */}
+        {profile.activityStatus && profile.activityStatus !== 'UNKNOWN' && (
+          <span className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span
+              className={cn(
+                'size-2 rounded-full',
+                profile.activityStatus === 'ONLINE' ? 'bg-success' : 'bg-warning',
+              )}
+            />
+            {profile.activityStatus === 'ONLINE' ? 'Online now' : 'Active recently'}
           </span>
-          {profile.activityStatus && profile.activityStatus !== 'UNKNOWN' && (
-            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span
-                className={cn(
-                  'size-2 rounded-full',
-                  profile.activityStatus === 'ONLINE'
-                    ? 'bg-success'
-                    : 'bg-warning',
-                )}
-              />
-              {profile.activityStatus === 'ONLINE' ? 'Online now' : 'Active recently'}
-            </span>
-          )}
-        </div>
+        )}
       </div>
     </Wrapper>
   )
