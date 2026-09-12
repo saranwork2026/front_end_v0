@@ -73,6 +73,10 @@ export const changePasswordSchema = z
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: 'validation.password.mismatch',
     path: ['confirmPassword'],
+  })
+  .refine((data) => data.newPassword !== data.currentPassword, {
+    message: 'validation.password.sameAsCurrent',
+    path: ['newPassword'],
   });
 
 /**
@@ -96,6 +100,7 @@ export const VALIDATION_MESSAGES_EN: Record<string, string> = {
   'validation.password.digit': 'Password must contain a digit',
   'validation.password.special': 'Password must contain a special character',
   'validation.password.mismatch': 'Passwords do not match',
+  'validation.password.sameAsCurrent': 'New password must be different from your current password',
   'validation.otp.invalid': 'OTP must be exactly 6 numeric digits',
   'validation.profileId.required': 'Profile ID is required',
   'validation.currentPassword.required': 'Current password is required',

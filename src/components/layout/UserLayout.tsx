@@ -150,7 +150,7 @@ export function UserLayout() {
               aria-haspopup="true"
             >
               {avatarUrl ? (
-                <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+                <img src={avatarUrl} alt="" className="h-full w-full object-cover object-top" />
               ) : (
                 avatarInitial
               )}
