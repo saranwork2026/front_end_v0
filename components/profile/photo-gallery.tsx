@@ -7,18 +7,32 @@ import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
 import { ImageLightbox } from '@/components/profile/image-lightbox'
 
+/**
+ * How to explain an empty gallery (no visible photos):
+ *  - 'owner-pending'  — the owner is looking at their own profile and has a
+ *                       photo still awaiting admin approval.
+ *  - 'owner-none'     — the owner has no photo at all → prompt to upload.
+ *  - 'viewer-none'    — another member's profile has no approved photo yet.
+ */
+export type PhotoEmptyState = 'owner-pending' | 'owner-none' | 'viewer-none'
+
 interface PhotoGalleryProps {
   name: string
   photos: string[]
   locked: boolean
   accessState: 'none' | 'requested' | 'granted'
   onRequestAccess: () => void
+  /** Context for the empty message when there are no photos to show. */
+  emptyState?: PhotoEmptyState
+  /** Navigate to the photo-management page (owner empty-state CTA). */
+  onManagePhotos?: () => void
 }
 
 /**
  * Photo gallery with a large active viewer + thumbnail strip and a full-screen
  * lightbox. When photos are privacy-locked it shows a blurred placeholder with
- * a "Request photo access" gate instead.
+ * a "Request photo access" gate instead; when there are simply no photos to
+ * show it renders a context-aware message (upload / pending / none).
  */
 export function PhotoGallery({
   name,
@@ -26,11 +40,60 @@ export function PhotoGallery({
   locked,
   accessState,
   onRequestAccess,
+  emptyState = 'viewer-none',
+  onManagePhotos,
 }: PhotoGalleryProps) {
   const [active, setActive] = useState(0)
   const [lightbox, setLightbox] = useState(false)
 
   const visible = !locked || accessState === 'granted'
+
+  // No photos to show (and not privacy-locked) → explain why, in the same box.
+  if (visible && photos.length === 0) {
+    const copy: Record<PhotoEmptyState, { icon: 'clock' | 'camera' | 'user'; title: string; body: string }> = {
+      'owner-pending': {
+        icon: 'clock',
+        title: 'Photo pending approval',
+        body: 'Your photo has been uploaded and is awaiting admin approval. It will be visible to other members once approved.',
+      },
+      'owner-none': {
+        icon: 'camera',
+        title: 'Add a profile photo',
+        body: 'Profiles with photos get far more interest. Upload a photo to help members recognise you.',
+      },
+      'viewer-none': {
+        icon: 'user',
+        title: 'No photo yet',
+        body: `${name.split(' ')[0]} hasn't added an approved photo yet.`,
+      },
+    }
+    const c = copy[emptyState]
+    return (
+      <section
+        aria-label="Photos"
+        className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
+      >
+        <div className="relative flex aspect-[4/3] w-full items-center justify-center bg-secondary sm:aspect-[16/10]">
+          <div className="absolute inset-0 bg-gradient-to-br from-secondary to-muted" aria-hidden="true" />
+          <div className="relative flex flex-col items-center gap-3 px-6 text-center">
+            <span className="flex size-14 items-center justify-center rounded-full bg-card text-primary shadow-sm">
+              <Icon name={c.icon} size={26} />
+            </span>
+            <div>
+              <p className="font-medium text-foreground">{c.title}</p>
+              <p className="mt-1 max-w-sm text-sm text-muted-foreground text-pretty">{c.body}</p>
+            </div>
+            {(emptyState === 'owner-none' || emptyState === 'owner-pending') && onManagePhotos && (
+              <Button variant="secondary" size="sm" onClick={onManagePhotos}>
+                <Icon name="camera" size={16} />
+                {emptyState === 'owner-none' ? 'Upload photo' : 'Manage photos'}
+              </Button>
+            )}
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   if (!visible) {
     return (

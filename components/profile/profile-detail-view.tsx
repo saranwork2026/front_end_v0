@@ -10,7 +10,7 @@ import { Icon } from '@/components/ui/icon'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Toaster, type ToastItem } from '@/components/ui/toast'
 import { ProfileHero } from '@/components/profile/profile-hero'
-import { PhotoGallery } from '@/components/profile/photo-gallery'
+import { PhotoGallery, type PhotoEmptyState } from '@/components/profile/photo-gallery'
 import { DetailSections } from '@/components/profile/detail-sections'
 import { ConnectPanel } from '@/components/profile/connect-panel'
 import { ContactPanel } from '@/components/profile/contact-panel'
@@ -57,6 +57,10 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
   const [blocked, setBlocked] = useState(false)
   const [interestState, setInterestState] = useState<'idle' | 'sending' | 'sent'>('idle')
   const [photoAccess, setPhotoAccess] = useState<'none' | 'requested' | 'granted'>('none')
+  // For the owner viewing their own profile: 'pending' when a photo is
+  // awaiting approval, 'none' when no photo exists at all. Drives the
+  // empty-gallery message (viewers always see the neutral "no photo yet").
+  const [ownPhotoEmpty, setOwnPhotoEmpty] = useState<'pending' | 'none'>('none')
   const [horoscopeRequested, setHoroscopeRequested] = useState(false)
   const [contactState, setContactState] = useState<'locked' | 'requested' | 'unlocking' | 'unlocked'>('locked')
   const [revealedContact, setRevealedContact] = useState<{ phone: string; email: string }>({ phone: '', email: '' })
@@ -85,6 +89,9 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
     let active = true
     setStatus('loading')
     setProfile(null)
+    // Reset per-profile state so stale values don't carry across navigations.
+    setInterestState('idle')
+    setOwnPhotoEmpty('none')
 
     async function load() {
       try {
@@ -127,6 +134,23 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
           sentInterestsRes.value.data.content.some((i) => i.otherProfileId === profileId)
         ) {
           setInterestState('sent')
+        }
+
+        // Owner viewing their own profile: the viewer endpoint only returns
+        // APPROVED photos, so an empty list is ambiguous (no photo vs pending
+        // approval). Fetch the owner's real photo list to tell them apart and
+        // show an actionable message.
+        if (ownProfileId === profileId && photoUrls.length === 0) {
+          try {
+            // listPhotos() returns the owner's own PROFILE photos (all
+            // statuses). Any non-deleted photo here means one exists but
+            // isn't APPROVED yet → "pending approval".
+            const own = await photoApi.listPhotos()
+            const live = own.data.filter((p) => !p.isDeleted)
+            setOwnPhotoEmpty(live.length > 0 ? 'pending' : 'none')
+          } catch {
+            setOwnPhotoEmpty('none')
+          }
         }
 
         setStatus('ready')
@@ -292,6 +316,9 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
           shortlisted={isShortlisted(profileId)}
           interestState={interestState}
           photoAccess={photoAccess}
+          photoEmptyState={
+            isOwnProfile ? (ownPhotoEmpty === 'pending' ? 'owner-pending' : 'owner-none') : 'viewer-none'
+          }
           horoscopeRequested={horoscopeRequested}
           contactState={unlocking ? 'unlocking' : contactState}
           contactQuota={contactQuota}
@@ -299,6 +326,7 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
           onShortlistToggle={handleShortlistToggle}
           onShare={handleShare}
           onRequestPhotoAccess={handleRequestPhotoAccess}
+          onManagePhotos={() => navigate('/photos')}
           onRequestHoroscope={handleRequestHoroscope}
           onUnlock={handleUnlockContact}
           onRequestContactAccess={handleRequestContactAccess}
@@ -383,6 +411,7 @@ interface ReadyContentProps {
   shortlisted: boolean
   interestState: 'idle' | 'sending' | 'sent'
   photoAccess: 'none' | 'requested' | 'granted'
+  photoEmptyState: PhotoEmptyState
   horoscopeRequested: boolean
   contactState: 'locked' | 'requested' | 'unlocking' | 'unlocked'
   contactQuota: number
@@ -390,6 +419,7 @@ interface ReadyContentProps {
   onShortlistToggle: () => void
   onShare: () => void
   onRequestPhotoAccess: () => void
+  onManagePhotos: () => void
   onRequestHoroscope: () => void
   onUnlock: () => void
   onRequestContactAccess: () => void
@@ -406,6 +436,7 @@ function ReadyContent({
   shortlisted,
   interestState,
   photoAccess,
+  photoEmptyState,
   horoscopeRequested,
   contactState,
   contactQuota,
@@ -413,6 +444,7 @@ function ReadyContent({
   onShortlistToggle,
   onShare,
   onRequestPhotoAccess,
+  onManagePhotos,
   onRequestHoroscope,
   onUnlock,
   onRequestContactAccess,
@@ -451,6 +483,8 @@ function ReadyContent({
             locked={profile.photosLocked}
             accessState={photoAccess}
             onRequestAccess={onRequestPhotoAccess}
+            emptyState={photoEmptyState}
+            onManagePhotos={onManagePhotos}
           />
 
           {profile.aboutMe && (
