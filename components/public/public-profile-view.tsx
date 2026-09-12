@@ -7,7 +7,7 @@ import type { PublicProfilePreview } from '@matrimony/shared-core'
 import { buttonVariants } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
 import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/lib/utils'
+import { cn, focalPosition } from '@/lib/utils'
 import { publicProfileApi } from '@/src/lib/api'
 
 /**
@@ -77,12 +77,7 @@ export function PublicProfileView({ profileId }: { profileId: string }) {
                 src={preview.primaryPhotoUrl}
                 alt={preview.firstName || 'Member'}
                 className="h-full w-full object-cover"
-                style={{
-                  objectPosition:
-                    preview.photoFocalX != null && preview.photoFocalY != null
-                      ? `${preview.photoFocalX}% ${preview.photoFocalY}%`
-                      : 'top',
-                }}
+                style={{ objectPosition: focalPosition(preview.photoFocalX, preview.photoFocalY) }}
                 loading="lazy"
               />
             ) : (

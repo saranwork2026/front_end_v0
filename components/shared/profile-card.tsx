@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 import { Badge } from '@/components/ui/badge'
 import { Icon } from '@/components/ui/icon'
-import { cn } from '@/lib/utils'
+import { cn, focalPosition } from '@/lib/utils'
 
 export interface ProfileCardProfile {
   profileId: string
@@ -97,12 +97,7 @@ export function ProfileCard({
               alt={`Photo of ${name}`}
               loading="lazy"
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-              style={{
-                objectPosition:
-                  profile.photoFocalX != null && profile.photoFocalY != null
-                    ? `${profile.photoFocalX}% ${profile.photoFocalY}%`
-                    : 'top',
-              }}
+              style={{ objectPosition: focalPosition(profile.photoFocalX, profile.photoFocalY) }}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-primary/40">

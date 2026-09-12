@@ -5,7 +5,7 @@ import Link from 'next/link'
 import type { ApiError, Conversation, Message } from '@matrimony/shared-core'
 
 import { Icon } from '@/components/ui/icon'
-import { cn } from '@/lib/utils'
+import { cn, focalPosition } from '@/lib/utils'
 import { authStore, chatApi } from '@/src/lib/api'
 import { connectChatSocket, disconnectChatSocket, type ChatSocketHandle } from '@/src/lib/chatSocket'
 
@@ -333,12 +333,7 @@ export function ChatConversationView({ profileId, state = 'ready' }: Props) {
                 src={conversation.otherPrimaryPhotoUrl}
                 alt=""
                 className="size-full object-cover"
-                style={{
-                  objectPosition:
-                    conversation.otherPhotoFocalX != null && conversation.otherPhotoFocalY != null
-                      ? `${conversation.otherPhotoFocalX}% ${conversation.otherPhotoFocalY}%`
-                      : 'top',
-                }}
+                style={{ objectPosition: focalPosition(conversation.otherPhotoFocalX, conversation.otherPhotoFocalY) }}
               />
             ) : (
               <span className="flex size-full items-center justify-center font-serif text-sm text-muted-foreground">

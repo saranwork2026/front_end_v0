@@ -11,7 +11,7 @@ import { Pagination } from '@/components/ui/pagination'
 import { Select } from '@/components/ui/select'
 import { StatusBadge } from '@/components/ui/status-badge'
 import { Toaster, type ToastItem } from '@/components/ui/toast'
-import { cn } from '@/lib/utils'
+import { cn, focalPosition } from '@/lib/utils'
 import { accessApi } from '@/src/lib/api'
 
 const PAGE_SIZE = 10
@@ -258,10 +258,7 @@ function AccessRow({
               src={party.photo}
               alt=""
               className="size-14 rounded-full object-cover"
-              style={{
-                objectPosition:
-                  party.focalX != null && party.focalY != null ? `${party.focalX}% ${party.focalY}%` : 'top',
-              }}
+              style={{ objectPosition: focalPosition(party.focalX, party.focalY) }}
             />
           ) : (
             <span className="flex size-14 items-center justify-center rounded-full bg-secondary font-serif text-lg text-primary">

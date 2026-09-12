@@ -8,7 +8,7 @@ import { Icon } from '@/components/ui/icon'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button, buttonVariants } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { cn, focalPosition } from '@/lib/utils'
 import { chatApi } from '@/src/lib/api'
 
 type ViewState = 'ready' | 'loading' | 'empty' | 'error'
@@ -156,7 +156,7 @@ function Avatar({
             src={photoUrl}
             alt=""
             className="size-full object-cover"
-            style={{ objectPosition: focalX != null && focalY != null ? `${focalX}% ${focalY}%` : 'top' }}
+            style={{ objectPosition: focalPosition(focalX, focalY) }}
           />
         ) : (
           <span className="flex size-full items-center justify-center font-serif text-lg text-muted-foreground">

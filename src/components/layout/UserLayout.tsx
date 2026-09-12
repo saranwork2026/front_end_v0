@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import { Icon } from '@/components/ui/icon'
-import { cn } from '@/lib/utils'
+import { cn, focalPosition } from '@/lib/utils'
 import { navItems, bottomNavItems, mobileMenuItems } from './navConfig'
 import { useAuthStore } from '@/src/stores/auth'
 import { useNotificationStore } from '@/src/stores/notification'
@@ -55,7 +55,7 @@ export function UserLayout() {
         if (!active) return
         const primary = (res.data ?? []).find((p) => p.isPrimary && !p.isDeleted)
         setAvatarUrl(primary?.thumbnailUrl ?? primary?.photoUrl ?? null)
-        if (primary) setAvatarPos(`${primary.focalX ?? 50}% ${primary.focalY ?? 50}%`)
+        if (primary) setAvatarPos(focalPosition(primary.focalX, primary.focalY))
       })
       .catch(() => {
         /* No photo / not fetchable — keep the initial fallback. */

@@ -11,7 +11,7 @@ import { Pagination } from '@/components/ui/pagination'
 import { Select } from '@/components/ui/select'
 import { StatusBadge } from '@/components/ui/status-badge'
 import { Toaster, type ToastItem } from '@/components/ui/toast'
-import { cn } from '@/lib/utils'
+import { cn, focalPosition } from '@/lib/utils'
 import { interestsApi } from '@/src/lib/api'
 
 const PAGE_SIZE = 10
@@ -256,12 +256,7 @@ function InterestRow({
               src={interest.otherPrimaryPhotoUrl}
               alt=""
               className="size-14 rounded-full object-cover"
-              style={{
-                objectPosition:
-                  interest.otherPhotoFocalX != null && interest.otherPhotoFocalY != null
-                    ? `${interest.otherPhotoFocalX}% ${interest.otherPhotoFocalY}%`
-                    : 'top',
-              }}
+              style={{ objectPosition: focalPosition(interest.otherPhotoFocalX, interest.otherPhotoFocalY) }}
             />
           ) : (
             <span className="flex size-14 items-center justify-center rounded-full bg-secondary font-serif text-lg text-primary">
