@@ -38,6 +38,9 @@ export interface SearchResult {
   currentCity: string;
   heightCm: number;
   primaryPhotoUrl: string | null;
+  /** DP crop focal point (object-position %, 0–100); null → center. */
+  photoFocalX?: number | null;
+  photoFocalY?: number | null;
   matchScore: number | null;
   /** Trust badge — true when the member's ID has been admin-verified. */
   verified?: boolean | null;

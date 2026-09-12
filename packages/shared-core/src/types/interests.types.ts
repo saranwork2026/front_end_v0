@@ -12,6 +12,9 @@ export interface Interest {
   otherAge: number | null;
   otherCity: string | null;
   otherPrimaryPhotoUrl: string | null;
+  /** DP crop focal point (object-position %, 0–100); null → center. */
+  otherPhotoFocalX?: number | null;
+  otherPhotoFocalY?: number | null;
 }
 
 export interface SendInterestResponse {

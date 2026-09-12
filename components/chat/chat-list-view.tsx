@@ -117,7 +117,7 @@ function ConversationRow({ conversation: c }: { conversation: Conversation }) {
         href={`/chat/${c.otherProfileId}`}
         className="flex items-center gap-3 px-3 py-3 transition-colors hover:bg-secondary/60 sm:px-4"
       >
-        <Avatar name={name} photoUrl={c.otherPrimaryPhotoUrl} />
+        <Avatar name={name} photoUrl={c.otherPrimaryPhotoUrl} focalX={c.otherPhotoFocalX} focalY={c.otherPhotoFocalY} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <span className="truncate text-sm font-medium text-foreground">{name}</span>
@@ -137,12 +137,27 @@ function ConversationRow({ conversation: c }: { conversation: Conversation }) {
   )
 }
 
-function Avatar({ name, photoUrl }: { name: string; photoUrl: string | null }) {
+function Avatar({
+  name,
+  photoUrl,
+  focalX,
+  focalY,
+}: {
+  name: string
+  photoUrl: string | null
+  focalX?: number | null
+  focalY?: number | null
+}) {
   return (
     <div className="relative shrink-0">
       <div className="size-12 overflow-hidden rounded-full bg-secondary">
         {photoUrl ? (
-          <img src={photoUrl} alt="" className="size-full object-cover" />
+          <img
+            src={photoUrl}
+            alt=""
+            className="size-full object-cover"
+            style={{ objectPosition: focalX != null && focalY != null ? `${focalX}% ${focalY}%` : '50% 30%' }}
+          />
         ) : (
           <span className="flex size-full items-center justify-center font-serif text-lg text-muted-foreground">
             {name.charAt(0).toUpperCase()}

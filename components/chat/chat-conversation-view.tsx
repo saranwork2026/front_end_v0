@@ -329,7 +329,17 @@ export function ChatConversationView({ profileId, state = 'ready' }: Props) {
         <div className="relative shrink-0">
           <div className="size-9 overflow-hidden rounded-full bg-secondary">
             {conversation?.otherPrimaryPhotoUrl ? (
-              <img src={conversation.otherPrimaryPhotoUrl} alt="" className="size-full object-cover" />
+              <img
+                src={conversation.otherPrimaryPhotoUrl}
+                alt=""
+                className="size-full object-cover"
+                style={{
+                  objectPosition:
+                    conversation.otherPhotoFocalX != null && conversation.otherPhotoFocalY != null
+                      ? `${conversation.otherPhotoFocalX}% ${conversation.otherPhotoFocalY}%`
+                      : '50% 30%',
+                }}
+              />
             ) : (
               <span className="flex size-full items-center justify-center font-serif text-sm text-muted-foreground">
                 {partnerName.charAt(0).toUpperCase()}

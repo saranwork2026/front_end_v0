@@ -3,6 +3,9 @@ export interface Conversation {
   otherFirstName: string;
   otherLastName: string | null;
   otherPrimaryPhotoUrl: string | null;
+  /** DP crop focal point (object-position %, 0–100); null → center. */
+  otherPhotoFocalX?: number | null;
+  otherPhotoFocalY?: number | null;
   lastMessage: string | null;
   lastMessageAt: string | null;
   isBlocked: boolean;

@@ -77,6 +77,12 @@ export function PublicProfileView({ profileId }: { profileId: string }) {
                 src={preview.primaryPhotoUrl}
                 alt={preview.firstName || 'Member'}
                 className="h-full w-full object-cover"
+                style={{
+                  objectPosition:
+                    preview.photoFocalX != null && preview.photoFocalY != null
+                      ? `${preview.photoFocalX}% ${preview.photoFocalY}%`
+                      : '50% 20%',
+                }}
                 loading="lazy"
               />
             ) : (

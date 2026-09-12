@@ -11,4 +11,7 @@ export interface PublicProfilePreview {
   currentCity?: string | null;
   religion?: string | null;
   primaryPhotoUrl?: string | null;
+  /** DP crop focal point (object-position %, 0–100); null → center. */
+  photoFocalX?: number | null;
+  photoFocalY?: number | null;
 }

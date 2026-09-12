@@ -38,6 +38,8 @@ export function toProfileCard(r: SearchResult): ProfileCardProfile {
     religion: r.religion,
     caste: r.caste,
     primaryPhotoUrl: r.primaryPhotoUrl ?? undefined,
+    photoFocalX: r.photoFocalX ?? undefined,
+    photoFocalY: r.photoFocalY ?? undefined,
     verified: r.verified ?? undefined,
     featured: r.featured ?? undefined,
     matchScore: r.matchScore ?? undefined,
@@ -58,6 +60,8 @@ export function toCardFromView(v: ProfileView): ProfileCardProfile {
     firstName: v.viewerFirstName ?? v.viewerProfileId,
     currentCity: v.viewerCity ?? undefined,
     primaryPhotoUrl: v.viewerPrimaryPhotoUrl ?? undefined,
+    photoFocalX: v.viewerPhotoFocalX ?? undefined,
+    photoFocalY: v.viewerPhotoFocalY ?? undefined,
     age: Number.isFinite(age) ? age : undefined,
   }
 }

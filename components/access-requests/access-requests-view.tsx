@@ -233,8 +233,8 @@ function AccessRow({
   // The "other party" is the requester when viewing received, owner when sent.
   const party =
     direction === 'received'
-      ? { profileId: request.requesterProfileId, firstName: request.requesterFirstName, lastName: request.requesterLastName, photo: request.requesterPrimaryPhotoUrl }
-      : { profileId: request.ownerProfileId, firstName: request.ownerFirstName, lastName: request.ownerLastName, photo: request.ownerPrimaryPhotoUrl }
+      ? { profileId: request.requesterProfileId, firstName: request.requesterFirstName, lastName: request.requesterLastName, photo: request.requesterPrimaryPhotoUrl, focalX: request.requesterPhotoFocalX, focalY: request.requesterPhotoFocalY }
+      : { profileId: request.ownerProfileId, firstName: request.ownerFirstName, lastName: request.ownerLastName, photo: request.ownerPrimaryPhotoUrl, focalX: request.ownerPhotoFocalX, focalY: request.ownerPhotoFocalY }
 
   const fullName = [party.firstName, party.lastName].filter(Boolean).join(' ')
   const initials = `${party.firstName?.[0] ?? ''}${party.lastName?.[0] ?? ''}`
@@ -254,7 +254,15 @@ function AccessRow({
         >
           {party.photo ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={party.photo} alt="" className="size-14 rounded-full object-cover" />
+            <img
+              src={party.photo}
+              alt=""
+              className="size-14 rounded-full object-cover"
+              style={{
+                objectPosition:
+                  party.focalX != null && party.focalY != null ? `${party.focalX}% ${party.focalY}%` : '50% 30%',
+              }}
+            />
           ) : (
             <span className="flex size-14 items-center justify-center rounded-full bg-secondary font-serif text-lg text-primary">
               {initials}

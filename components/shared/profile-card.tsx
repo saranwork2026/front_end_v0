@@ -18,6 +18,9 @@ export interface ProfileCardProfile {
   religion?: string
   caste?: string
   primaryPhotoUrl?: string
+  /** DP crop focal point (object-position %, 0–100); undefined → face-top default. */
+  photoFocalX?: number
+  photoFocalY?: number
   verified?: boolean
   featured?: boolean
   matchScore?: number
@@ -93,7 +96,13 @@ export function ProfileCard({
               src={profile.primaryPhotoUrl || '/placeholder.svg'}
               alt={`Photo of ${name}`}
               loading="lazy"
-              className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+              style={{
+                objectPosition:
+                  profile.photoFocalX != null && profile.photoFocalY != null
+                    ? `${profile.photoFocalX}% ${profile.photoFocalY}%`
+                    : '50% 20%',
+              }}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-primary/40">

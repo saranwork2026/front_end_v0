@@ -252,7 +252,17 @@ function InterestRow({
         >
           {interest.otherPrimaryPhotoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={interest.otherPrimaryPhotoUrl} alt="" className="size-14 rounded-full object-cover" />
+            <img
+              src={interest.otherPrimaryPhotoUrl}
+              alt=""
+              className="size-14 rounded-full object-cover"
+              style={{
+                objectPosition:
+                  interest.otherPhotoFocalX != null && interest.otherPhotoFocalY != null
+                    ? `${interest.otherPhotoFocalX}% ${interest.otherPhotoFocalY}%`
+                    : '50% 30%',
+              }}
+            />
           ) : (
             <span className="flex size-14 items-center justify-center rounded-full bg-secondary font-serif text-lg text-primary">
               {initials}
