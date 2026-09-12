@@ -28,6 +28,7 @@ export const adminNav: AdminNavItem[] = [
   { label: 'Verifications', href: '/admin/verifications', icon: 'circle-check' },
   { label: 'Flagged Messages', href: '/admin/flagged-messages', icon: 'chat' },
   { label: 'Broadcast', href: '/admin/broadcast', icon: 'megaphone', approverOnly: true },
+  { label: 'Notification Settings', href: '/admin/notification-policy', icon: 'bell' },
   { label: 'Audit', href: '/admin/audit', icon: 'layers' },
   { label: 'Activity', href: '/admin/activity', icon: 'sparkles' },
   { label: 'Sessions', href: '/admin/sessions', icon: 'clock' },

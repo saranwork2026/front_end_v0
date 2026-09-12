@@ -130,6 +130,17 @@ export type { PublicProfilePreview } from './types/publicProfile.types';
 // Notification types
 export type { NotificationType, Notification, UnreadCountResponse } from './types/notifications.types';
 
+// Notification policy (admin) types
+export type {
+  NotificationPolicyChannel,
+  NotificationCategory,
+  NotificationPolicyEventType,
+  ChannelPolicyView,
+  EventPolicyView,
+  UpdateChannelPolicyPayload,
+  ToggleAllChannelsPayload,
+} from './types/notificationPolicy.types';
+
 // Admin types
 export type {
   ModerationAction,

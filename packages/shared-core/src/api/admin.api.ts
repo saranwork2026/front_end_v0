@@ -38,6 +38,12 @@ import type {
 } from '../types/plans.types';
 import type { UserProfile } from '../types/profile.types';
 import type { PaginatedResponse } from '../types/common.types';
+import type {
+  EventPolicyView,
+  NotificationPolicyChannel,
+  UpdateChannelPolicyPayload,
+  ToggleAllChannelsPayload,
+} from '../types/notificationPolicy.types';
 
 export interface AdminUserListParams {
   page?: number;
@@ -517,6 +523,34 @@ export function createAdminApi(client: AxiosInstance) {
 
     deactivatePlan(planId: number) {
       return client.put<{ message: string }>(`/admin/plans/${planId}/deactivate`);
+    },
+
+    // --- Notification policy (which channels fire for each event) ---
+    /** The full event x channel policy matrix. */
+    getNotificationPolicy() {
+      return client.get<EventPolicyView[]>('/admin/notification-policy');
+    },
+
+    /** Update a single (event, channel) pair — "specifically" per-channel control. */
+    updateNotificationChannel(
+      eventType: string,
+      channel: NotificationPolicyChannel,
+      payload: UpdateChannelPolicyPayload
+    ) {
+      return client.put<{ status: string }>(
+        `/admin/notification-policy/${eventType}/channels/${channel}`,
+        payload
+      );
+    },
+
+    /** Enable/disable all overridable channels for an event — "all" control. */
+    toggleNotificationEventChannels(eventType: string, payload: ToggleAllChannelsPayload) {
+      return client.put<{ status: string }>(`/admin/notification-policy/${eventType}`, payload);
+    },
+
+    /** Revert an event's channels to their code-defined defaults. */
+    resetNotificationEvent(eventType: string) {
+      return client.post<{ status: string }>(`/admin/notification-policy/${eventType}/reset`);
     },
   };
 }

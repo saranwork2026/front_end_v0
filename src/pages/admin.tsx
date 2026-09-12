@@ -18,6 +18,7 @@ import { AdminActivityView } from '@/components/admin/admin-activity-view'
 import { AdminSessionsView } from '@/components/admin/admin-sessions-view'
 import { AdminSuccessStoriesView } from '@/components/admin/admin-success-stories-view'
 import { AdminAdBannersView } from '@/components/admin/admin-ad-banners-view'
+import { AdminNotificationPolicyView } from '@/components/admin/admin-notification-policy-view'
 
 type AdminRole = 'ADMIN' | 'ADMIN_APPROVER'
 
@@ -204,6 +205,15 @@ export function AdminAdBannersPage() {
   return (
     <AdminShell activeHref="/admin/ad-banners">
       <AdminAdBannersView isApprover={isApprover} />
+    </AdminShell>
+  )
+}
+
+export function AdminNotificationPolicyPage() {
+  useDocumentTitle('Admin · Notification settings')
+  return (
+    <AdminShell activeHref="/admin/notification-policy">
+      <AdminNotificationPolicyView />
     </AdminShell>
   )
 }

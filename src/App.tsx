@@ -62,6 +62,7 @@ import {
   AdminSessionsPage,
   AdminSuccessStoriesPage,
   AdminAdBannersPage,
+  AdminNotificationPolicyPage,
 } from './pages/admin'
 import { AccessDeniedPage, NotFoundPage } from './pages/errors'
 import { ReactivateAccountPage } from './pages/ReactivateAccountPage'
@@ -153,6 +154,7 @@ export function App() {
         <Route path="/admin/sessions" element={<AdminSessionsPage />} />
         <Route path="/admin/success-stories" element={<AdminSuccessStoriesPage />} />
         <Route path="/admin/ad-banners" element={<AdminAdBannersPage />} />
+        <Route path="/admin/notification-policy" element={<AdminNotificationPolicyPage />} />
       </Route>
 
       {/* Errors */}
