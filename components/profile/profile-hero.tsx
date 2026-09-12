@@ -28,7 +28,8 @@ export function ProfileHero({ profile, photoVisible }: ProfileHeroProps) {
               <img
                 src={avatar || '/placeholder.svg'}
                 alt={`Photo of ${name}`}
-                className="h-full w-full object-cover object-top"
+                className="h-full w-full object-cover"
+                style={{ objectPosition: profile.avatarPosition ?? '50% 20%' }}
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-primary-foreground/50">

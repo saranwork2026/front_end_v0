@@ -41,6 +41,9 @@ export function UserLayout() {
   const unreadCount = useNotificationStore((s) => s.unreadCount)
   const avatarInitial = profileId?.charAt(0).toUpperCase() ?? 'U'
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  // Member-set DP focal point (object-position %) so the header avatar shows
+  // the same face-centered crop the user positioned on /photos.
+  const [avatarPos, setAvatarPos] = useState('50% 50%')
 
   // Load the member's primary photo for the header avatar (falls back to the
   // profileId initial when there's no approved primary photo). Best-effort.
@@ -52,6 +55,7 @@ export function UserLayout() {
         if (!active) return
         const primary = (res.data ?? []).find((p) => p.isPrimary && !p.isDeleted)
         setAvatarUrl(primary?.thumbnailUrl ?? primary?.photoUrl ?? null)
+        if (primary) setAvatarPos(`${primary.focalX ?? 50}% ${primary.focalY ?? 50}%`)
       })
       .catch(() => {
         /* No photo / not fetchable — keep the initial fallback. */
@@ -150,7 +154,7 @@ export function UserLayout() {
               aria-haspopup="true"
             >
               {avatarUrl ? (
-                <img src={avatarUrl} alt="" className="h-full w-full object-cover object-top" />
+                <img src={avatarUrl} alt="" className="h-full w-full object-cover" style={{ objectPosition: avatarPos }} />
               ) : (
                 avatarInitial
               )}

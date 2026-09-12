@@ -51,6 +51,8 @@ export interface ProfileDetail {
   nativePlace?: string
   /* Media + privacy gates */
   photos: string[]
+  /** CSS object-position for the hero avatar (member-set DP focal point). */
+  avatarPosition?: string
   photosLocked: boolean
   horoscopePhotoCount: number
   contact: { phone: string; email: string }
@@ -98,6 +100,8 @@ interface ExtraDetailData {
   /** True when the viewer isn't allowed to see photos yet. */
   photosLocked?: boolean
   horoscopePhotoCount?: number
+  /** CSS object-position for the hero avatar (primary photo's focal point). */
+  avatarPosition?: string
   /** Revealed contact (after unlock); blank until then. */
   contact?: { phone: string; email: string }
 }
@@ -142,6 +146,7 @@ export function toProfileDetail(p: UserProfile, extra: ExtraDetailData = {}): Pr
     photos: extra.photoUrls ?? [],
     photosLocked: extra.photosLocked ?? (extra.photoUrls?.length ?? 0) === 0,
     horoscopePhotoCount: extra.horoscopePhotoCount ?? 0,
+    avatarPosition: extra.avatarPosition,
     contact: extra.contact ?? { phone: '', email: '' },
   }
 }

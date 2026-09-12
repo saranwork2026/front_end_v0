@@ -115,8 +115,14 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
         const anyBlurred = photos.some((p) => p.isBlurred)
         const horoscopeCount = horoscopeRes.status === 'fulfilled' ? horoscopeRes.value.data.length : 0
 
+        // Hero avatar uses the member-set DP focal point (primary photo, else
+        // the first visible one) so the same face-centered crop shows here too.
+        const dpPhoto = photos.find((p) => p.isPrimary && !p.isBlurred) ?? photos.find((p) => !p.isBlurred)
+        const avatarPosition = dpPhoto ? `${dpPhoto.focalX ?? 50}% ${dpPhoto.focalY ?? 50}%` : undefined
+
         const detail = toProfileDetail(profileRes.value.data, {
           photoUrls,
+          avatarPosition,
           photosLocked: photoUrls.length === 0 && anyBlurred,
           horoscopePhotoCount: horoscopeCount,
         })

@@ -74,6 +74,14 @@ export function createPhotoApi(client: AxiosInstance) {
       return client.put<PhotoResponse>(`/user/photos/${photoId}/primary`);
     },
 
+    /**
+     * Set the DP crop focal point (CSS object-position %, 0–100) for one of the
+     * caller's own photos, so the avatar/DP shows a consistent face-centered crop.
+     */
+    setPhotoFocus(photoId: number, focalX: number, focalY: number) {
+      return client.put<PhotoResponse>(`/user/photos/${photoId}/focus`, { focalX, focalY });
+    },
+
     deletePhoto(photoId: number) {
       return client.delete<PhotoResponse>(`/user/photos/${photoId}`);
     },
