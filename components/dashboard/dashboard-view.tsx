@@ -17,7 +17,7 @@ import { Pagination } from '@/components/ui/pagination'
 import { ProfileCardSkeleton } from '@/components/ui/skeleton'
 import { ProfileCard } from '@/components/shared/profile-card'
 import { ProfileStrengthWidget } from '@/components/shared/profile-strength-widget'
-import { cn } from '@/lib/utils'
+import { cn, scrollMainToTop } from '@/lib/utils'
 import { profileApi, searchApi, profileViewsApi, adBannerApi } from '@/src/lib/api'
 import { toProfileCard, toCardFromView, missingSectionLabels, flattenProfileResponse } from '@/src/lib/adapters'
 import type { ProfileView, AdBanner } from '@matrimony/shared-core'
@@ -251,7 +251,7 @@ export function DashboardView({ preview }: DashboardViewProps) {
                 totalPages={results?.totalPages ?? 0}
                 onPageChange={(p) => {
                   setPage(p)
-                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                  scrollMainToTop()
                 }}
                 className="mt-8"
               />

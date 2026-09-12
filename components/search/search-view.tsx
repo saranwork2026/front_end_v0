@@ -13,6 +13,7 @@ import { ProfileCardSkeleton } from '@/components/ui/skeleton'
 import { ProfileCard } from '@/components/shared/profile-card'
 import { FilterChip } from '@/components/shared/filter-bar'
 import { FilterFields } from '@/components/search/filter-fields'
+import { scrollMainToTop } from '@/lib/utils'
 import { profileApi, searchApi } from '@/src/lib/api'
 import { toProfileCard, flattenProfileResponse } from '@/src/lib/adapters'
 import {
@@ -276,7 +277,7 @@ export function SearchView() {
                   totalPages={results?.totalPages ?? 0}
                   onPageChange={(p) => {
                     void runSearch(applied, p)
-                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                    scrollMainToTop()
                   }}
                   className="mt-8"
                 />

@@ -10,6 +10,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { Pagination } from '@/components/ui/pagination'
 import { ProfileCardSkeleton } from '@/components/ui/skeleton'
 import { ProfileCard } from '@/components/shared/profile-card'
+import { scrollMainToTop } from '@/lib/utils'
 import { shortlistApi } from '@/src/lib/api'
 import { toProfileCard } from '@/src/lib/adapters'
 
@@ -151,7 +152,7 @@ export function ShortlistView({ preview }: ShortlistViewProps) {
               totalPages={results?.totalPages ?? 0}
               onPageChange={(p) => {
                 setPage(p)
-                window.scrollTo({ top: 0, behavior: 'smooth' })
+                scrollMainToTop()
               }}
               className="mt-8"
             />

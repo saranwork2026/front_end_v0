@@ -17,3 +17,22 @@ export function focalPosition(x?: number | null, y?: number | null): string {
   if (x === 50 && y === 50) return 'top'
   return `${x}% ${y}%`
 }
+
+/**
+ * Scroll the app's content area back to the top. The authenticated shell
+ * (UserLayout) is `h-dvh overflow-hidden` and scrolls inside its `<main>`, so
+ * `window.scrollTo` is a no-op there. This targets that `<main>` element and
+ * falls back to the window for any surface that scrolls the document itself.
+ *
+ * Use after actions that replace the visible list in place (e.g. paginating),
+ * where a route change (handled by UserLayout's scroll reset) doesn't fire.
+ */
+export function scrollMainToTop(behavior: ScrollBehavior = 'smooth') {
+  if (typeof document === 'undefined') return
+  const main = document.querySelector('main')
+  if (main && main.scrollHeight > main.clientHeight) {
+    main.scrollTo({ top: 0, left: 0, behavior })
+  } else {
+    window.scrollTo({ top: 0, left: 0, behavior })
+  }
+}

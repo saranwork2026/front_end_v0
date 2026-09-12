@@ -10,7 +10,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { Pagination } from '@/components/ui/pagination'
 import { ProfileCardSkeleton } from '@/components/ui/skeleton'
 import { ProfileCard, type ProfileCardProfile } from '@/components/shared/profile-card'
-import { cn } from '@/lib/utils'
+import { cn, scrollMainToTop } from '@/lib/utils'
 import {
   searchApi,
   shortlistApi,
@@ -292,7 +292,7 @@ export function MatchesView({ preview }: MatchesViewProps) {
               totalPages={totalPages}
               onPageChange={(p) => {
                 setPage(p)
-                window.scrollTo({ top: 0, behavior: 'smooth' })
+                scrollMainToTop()
               }}
               className="mt-8"
             />

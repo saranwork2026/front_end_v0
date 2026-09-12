@@ -37,6 +37,15 @@ export function UserLayout() {
   const [avatarOpen, setAvatarOpen] = useState(false)
   const avatarRef = useRef<HTMLDivElement>(null)
 
+  // The app scrolls inside <main> (the shell is h-dvh overflow-hidden), not the
+  // window — so React Router's lack of scroll restoration leaves a new page at
+  // the previous page's offset (e.g. opening a profile lands mid-page). Reset
+  // the main scroll container to the top on every route change.
+  const mainRef = useRef<HTMLElement>(null)
+  useEffect(() => {
+    mainRef.current?.scrollTo({ top: 0, left: 0 })
+  }, [location.pathname])
+
   const profileId = useAuthStore((s) => s.profileId)
   const unreadCount = useNotificationStore((s) => s.unreadCount)
   const avatarInitial = profileId?.charAt(0).toUpperCase() ?? 'U'
@@ -205,6 +214,7 @@ export function UserLayout() {
 
         {/* Page content */}
         <main
+          ref={mainRef}
           className={cn(
             'relative min-h-0 flex-1 overflow-y-auto md:pb-0',
             hideBottomNav ? 'pb-0' : 'pb-[calc(4rem+env(safe-area-inset-bottom))]',
