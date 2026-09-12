@@ -199,8 +199,6 @@ export function DashboardView({ preview }: DashboardViewProps) {
         <ProfileStrengthWidget strength={strengthPct} missing={missing} className="mb-8" />
       )}
 
-      {banners.length > 0 && <AdCarousel banners={banners} />}
-
       {isLoading ? (
         <DashboardSkeleton />
       ) : !hasAnything ? (
@@ -291,6 +289,13 @@ export function DashboardView({ preview }: DashboardViewProps) {
         <ServicesCard />
         <SupportCard />
       </div>
+
+      {/* #6 Vendor ads — shown after the support/help section. */}
+      {banners.length > 0 && (
+        <div className="mt-10">
+          <AdCarousel banners={banners} />
+        </div>
+      )}
     </main>
   )
 }
