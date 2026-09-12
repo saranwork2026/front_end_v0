@@ -85,7 +85,15 @@ export type {
   FamilySectionRequest,
   HoroscopeSectionRequest,
   TamilCalendarSuggestion,
+  Graha,
+  ChartType,
+  ChartSign,
+  ChartData,
+  GenerateChartRequest,
+  GenerateChartResponse,
+  ConfirmChartRequest,
 } from './types/profile.types';
+export { GRAHA_TAMIL, CHART_SIGNS } from './types/profile.types';
 
 // Search types
 export type { SearchFilters, SearchResult, ActivityStatus } from './types/search.types';

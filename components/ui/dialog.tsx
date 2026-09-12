@@ -63,11 +63,11 @@ export function Dialog({
         aria-labelledby="dialog-title"
         aria-describedby={description ? 'dialog-description' : undefined}
         className={cn(
-          'relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card shadow-2xl outline-none animate-in fade-in zoom-in-95',
+          'relative z-10 flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl outline-none animate-in fade-in zoom-in-95',
           className,
         )}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-border/70 p-5">
+        <div className="flex shrink-0 items-start justify-between gap-4 border-b border-border/70 p-5">
           <div className="min-w-0">
             <h2
               id="dialog-title"
@@ -93,9 +93,9 @@ export function Dialog({
             <Icon name="x" size={20} />
           </button>
         </div>
-        {children && <div className="p-5">{children}</div>}
+        {children && <div className="min-h-0 flex-1 overflow-y-auto p-5">{children}</div>}
         {footer && (
-          <div className="flex flex-wrap justify-end gap-3 border-t border-border/70 bg-secondary/40 p-4">
+          <div className="flex shrink-0 flex-wrap justify-end gap-3 border-t border-border/70 bg-secondary/40 p-4">
             {footer}
           </div>
         )}

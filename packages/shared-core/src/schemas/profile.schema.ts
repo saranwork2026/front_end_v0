@@ -146,6 +146,11 @@ export const horoscopeSectionSchema = z.object({
   tamilMonth: z.string().optional(),
   tamilDate: z.string().optional(),
   kilamai: z.string().optional(),
+  birthPlaceLabel: z.string().optional(),
+  birthLatitude: z.number().optional(),
+  birthLongitude: z.number().optional(),
+  birthTimezone: z.string().optional(),
+  padam: z.number().optional(),
 });
 
 // Inferred types

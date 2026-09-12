@@ -205,5 +205,10 @@ export function flattenProfileResponse(res: Record<string, unknown>): import('@m
     tamilMonth: pick(horoscope, 'tamilMonth'),
     tamilDate: pick(horoscope, 'tamilDate'),
     kilamai: pick(horoscope, 'kilamai'),
+    birthPlaceLabel: pick(horoscope, 'birthPlaceLabel'),
+    birthLatitude: pick(horoscope, 'birthLatitude'),
+    birthLongitude: pick(horoscope, 'birthLongitude'),
+    birthTimezone: pick(horoscope, 'birthTimezone'),
+    padam: pick(horoscope, 'padam'),
   } as unknown as import('@matrimony/shared-core').UserProfile
 }

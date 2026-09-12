@@ -36,7 +36,7 @@ import type {
   PlanCreateRequest,
   PlanUpdateRequest,
 } from '../types/plans.types';
-import type { UserProfile } from '../types/profile.types';
+import type { UserProfile, ChartData } from '../types/profile.types';
 import type { PaginatedResponse } from '../types/common.types';
 import type {
   EventPolicyView,
@@ -191,7 +191,12 @@ export function createAdminApi(client: AxiosInstance) {
 
     /** Per-member data export (DPDP/GDPR) — returns a JSON object of the member's data. */
     exportUserData(profileId: string) {
-      return client.get<Record<string, unknown>>(`/admin/users/${profileId}/export`);
+      return client.get<Record<string, unknown>>(`/admin/users/${profileId}/export?format=json`);
+    },
+
+    /** Per-member biodata export — returns a printable PDF (binary). */
+    exportUserBiodataPdf(profileId: string) {
+      return client.get<Blob>(`/admin/users/${profileId}/export`, { responseType: 'blob' });
     },
 
     // --- Admin sessions ---
@@ -269,6 +274,13 @@ export function createAdminApi(client: AxiosInstance) {
     getProfilePhotosForReview(profileId: string) {
       return client.get<PendingPhotoSummary[]>(
         `/admin/moderation/profiles/${profileId}/photos`
+      );
+    },
+
+    /** A profile's generated Raasi/Amsam charts for admin review (unfiltered). */
+    getProfileChartsForReview(profileId: string) {
+      return client.get<ChartData[]>(
+        `/admin/moderation/profiles/${profileId}/charts`
       );
     },
 

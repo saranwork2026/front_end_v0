@@ -140,6 +140,10 @@ export interface WizardForm {
   tamilMonth: string
   tamilDate: string
   kilamai: string
+  birthPlaceLabel: string
+  birthLatitude: string
+  birthLongitude: string
+  birthTimezone: string
   aboutMe: string
 }
 
@@ -154,7 +158,9 @@ export const emptyForm: WizardForm = {
   brothers: '', brothersMarried: '', sisters: '', sistersMarried: '', assetDetails: '', birthOrder: '', ownHouse: false,
   birthTime: '', birthCity: '', nakshatra: '', padam: '', raasi: '', dhosam: '', lagnam: '',
   horoscopeAvailable: false, willingToShareHoroscope: false,
-  tamilYear: '', tamilMonth: '', tamilDate: '', kilamai: '', aboutMe: '',
+  tamilYear: '', tamilMonth: '', tamilDate: '', kilamai: '',
+  birthPlaceLabel: '', birthLatitude: '', birthLongitude: '', birthTimezone: '',
+  aboutMe: '',
 }
 
 /* Retained for the ?state=empty preview only. */
@@ -383,6 +389,10 @@ function horoscopeDto(f: WizardForm): HoroscopeSectionRequest {
     tamilMonth: str(f.tamilMonth),
     tamilDate: str(f.tamilDate),
     kilamai: str(f.kilamai),
+    birthPlaceLabel: str(f.birthPlaceLabel),
+    birthLatitude: f.birthLatitude ? Number(f.birthLatitude) : undefined,
+    birthLongitude: f.birthLongitude ? Number(f.birthLongitude) : undefined,
+    birthTimezone: str(f.birthTimezone),
   }
 }
 
@@ -491,6 +501,10 @@ export function seedFromProfile(p: UserProfile): WizardForm {
     tamilMonth: p.tamilMonth ?? '',
     tamilDate: p.tamilDate ?? '',
     kilamai: p.kilamai ?? '',
+    birthPlaceLabel: p.birthPlaceLabel ?? '',
+    birthLatitude: p.birthLatitude != null ? String(p.birthLatitude) : '',
+    birthLongitude: p.birthLongitude != null ? String(p.birthLongitude) : '',
+    birthTimezone: p.birthTimezone ?? '',
     aboutMe: p.aboutMe ?? '',
   }
 }

@@ -16,10 +16,8 @@ interface FilterFieldsProps {
 }
 
 // Backend enum option lists (values match the backend enums exactly).
-const GENDERS = [
-  { value: 'MALE', label: 'Male' },
-  { value: 'FEMALE', label: 'Female' },
-] as const
+// Gender is intentionally NOT a filter: the backend already enforces
+// opposite-gender matching server-side, so exposing it here is redundant.
 const MARITAL_STATUSES = [
   { value: 'NEVER_MARRIED', label: 'Never Married' },
   { value: 'DIVORCED', label: 'Divorced' },
@@ -85,18 +83,6 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
             onChange={(e) => onChange({ maxAge: toNum(e.target.value) })}
           />
         </div>
-        <Select
-          label="Gender"
-          value={value.gender ?? ''}
-          onChange={(e) => onChange({ gender: (e.target.value || undefined) as SearchFilters['gender'] })}
-        >
-          <option value="">Any</option>
-          {GENDERS.map((g) => (
-            <option key={g.value} value={g.value}>
-              {g.label}
-            </option>
-          ))}
-        </Select>
         <Select
           label="Marital status"
           value={value.maritalStatus ?? ''}

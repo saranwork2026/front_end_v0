@@ -21,6 +21,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Toaster, type ToastItem } from '@/components/ui/toast'
 import { ImageLightbox } from '@/components/profile/image-lightbox'
 import { ProfileDetailSections } from '@/components/shared/profile-detail-sections'
+import { SouthIndianChart } from '@/components/horoscope/south-indian-chart'
+import type { ChartData } from '@matrimony/shared-core'
 import { cn } from '@/lib/utils'
 import { adminApi } from '@/src/lib/api'
 import { flattenProfileResponse } from '@/src/lib/adapters'
@@ -476,6 +478,7 @@ function ReviewDialog({
 
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [profilePhotos, setProfilePhotos] = useState<PendingPhotoSummary[]>([])
+  const [profileCharts, setProfileCharts] = useState<ChartData[]>([])
   const [profileLoading, setProfileLoading] = useState(false)
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null)
 
@@ -496,6 +499,14 @@ function ReviewDialog({
       })
       .finally(() => {
         if (active) setProfileLoading(false)
+      })
+    adminApi
+      .getProfileChartsForReview(target.item.profileId)
+      .then((res) => {
+        if (active) setProfileCharts(res.data ?? [])
+      })
+      .catch(() => {
+        /* non-fatal: charts are optional */
       })
     adminApi
       .getProfilePhotosForReview(target.item.profileId)
@@ -627,6 +638,23 @@ function ReviewDialog({
                   )}
                 </div>
                 <ProfileDetailSections columns={3} sections={buildProfileSections(profile)} />
+                {profileCharts.length > 0 && (
+                  <div className="mt-2">
+                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Horoscope charts
+                    </h3>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {profileCharts.map((c) => (
+                        <div key={c.chartType} className="flex flex-col items-center gap-1.5">
+                          <span className="text-xs font-medium text-muted-foreground">
+                            {c.chartType === 'NAVAMSA' ? 'Amsam (D9)' : 'Raasi (D1)'}
+                          </span>
+                          <SouthIndianChart chart={c} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </>
             ) : (
               <p className="text-sm text-muted-foreground">Could not load this profile.</p>

@@ -275,19 +275,19 @@ export function AdminUserDetailView({ profileId }: AdminUserDetailViewProps) {
   async function handleExport() {
     if (!profile) return
     try {
-      const res = await adminApi.exportUserData(profile.profileId)
-      const blob = new Blob([JSON.stringify(res.data, null, 2)], { type: 'application/json' })
+      const res = await adminApi.exportUserBiodataPdf(profile.profileId)
+      const blob = new Blob([res.data as BlobPart], { type: 'application/pdf' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `member-data-${profile.profileId}.json`
+      a.download = `biodata-${profile.profileId}.pdf`
       document.body.appendChild(a)
       a.click()
       a.remove()
       URL.revokeObjectURL(url)
-      pushToast('Member data exported.', 'success')
+      pushToast('Biodata PDF exported.', 'success')
     } catch {
-      pushToast('Could not export member data.', 'error')
+      pushToast('Could not export biodata PDF.', 'error')
     }
   }
 
@@ -423,7 +423,7 @@ export function AdminUserDetailView({ profileId }: AdminUserDetailViewProps) {
               { label: flagged ? 'Unflag member' : 'Flag member', icon: 'flag', onSelect: () => setModal({ kind: 'flag' }) },
               { label: featured ? 'Remove featured' : 'Feature member', icon: 'star', onSelect: onFeatureToggle },
               { label: boosted ? 'Remove boost' : 'Boost profile', icon: 'sparkles', onSelect: onBoostToggle },
-              { label: 'Export member data', icon: 'download', onSelect: handleExport },
+              { label: 'Export biodata (PDF)', icon: 'download', onSelect: handleExport },
               ...(canPurge
                 ? [{ label: 'Delete member', icon: 'trash' as const, onSelect: () => setModal({ kind: 'purge' }), danger: true }]
                 : []),

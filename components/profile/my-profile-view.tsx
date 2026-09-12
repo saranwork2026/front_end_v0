@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils'
 import { flattenProfileResponse } from '@/src/lib/adapters'
 import { photoApi, profileApi } from '@/src/lib/api'
 import { BIRTH_ORDER_OPTIONS } from '@/src/data/panchangamData'
+import { HoroscopeChartsDisplay } from '@/components/horoscope/horoscope-charts-display'
 
 type FieldValue = string | number | boolean | null | undefined
 
@@ -429,6 +430,12 @@ export function MyProfileView() {
                 </dl>
               ) : (
                 <p className="mt-4 text-sm text-muted-foreground">{section.emptyHint}</p>
+              )}
+
+              {section.key === 'horoscope' && (
+                <div className="mt-4">
+                  <HoroscopeChartsDisplay />
+                </div>
               )}
             </section>
           )

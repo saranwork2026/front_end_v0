@@ -9,6 +9,10 @@ import type {
   FamilySectionRequest,
   HoroscopeSectionRequest,
   TamilCalendarSuggestion,
+  GenerateChartRequest,
+  GenerateChartResponse,
+  ConfirmChartRequest,
+  ChartData,
 } from '../types/profile.types';
 
 /**
@@ -123,6 +127,32 @@ export function createProfileApi(client: AxiosInstance) {
       return client.get<TamilCalendarSuggestion>('/user/profile/horoscope/tamil-calendar', {
         params: { dob },
       });
+    },
+
+    // ---- Digital Raasi/Amsam chart generation (Spec 2) ----
+
+    /**
+     * Compute suggested D1/D9 charts + panchangam from birth date/time/place.
+     * Suggestions only — persists nothing. Backend returns 422 if birth time or
+     * place is missing.
+     */
+    generateHoroscopeChart(data: GenerateChartRequest) {
+      return client.post<GenerateChartResponse>('/user/horoscope/chart/generate', data);
+    },
+
+    /** Persist the (possibly member-edited) charts. */
+    confirmHoroscopeChart(data: ConfirmChartRequest) {
+      return client.post<{ message: string }>('/user/horoscope/chart/confirm', data);
+    },
+
+    /** The member's own stored charts. */
+    getHoroscopeCharts() {
+      return client.get<ChartData[]>('/user/horoscope/chart');
+    },
+
+    /** Another member's charts (visibility-gated server-side). */
+    getHoroscopeChartsForProfile(profileId: string) {
+      return client.get<ChartData[]>(`/user/horoscope/chart/${profileId}`);
     },
 
     /**

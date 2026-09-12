@@ -136,6 +136,11 @@ export interface UserProfile {
   tamilMonth: string | null;
   tamilDate: string | null;
   kilamai: string | null;
+  birthPlaceLabel: string | null;
+  birthLatitude: number | null;
+  birthLongitude: number | null;
+  birthTimezone: string | null;
+  padam: number | null;
   // Computed
   matchScore: number | null;
 }
@@ -224,6 +229,11 @@ export interface HoroscopeSectionRequest {
   tamilMonth?: string;
   tamilDate?: string;
   kilamai?: string;
+  birthPlaceLabel?: string;
+  birthLatitude?: number;
+  birthLongitude?: number;
+  birthTimezone?: string;
+  padam?: number;
 }
 
 /** Suggested Tamil-calendar values derived from a DOB (GET .../tamil-calendar). */
@@ -232,4 +242,60 @@ export interface TamilCalendarSuggestion {
   tamilMonth: string;
   tamilDate: string;
   kilamai: string;
+}
+
+// ==================== Horoscope charts (Spec 2) ====================
+
+/** Graha codes as returned/stored by the backend chart JSON. */
+export type Graha =
+  | 'SUN' | 'MOON' | 'MARS' | 'MERCURY' | 'JUPITER'
+  | 'VENUS' | 'SATURN' | 'RAHU' | 'KETU' | 'LAGNA';
+
+/** Tamil chart abbreviations for each graha (as printed on a jathagam). */
+export const GRAHA_TAMIL: Record<Graha, string> = {
+  SUN: 'சூ', MOON: 'சந்', MARS: 'செ', MERCURY: 'பு', JUPITER: 'கு',
+  VENUS: 'சு', SATURN: 'சனி', RAHU: 'ரா', KETU: 'கே', LAGNA: 'ல',
+};
+
+export type ChartType = 'RASI' | 'NAVAMSA';
+
+/** The 12 zodiac sign keys, fixed order (index 0 = Mesha). */
+export const CHART_SIGNS = [
+  'MESHA', 'RISHABHA', 'MITHUNA', 'KATAKA', 'SIMHA', 'KANYA',
+  'TULA', 'VRISCHIKA', 'DHANUS', 'MAKARA', 'KUMBHA', 'MEENA',
+] as const;
+
+export type ChartSign = (typeof CHART_SIGNS)[number];
+
+/** One divisional chart: sign key -> grahas occupying that sign. */
+export interface ChartData {
+  chartType: ChartType;
+  placements: Record<string, Graha[]>;
+}
+
+/** Request to generate charts (all required; guard rejects if incomplete). */
+export interface GenerateChartRequest {
+  dateOfBirth: string; // YYYY-MM-DD
+  birthTime: string;   // HH:mm
+  latitude: number;
+  longitude: number;
+  timezone: string;    // IANA id, e.g. "Asia/Kolkata"
+  placeLabel?: string;
+}
+
+/** Generated charts + panchangam suggestions (nothing persisted yet). */
+export interface GenerateChartResponse {
+  rasiChart: ChartData;
+  navamsaChart: ChartData;
+  nakshatra: string;
+  padam: number;
+  raasi: string;
+  lagnam: string;
+}
+
+/** Persist the (possibly edited) charts. */
+export interface ConfirmChartRequest {
+  rasiChart: ChartData;
+  navamsaChart: ChartData;
+  edited: boolean;
 }

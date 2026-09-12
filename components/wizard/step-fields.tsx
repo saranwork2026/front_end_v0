@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { SearchableSelect } from '@/components/ui/searchable-select'
 import { HoroscopePhotoManager } from '@/components/photos/horoscope-photo-manager'
+import { HoroscopeChartPanel } from '@/components/horoscope/horoscope-chart-panel'
 import {
   bloodGroupOptions,
   bodyTypeOptions,
@@ -829,6 +830,10 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
           </div>
 
           {form.horoscopeAvailable && !hideHoroscopeUpload && <HoroscopePhotoManager />}
+
+          {/* Digital chart generation — user-scoped (hidden in admin-assisted,
+              same rationale as the photo uploader). */}
+          {!hideHoroscopeUpload && <HoroscopeChartPanel form={form} onChange={onChange} />}
 
           <div className="flex flex-col gap-1.5">
             <label

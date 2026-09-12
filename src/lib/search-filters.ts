@@ -9,7 +9,6 @@ export interface ActiveChip {
   label: string
 }
 
-const GENDER_LABEL: Record<string, string> = { MALE: 'Male', FEMALE: 'Female' }
 const MARITAL_LABEL: Record<string, string> = {
   NEVER_MARRIED: 'Never Married',
   DIVORCED: 'Divorced',
@@ -25,7 +24,6 @@ function educationLabel(code?: string): string {
 export function buildActiveChips(f: SearchFilters): ActiveChip[] {
   const chips: ActiveChip[] = []
   if (f.minAge || f.maxAge) chips.push({ key: 'age', label: `Age ${f.minAge ?? 18}–${f.maxAge ?? 60}` })
-  if (f.gender) chips.push({ key: 'gender', label: GENDER_LABEL[f.gender] ?? f.gender })
   if (f.maritalStatus) chips.push({ key: 'maritalStatus', label: MARITAL_LABEL[f.maritalStatus] ?? f.maritalStatus })
   if (f.motherTongue) chips.push({ key: 'motherTongue', label: f.motherTongue })
   if (f.religion) chips.push({ key: 'religion', label: f.religion })
