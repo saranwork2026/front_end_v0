@@ -29,6 +29,7 @@ export type { ShortlistListParams } from './api/shortlist.api';
 export { createBlockApi } from './api/block.api';
 export { createProfileViewsApi } from './api/profileViews.api';
 export type { ProfileViewListParams } from './api/profileViews.api';
+export { createActivityApi } from './api/activity.api';
 export { createReportApi } from './api/report.api';
 export { createAccountApi } from './api/account.api';
 export { createPhotoApi } from './api/photo.api';
@@ -190,6 +191,9 @@ export type { BlockedUser } from './types/block.types';
 
 // Profile view types
 export type { ProfileView, ProfileViewCountResponse } from './types/profileViews.types';
+
+// Activity summary types
+export type { ActivitySummary } from './types/activity.types';
 
 // Report types
 export type { ReportReasonType, ReportUserRequest } from './types/report.types';

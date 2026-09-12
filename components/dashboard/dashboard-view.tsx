@@ -18,8 +18,9 @@ import { ProfileCardSkeleton } from '@/components/ui/skeleton'
 import { ProfileCard } from '@/components/shared/profile-card'
 import { ProfileStrengthWidget } from '@/components/shared/profile-strength-widget'
 import { cn } from '@/lib/utils'
-import { profileApi, searchApi } from '@/src/lib/api'
+import { profileApi, searchApi, profileViewsApi } from '@/src/lib/api'
 import { toProfileCard, missingSectionLabels, flattenProfileResponse } from '@/src/lib/adapters'
+import type { ProfileView } from '@matrimony/shared-core'
 
 /** Preview states retained so the loading/empty views can be forced via ?preview=. */
 export type DashboardPreview = 'loading' | 'empty'
@@ -37,6 +38,12 @@ export function DashboardView({ preview }: DashboardViewProps) {
   const [results, setResults] = useState<PaginatedResponse<SearchResult> | null>(null)
   const [loadingResults, setLoadingResults] = useState(false)
   const [page, setPage] = useState(0)
+
+  // #3 profiles who viewed me, #4 profiles I viewed, and the set of profileIds
+  // I've already viewed (used to hide already-seen profiles from #2).
+  const [viewedMe, setViewedMe] = useState<ProfileView[]>([])
+  const [iViewed, setIViewed] = useState<ProfileView[]>([])
+  const [viewedIds, setViewedIds] = useState<Set<string>>(new Set())
 
   // Load the profile (welcome header + strength). Reaching this page means
   // ProfileStatusGuard already confirmed APPROVED.
@@ -72,6 +79,27 @@ export function DashboardView({ preview }: DashboardViewProps) {
       .catch(() => {
         if (!cancelled) setDaily([])
       })
+    return () => {
+      cancelled = true
+    }
+  }, [preview])
+
+  // #3/#4 + the "already viewed" set (best-effort — failures just hide sections).
+  useEffect(() => {
+    if (preview) return
+    let cancelled = false
+    Promise.allSettled([
+      profileViewsApi.getProfileViews({ page: 0, size: 8 }),
+      profileViewsApi.getProfilesIViewed({ page: 0, size: 8 }),
+    ]).then(([me, mine]) => {
+      if (cancelled) return
+      if (me.status === 'fulfilled') setViewedMe(me.value.data.content ?? [])
+      if (mine.status === 'fulfilled') {
+        const list = mine.value.data.content ?? []
+        setIViewed(list)
+        setViewedIds(new Set(list.map((v) => v.viewerProfileId).filter(Boolean) as string[]))
+      }
+    })
     return () => {
       cancelled = true
     }
@@ -128,8 +156,11 @@ export function DashboardView({ preview }: DashboardViewProps) {
   const strengthPct = profile?.profileStrength?.completionPct ?? profile?.profileCompletionPct ?? 0
   const missing = missingSectionLabels(profile?.profileStrength?.missingSections)
 
-  const dailyCards = preview === 'empty' ? [] : daily
-  const matchContent = preview === 'empty' ? [] : results?.content ?? []
+  // #2: only surface profiles the customer hasn't already viewed. If every
+  // curated/recommended profile has been viewed, the section simply hides.
+  const notViewed = (list: SearchResult[]) => list.filter((p) => !viewedIds.has(p.profileId))
+  const dailyCards = preview === 'empty' ? [] : notViewed(daily)
+  const matchContent = preview === 'empty' ? [] : notViewed(results?.content ?? [])
   const hasAnything = dailyCards.length > 0 || matchContent.length > 0
 
   return (
@@ -208,7 +239,62 @@ export function DashboardView({ preview }: DashboardViewProps) {
           )}
         </>
       )}
+
+      {/* #3 Profiles who viewed me + #4 Profiles I viewed — shown independently
+          of match availability (best-effort; each hides when empty). */}
+      {!isLoading && viewedMe.length > 0 && (
+        <section aria-labelledby="viewed-me" className="mt-10">
+          <SectionHeading id="viewed-me" eyebrow="Profile views" title="Who viewed your profile" icon="eye" />
+          <ViewedGrid views={viewedMe} />
+          <div className="mt-4">
+            <Link
+              href="/profile-views"
+              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
+              View all
+            </Link>
+          </div>
+        </section>
+      )}
+
+      {!isLoading && iViewed.length > 0 && (
+        <section aria-labelledby="i-viewed" className="mt-10">
+          <SectionHeading id="i-viewed" eyebrow="Recently viewed" title="Profiles you viewed" icon="eye" />
+          <ViewedGrid views={iViewed} />
+        </section>
+      )}
     </main>
+  )
+}
+
+/** Compact grid of profile-view entries (reused for "who viewed me" + "I viewed"). */
+function ViewedGrid({ views }: { views: ProfileView[] }) {
+  return (
+    <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      {views.map((v) => (
+        <Link
+          key={`${v.viewerProfileId}-${v.viewedAt ?? ''}`}
+          href={`/profile/${v.viewerProfileId}`}
+          className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 transition-colors hover:border-primary/30"
+        >
+          <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary text-sm font-semibold text-muted-foreground">
+            {v.viewerPrimaryPhotoUrl ? (
+              <img src={v.viewerPrimaryPhotoUrl} alt="" className="h-full w-full object-cover" />
+            ) : (
+              (v.viewerFirstName?.charAt(0) ?? '?').toUpperCase()
+            )}
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-medium text-foreground">
+              {v.viewerFirstName ?? v.viewerProfileId}
+            </span>
+            <span className="block truncate text-xs text-muted-foreground">
+              {[v.viewerAge, v.viewerCity].filter(Boolean).join(' · ') || v.viewerProfileId}
+            </span>
+          </span>
+        </Link>
+      ))}
+    </div>
   )
 }
 
@@ -228,7 +314,7 @@ function SectionHeading({
   id: string
   eyebrow: string
   title: string
-  icon: 'sparkles' | 'heart'
+  icon: 'sparkles' | 'heart' | 'eye'
 }) {
   return (
     <div>

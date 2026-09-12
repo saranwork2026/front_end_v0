@@ -21,10 +21,12 @@ export const navItems: NavItem[] = [
   { to: '/', label: 'Dashboard', icon: 'home', bottomNav: true },
   { to: '/search', label: 'Search', icon: 'search', bottomNav: true },
   { to: '/matches', label: 'Matches', icon: 'heart', bottomNav: true },
-  { to: '/chat', label: 'Chat', icon: 'chat', bottomNav: true },
-  { to: '/notifications', label: 'Notifications', icon: 'bell', bottomNav: true },
+  { to: '/chat', label: 'Messages', icon: 'chat', bottomNav: true },
+  { to: '/interests', label: 'Interests', icon: 'mail', bottomNav: true },
+  // Notifications lives in the top-right bell + the slide-over menu (not the
+  // bottom tab bar) to keep the tab bar to 5 core destinations.
+  { to: '/notifications', label: 'Notifications', icon: 'bell' },
   { to: '/shortlist', label: 'Shortlist', icon: 'star' },
-  { to: '/interests', label: 'Interests', icon: 'mail' },
   { to: '/profile-views', label: 'Profile Views', icon: 'eye' },
   { to: '/plans', label: 'Plans', icon: 'sparkles' },
   { to: '/referrals', label: 'Refer & Earn', icon: 'handshake' },

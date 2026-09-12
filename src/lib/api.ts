@@ -25,6 +25,7 @@ import {
   createShortlistApi,
   createBlockApi,
   createProfileViewsApi,
+  createActivityApi,
   createReportApi,
   createAccountApi,
   createPhotoApi,
@@ -80,6 +81,7 @@ export const plansApi = createPlansApi(apiClient)
 export const shortlistApi = createShortlistApi(apiClient)
 export const blockApi = createBlockApi(apiClient)
 export const profileViewsApi = createProfileViewsApi(apiClient)
+export const activityApi = createActivityApi(apiClient)
 export const reportApi = createReportApi(apiClient)
 export const accountApi = createAccountApi(apiClient)
 export const photoApi = createPhotoApi(apiClient)

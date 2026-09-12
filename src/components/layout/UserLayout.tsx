@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import { navItems, bottomNavItems, mobileMenuItems } from './navConfig'
 import { useAuthStore } from '@/src/stores/auth'
 import { useNotificationStore } from '@/src/stores/notification'
-import { notificationsApi } from '@/src/lib/api'
+import { notificationsApi, photoApi } from '@/src/lib/api'
 import { notificationStore } from '@/src/stores/notification'
 import { logout } from '@/src/lib/auth-utils'
 
@@ -40,6 +40,26 @@ export function UserLayout() {
   const profileId = useAuthStore((s) => s.profileId)
   const unreadCount = useNotificationStore((s) => s.unreadCount)
   const avatarInitial = profileId?.charAt(0).toUpperCase() ?? 'U'
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+
+  // Load the member's primary photo for the header avatar (falls back to the
+  // profileId initial when there's no approved primary photo). Best-effort.
+  useEffect(() => {
+    let active = true
+    photoApi
+      .listPhotos()
+      .then((res) => {
+        if (!active) return
+        const primary = (res.data ?? []).find((p) => p.isPrimary && !p.isDeleted)
+        setAvatarUrl(primary?.thumbnailUrl ?? primary?.photoUrl ?? null)
+      })
+      .catch(() => {
+        /* No photo / not fetchable — keep the initial fallback. */
+      })
+    return () => {
+      active = false
+    }
+  }, [])
 
   // Poll unread notification count (mirrors the existing app's 60s poll).
   useEffect(() => {
@@ -124,12 +144,16 @@ export function UserLayout() {
             <button
               type="button"
               onClick={() => setAvatarOpen((v) => !v)}
-              className="flex size-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground transition-shadow hover:ring-2 hover:ring-primary/30"
+              className="flex size-9 items-center justify-center overflow-hidden rounded-full bg-primary text-sm font-semibold text-primary-foreground transition-shadow hover:ring-2 hover:ring-primary/30"
               aria-label="Account menu"
               aria-expanded={avatarOpen}
               aria-haspopup="true"
             >
-              {avatarInitial}
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+              ) : (
+                avatarInitial
+              )}
             </button>
             {avatarOpen && (
               <div className="absolute right-0 z-50 mt-2 w-48 rounded-lg border border-border bg-card py-1 shadow-lg">
