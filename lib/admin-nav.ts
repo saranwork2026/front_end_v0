@@ -24,6 +24,7 @@ export const adminNav: AdminNavItem[] = [
   { label: 'Reports', href: '/admin/reports', icon: 'alert-circle' },
   { label: 'Plans', href: '/admin/plans', icon: 'wallet' },
   { label: 'Success Stories', href: '/admin/success-stories', icon: 'heart' },
+  { label: 'Vendor Ads', href: '/admin/ad-banners', icon: 'megaphone' },
   { label: 'Verifications', href: '/admin/verifications', icon: 'circle-check' },
   { label: 'Flagged Messages', href: '/admin/flagged-messages', icon: 'chat' },
   { label: 'Broadcast', href: '/admin/broadcast', icon: 'megaphone', approverOnly: true },

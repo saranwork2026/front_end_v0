@@ -30,6 +30,7 @@ export { createBlockApi } from './api/block.api';
 export { createProfileViewsApi } from './api/profileViews.api';
 export type { ProfileViewListParams } from './api/profileViews.api';
 export { createActivityApi } from './api/activity.api';
+export { createAdBannerApi } from './api/adBanner.api';
 export { createReportApi } from './api/report.api';
 export { createAccountApi } from './api/account.api';
 export { createPhotoApi } from './api/photo.api';
@@ -194,6 +195,9 @@ export type { ProfileView, ProfileViewCountResponse } from './types/profileViews
 
 // Activity summary types
 export type { ActivitySummary } from './types/activity.types';
+
+// Ad banner types
+export type { AdBanner, AdBannerStatus } from './types/adBanner.types';
 
 // Report types
 export type { ReportReasonType, ReportUserRequest } from './types/report.types';

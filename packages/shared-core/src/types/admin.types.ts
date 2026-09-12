@@ -30,7 +30,9 @@ export type ModerationRequestAction =
   | 'REJECT_PAYMENT'
   | 'ASSIGN_SUBSCRIPTION'
   | 'APPLY_PROFILE_EDIT'
-  | 'APPLY_ASSISTED_PROFILE';
+  | 'APPLY_ASSISTED_PROFILE'
+  | 'APPROVE_AD_BANNER'
+  | 'REJECT_AD_BANNER';
 
 export type ModerationRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 

@@ -18,9 +18,9 @@ import { ProfileCardSkeleton } from '@/components/ui/skeleton'
 import { ProfileCard } from '@/components/shared/profile-card'
 import { ProfileStrengthWidget } from '@/components/shared/profile-strength-widget'
 import { cn } from '@/lib/utils'
-import { profileApi, searchApi, profileViewsApi } from '@/src/lib/api'
+import { profileApi, searchApi, profileViewsApi, adBannerApi } from '@/src/lib/api'
 import { toProfileCard, missingSectionLabels, flattenProfileResponse } from '@/src/lib/adapters'
-import type { ProfileView } from '@matrimony/shared-core'
+import type { ProfileView, AdBanner } from '@matrimony/shared-core'
 
 /** Preview states retained so the loading/empty views can be forced via ?preview=. */
 export type DashboardPreview = 'loading' | 'empty'
@@ -44,6 +44,9 @@ export function DashboardView({ preview }: DashboardViewProps) {
   const [viewedMe, setViewedMe] = useState<ProfileView[]>([])
   const [iViewed, setIViewed] = useState<ProfileView[]>([])
   const [viewedIds, setViewedIds] = useState<Set<string>>(new Set())
+
+  // #6 approved vendor/promo banners (rotating carousel).
+  const [banners, setBanners] = useState<AdBanner[]>([])
 
   // Load the profile (welcome header + strength). Reaching this page means
   // ProfileStatusGuard already confirmed APPROVED.
@@ -78,6 +81,23 @@ export function DashboardView({ preview }: DashboardViewProps) {
       })
       .catch(() => {
         if (!cancelled) setDaily([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [preview])
+
+  // #6 approved vendor banners (best-effort; section hides when none).
+  useEffect(() => {
+    if (preview) return
+    let cancelled = false
+    adBannerApi
+      .getApprovedBanners()
+      .then((res) => {
+        if (!cancelled) setBanners(res.data ?? [])
+      })
+      .catch(() => {
+        if (!cancelled) setBanners([])
       })
     return () => {
       cancelled = true
@@ -179,6 +199,8 @@ export function DashboardView({ preview }: DashboardViewProps) {
         <ProfileStrengthWidget strength={strengthPct} missing={missing} className="mb-8" />
       )}
 
+      {banners.length > 0 && <AdCarousel banners={banners} />}
+
       {isLoading ? (
         <DashboardSkeleton />
       ) : !hasAnything ? (
@@ -263,7 +285,157 @@ export function DashboardView({ preview }: DashboardViewProps) {
           <ViewedGrid views={iViewed} />
         </section>
       )}
+
+      {/* #5 Our services (matrimony + event management) + #7 Support/help. */}
+      <div className="mt-10 grid gap-6 lg:grid-cols-2">
+        <ServicesCard />
+        <SupportCard />
+      </div>
     </main>
+  )
+}
+
+/** #5 — Magizh does both matrimony registration and event management. */
+function ServicesCard() {
+  return (
+    <section
+      aria-labelledby="our-services"
+      className="rounded-2xl border border-gold/30 bg-gradient-to-br from-gold/5 to-transparent p-5 sm:p-6"
+    >
+      <div className="flex items-center gap-2 text-gold">
+        <Icon name="sparkles" size={16} />
+        <span className="text-xs font-semibold uppercase tracking-wide">Our services</span>
+      </div>
+      <h2 id="our-services" className="mt-1 font-serif text-xl font-bold text-foreground">
+        Matrimony &amp; Event Management
+      </h2>
+      <p className="mt-2 text-sm text-muted-foreground text-pretty">
+        Wedding registration for all communities, and complete service for all
+        auspicious events (நிகழ்ச்சி மேலாண்மை).
+      </p>
+      <dl className="mt-4 space-y-2.5 text-sm">
+        <div className="flex items-start gap-2.5">
+          <Icon name="map-pin" size={16} className="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
+          <dd className="text-foreground text-pretty">
+            1st Floor, Najeem Commercial Complex, Behind Old Bus Stand, Mayiladuthurai&nbsp;&ndash;&nbsp;609&nbsp;001
+          </dd>
+        </div>
+        <div className="flex items-start gap-2.5">
+          <Icon name="phone" size={16} className="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
+          <dd className="text-foreground">
+            <a href="tel:+919943099050" className="hover:underline">99430&nbsp;99050</a>,{' '}
+            <a href="tel:+919943099060" className="hover:underline">99430&nbsp;99060</a>
+          </dd>
+        </div>
+        <div className="flex items-start gap-2.5">
+          <Icon name="mail" size={16} className="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
+          <dd className="text-foreground">
+            <a href="mailto:info@magizhmatrimony.com" className="hover:underline">
+              info@magizhmatrimony.com
+            </a>
+          </dd>
+        </div>
+      </dl>
+    </section>
+  )
+}
+
+/** #7 — support/help contact for matrimony assistance. */
+function SupportCard() {
+  return (
+    <section
+      aria-labelledby="need-help"
+      className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6"
+    >
+      <div className="flex items-center gap-2 text-primary">
+        <Icon name="phone" size={16} />
+        <span className="text-xs font-semibold uppercase tracking-wide">Need help?</span>
+      </div>
+      <h2 id="need-help" className="mt-1 font-serif text-xl font-bold text-foreground">
+        We&apos;re here to help
+      </h2>
+      <p className="mt-2 text-sm text-muted-foreground text-pretty">
+        If you need support from Magizh Matrimony, please call us and our team
+        will be glad to assist you.
+      </p>
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+        <a
+          href="tel:+919943099050"
+          className={cn(buttonVariants({ size: 'lg' }), 'w-full sm:w-auto')}
+        >
+          <Icon name="phone" size={18} />
+          99430 99050
+        </a>
+        <a
+          href="tel:+919943099060"
+          className={cn(buttonVariants({ variant: 'secondary', size: 'lg' }), 'w-full sm:w-auto')}
+        >
+          <Icon name="phone" size={18} />
+          99430 99060
+        </a>
+      </div>
+      <div className="mt-3">
+        <Link href="/support" className="text-sm font-medium text-primary underline-offset-4 hover:underline">
+          Visit the help centre
+        </Link>
+      </div>
+    </section>
+  )
+}
+
+/** #6 Rotating vendor/promo banner carousel (auto-advances when >1 banner). */
+function AdCarousel({ banners }: { banners: AdBanner[] }) {
+  const [index, setIndex] = useState(0)
+  const count = banners.length
+
+  useEffect(() => {
+    if (count <= 1) return
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
+    const id = setInterval(() => setIndex((i) => (i + 1) % count), 5000)
+    return () => clearInterval(id)
+  }, [count])
+
+  const current = banners[Math.min(index, count - 1)]
+  const inner = (
+    <img
+      src={current.imageUrl}
+      alt={current.title ?? 'Advertisement'}
+      className="h-full w-full object-cover"
+      loading="lazy"
+    />
+  )
+
+  return (
+    <section aria-label="Sponsored" className="mb-8">
+      <div className="relative overflow-hidden rounded-2xl border border-border bg-muted">
+        <div className="aspect-[4/1] w-full">
+          {current.linkUrl ? (
+            <a href={current.linkUrl} target="_blank" rel="noopener noreferrer" className="block h-full w-full">
+              {inner}
+            </a>
+          ) : (
+            inner
+          )}
+        </div>
+        {count > 1 && (
+          <div className="absolute inset-x-0 bottom-2 flex items-center justify-center gap-1.5">
+            {banners.map((b, i) => (
+              <button
+                key={b.id}
+                type="button"
+                onClick={() => setIndex(i)}
+                aria-label={`Show banner ${i + 1} of ${count}`}
+                aria-current={i === index}
+                className={cn(
+                  'h-1.5 rounded-full transition-all',
+                  i === index ? 'w-5 bg-white' : 'w-1.5 bg-white/60 hover:bg-white/80',
+                )}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
   )
 }
 

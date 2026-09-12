@@ -73,6 +73,8 @@ const ACTION_LABELS: Record<ModerationRequestRecord['action'], string> = {
   ASSIGN_SUBSCRIPTION: 'Assign subscription',
   APPLY_PROFILE_EDIT: 'Apply profile edit',
   APPLY_ASSISTED_PROFILE: 'Apply assisted profile',
+  APPROVE_AD_BANNER: 'Approve vendor ad',
+  REJECT_AD_BANNER: 'Reject vendor ad',
 }
 
 /** What kind of detail a request's action needs shown in the approver modal. */

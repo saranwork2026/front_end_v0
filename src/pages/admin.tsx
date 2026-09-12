@@ -17,6 +17,7 @@ import { AdminAuditView } from '@/components/admin/admin-audit-view'
 import { AdminActivityView } from '@/components/admin/admin-activity-view'
 import { AdminSessionsView } from '@/components/admin/admin-sessions-view'
 import { AdminSuccessStoriesView } from '@/components/admin/admin-success-stories-view'
+import { AdminAdBannersView } from '@/components/admin/admin-ad-banners-view'
 
 type AdminRole = 'ADMIN' | 'ADMIN_APPROVER'
 
@@ -192,6 +193,17 @@ export function AdminSuccessStoriesPage() {
   return (
     <AdminShell activeHref="/admin/success-stories">
       <AdminSuccessStoriesView initialState={state} isApprover={isApprover} />
+    </AdminShell>
+  )
+}
+
+export function AdminAdBannersPage() {
+  useDocumentTitle('Admin · Vendor ads')
+  const [params] = useSearchParams()
+  const isApprover = params.get('role') === 'approver'
+  return (
+    <AdminShell activeHref="/admin/ad-banners">
+      <AdminAdBannersView isApprover={isApprover} />
     </AdminShell>
   )
 }
