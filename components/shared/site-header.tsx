@@ -2,10 +2,13 @@
 
 import { useState } from 'react'
 
+import { useTranslation } from 'react-i18next'
+
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Icon, type IconName } from '@/components/ui/icon'
 import { BottomSheet } from '@/components/ui/bottom-sheet'
+import { LanguageSwitcher } from '@/components/shared/language-switcher'
 
 interface NavLink {
   label: string
@@ -36,6 +39,7 @@ export function SiteHeader({
   className,
 }: SiteHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const { t } = useTranslation()
 
   return (
     <header
@@ -80,27 +84,31 @@ export function SiteHeader({
 
         {/* Desktop actions */}
         <div className="hidden items-center gap-2 md:flex">
-          <Button variant="ghost" size="icon" aria-label="Notifications">
+          <LanguageSwitcher />
+          <Button variant="ghost" size="icon" aria-label={t('header.notifications')}>
             <Icon name="bell" size={18} />
           </Button>
           <button
             type="button"
-            aria-label="Account"
+            aria-label={t('header.account')}
             className="flex size-9 items-center justify-center rounded-full bg-secondary text-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
           >
             <Icon name="user" size={18} />
           </button>
         </div>
 
-        {/* Mobile menu trigger */}
-        <button
-          type="button"
-          onClick={() => setMenuOpen(true)}
-          aria-label="Open menu"
-          className="flex size-10 items-center justify-center rounded-lg text-foreground transition-colors hover:bg-secondary md:hidden"
-        >
-          <Icon name="menu" size={22} />
-        </button>
+        {/* Mobile: language toggle stays visible next to the menu trigger. */}
+        <div className="flex items-center gap-1 md:hidden">
+          <LanguageSwitcher />
+          <button
+            type="button"
+            onClick={() => setMenuOpen(true)}
+            aria-label={t('header.openMenu')}
+            className="flex size-10 items-center justify-center rounded-lg text-foreground transition-colors hover:bg-secondary"
+          >
+            <Icon name="menu" size={22} />
+          </button>
+        </div>
       </div>
 
       {/* Mobile navigation */}

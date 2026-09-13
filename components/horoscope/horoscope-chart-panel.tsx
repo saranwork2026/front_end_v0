@@ -5,9 +5,11 @@ import type { GenerateChartResponse } from '@matrimony/shared-core'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Select } from '@/components/ui/select'
 import { SearchableSelect } from '@/components/ui/searchable-select'
 import { profileApi } from '@/src/lib/api'
 import type { WizardForm } from '@/lib/wizard-data'
+import { nakshatraOptions, raasiOptions, padamOptions } from '@/lib/wizard-data'
 import { SouthIndianChart } from '@/components/horoscope/south-indian-chart'
 import { BIRTH_PLACE_OPTIONS, findBirthPlace } from '@/src/data/birthPlaceData'
 
@@ -107,9 +109,11 @@ export function HoroscopeChartPanel({
       setResult(res.data)
       setOwnCharts(null)
       // Pre-fill the panchangam dropdowns from the suggestions (the member can
-      // still override any of them before saving the section).
+      // still override any of them before saving the section). This includes
+      // padam, which the wizard's Raasi auto-derivation also uses.
       onChange({
         nakshatra: res.data.nakshatra || form.nakshatra,
+        padam: res.data.padam ? String(res.data.padam) : form.padam,
         raasi: res.data.raasi || form.raasi,
         lagnam: res.data.lagnam || form.lagnam,
       })
@@ -242,10 +246,63 @@ export function HoroscopeChartPanel({
       {showing && (
         <div className="mt-1 flex flex-col gap-4">
           {result && (
-            <p className="text-xs text-muted-foreground">
-              Nakshatra: <b>{result.nakshatra}</b> (padam {result.padam}) · Raasi: <b>{result.raasi}</b> ·
-              Lagnam: <b>{result.lagnam}</b>. Check the details above and click Save chart to keep them.
-            </p>
+            <>
+              <p className="text-xs text-muted-foreground">
+                Review the generated values below — edit any of them if needed, then click Save chart.
+              </p>
+              {/* Editable panchangam fields, pre-filled from the generated chart
+                  and bound to the wizard form so edits persist on save. */}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Select
+                  label="Nakshatra (birth star)"
+                  value={form.nakshatra}
+                  onChange={(e) => onChange({ nakshatra: e.target.value })}
+                >
+                  <option value="">Select nakshatra</option>
+                  {nakshatraOptions.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </Select>
+                <Select
+                  label="Padam (Pada)"
+                  value={form.padam}
+                  onChange={(e) => onChange({ padam: e.target.value })}
+                >
+                  <option value="">Select padam</option>
+                  {padamOptions.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </Select>
+                <Select
+                  label="Raasi (moon sign)"
+                  value={form.raasi}
+                  onChange={(e) => onChange({ raasi: e.target.value })}
+                >
+                  <option value="">Select raasi</option>
+                  {raasiOptions.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </Select>
+                <Select
+                  label="Lagnam (ascendant)"
+                  value={form.lagnam}
+                  onChange={(e) => onChange({ lagnam: e.target.value })}
+                >
+                  <option value="">Select lagnam</option>
+                  {raasiOptions.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+            </>
           )}
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col items-center gap-1.5">

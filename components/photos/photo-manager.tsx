@@ -10,9 +10,16 @@ import { StatusBadge } from '@/components/ui/status-badge'
 import { Toaster, type ToastItem } from '@/components/ui/toast'
 import { cn } from '@/lib/utils'
 import { photoApi } from '@/src/lib/api'
+import { compressImageIfNeeded } from '@/src/lib/imageCompression'
 
 const MAX_PROFILE_PHOTOS = 3
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+// Compression target: photos larger than this are automatically downscaled/
+// re-encoded in the browser before upload (rather than rejected). Kept under
+// the backend's 5 MB limit with margin.
+const COMPRESS_TARGET_BYTES = 4.5 * 1024 * 1024
+// Hard ceiling at selection time — extremely large files (e.g. > 25 MB raw)
+// are rejected outright; anything under is compressed to the target.
+const MAX_SELECT_BYTES = 25 * 1024 * 1024
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 const ACCEPT_ATTR = 'image/jpeg,image/png,image/webp'
 
@@ -26,8 +33,8 @@ function validateFile(file: File): string | null {
   if (!ACCEPTED_TYPES.includes(file.type)) {
     return 'Invalid file format. Only JPEG, PNG, and WEBP are accepted.'
   }
-  if (file.size > MAX_FILE_SIZE) {
-    return 'File is too large. Maximum size is 5 MB.'
+  if (file.size > MAX_SELECT_BYTES) {
+    return 'File is too large. Please choose an image under 25 MB.'
   }
   return null
 }
@@ -107,7 +114,10 @@ export function PhotoManager() {
       }
       setUploadingProfile(true)
       try {
-        const res = await photoApi.uploadPhoto(file, visibility)
+        // Auto-reduce oversized photos in the browser before upload so members
+        // don't have to shrink files themselves.
+        const toUpload = await compressImageIfNeeded(file, COMPRESS_TARGET_BYTES)
+        const res = await photoApi.uploadPhoto(toUpload, visibility)
         setPhotos((prev) => [...prev, res.data])
         pushToast('Photo uploaded. It will be visible after admin approval.', 'success')
       } catch (err) {

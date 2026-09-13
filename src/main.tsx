@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 
 import { App } from './App'
 import { AppBootstrap } from './components/AppBootstrap'
+import './i18n/config' // initialise i18next before first render (no language flash)
 import './index.css'
 
 createRoot(document.getElementById('root')!).render(

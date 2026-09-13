@@ -48,6 +48,7 @@ export function SearchableSelect({
   const [query, setQuery] = React.useState('')
   const [open, setOpen] = React.useState(false)
   const [highlight, setHighlight] = React.useState(-1)
+  const [dropUp, setDropUp] = React.useState(false)
   const containerRef = React.useRef<HTMLDivElement>(null)
   const searchRef = React.useRef<HTMLInputElement>(null)
 
@@ -77,6 +78,17 @@ export function SearchableSelect({
 
   function openDropdown() {
     if (disabled) return
+    // Decide whether to open the panel upward: if the space below the trigger
+    // is less than the panel's approx height (~300px) AND there's more room
+    // above, flip up so the options aren't clipped/hidden off-screen. This is
+    // what keeps fields near the bottom (e.g. Mother tongue) usable.
+    const trigger = containerRef.current?.getBoundingClientRect()
+    if (trigger) {
+      const spaceBelow = window.innerHeight - trigger.bottom
+      const spaceAbove = trigger.top
+      const PANEL_APPROX = 300
+      setDropUp(spaceBelow < PANEL_APPROX && spaceAbove > spaceBelow)
+    }
     setOpen(true)
     setQuery('')
     setHighlight(0)
@@ -174,7 +186,12 @@ export function SearchableSelect({
         )}
 
         {open && !disabled && (
-          <div className="absolute left-0 right-0 top-full z-30 mt-1 rounded-lg border border-border bg-card p-1 shadow-xl">
+          <div
+            className={cn(
+              'absolute left-0 right-0 z-30 rounded-lg border border-border bg-card p-1 shadow-xl',
+              dropUp ? 'bottom-full mb-1' : 'top-full mt-1',
+            )}
+          >
             <div className="relative p-1">
               <input
                 ref={searchRef}

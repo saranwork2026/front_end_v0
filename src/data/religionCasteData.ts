@@ -107,7 +107,10 @@ export function hasGothramField(religion: string): boolean {
 // ---- Caste / Community, scoped by religion -----------------------------
 // "Other" is always appended as an escape hatch so no one is blocked.
 
-const HINDU_CASTES: string[] = [
+// Full pan-India Hindu caste list. Retained (exported) for potential future
+// use (e.g. a non-Tamil-Nadu region toggle); the Hindu option currently uses
+// the Tamil-Nadu-focused list below instead. Not wired into CASTES_BY_RELIGION.
+export const ALL_INDIA_HINDU_CASTES: string[] = [
   'Ad Dharmi', 'Adi Andhra', 'Adi Dravida', 'Adi-karnataka', 'Agarwal',
   'Agnikula Kshatriya', 'Agri', 'Ahir Shimpi', 'Ahom', 'Ambalavasi',
   'Arekatica', 'Arora', 'Arunthathiyar', 'Arya Vysya', 'Ayyaraka', 'Badaga',
@@ -194,6 +197,31 @@ const HINDU_CASTES: string[] = [
   'Yadav', 'Yellapu',
 ];
 
+// Tamil Nadu Hindu castes/communities (the platform's primary audience). This
+// replaces the broad pan-India Hindu list for the Hindu option so members see
+// communities actually found in Tamil Nadu. "Other" is always appended (via
+// toOptionsWithOther) so anyone outside this list is never blocked. Ordered
+// alphabetically; grouped Brahmin sub-communities kept explicit as they're
+// commonly distinguished in TN matrimony.
+const TAMILNADU_HINDU_CASTES: string[] = [
+  'Adi Dravida', 'Agamudayar', 'Ambalakarar', 'Arunthathiyar', 'Arya Vysya',
+  'Badaga', 'Balija Naidu', 'Boyer', 'Brahmin - Iyengar', 'Brahmin - Iyer',
+  'Brahmin - Gurukkal', 'Brahmin - Smartha', 'Brahmin - Sri Vaishnava',
+  'Chettiar', 'Nattukottai Chettiar (Nagarathar)', 'Vaniya Chettiar',
+  'Devanga Chettiar', 'Devandra Kula Vellalar', 'Gramani', 'Isai Vellalar',
+  'Kongu Vellala Gounder', 'Vettuva Gounder', 'Urali Gounder', 'Gounder',
+  'Kammavar Naidu', 'Kamma', 'Karuneegar', 'Kongu Chettiar', 'Kshatriya',
+  'Kulalar', 'Kuravan', 'Kurumbar', 'Labbai', 'Maruthuvar', 'Meenavar',
+  'Mudaliar - Sengunthar', 'Mudaliar - Thuluva Vellalar',
+  'Mudaliar - Arcot', 'Mudaliar - Isai Vellalar', 'Mudaliar', 'Mukkulathor',
+  'Muthuraja / Muthuracha', 'Nadar', 'Naicker', 'Naidu', 'Pallar',
+  'Pandaram', 'Parkava Kulam', 'Pillai - Saiva', 'Pillai - Vellalar',
+  'Pillai', 'Reddy', 'Senguntha Mudaliyar', 'Sourashtra', 'Sozhiya Vellalar',
+  'Thevar (Mukkulathor)', 'Kallar', 'Maravar', 'Agamudayar Thevar',
+  'Vaniyar', 'Vannar', 'Vannia Kula Kshatriyar (Vanniyar)', 'Vellalar',
+  'Vishwakarma (Viswabrahmin)', 'Yadava (Konar)', 'Yadav',
+];
+
 const MUSLIM_CASTES: string[] = [
   'Ansari', 'Arain', 'Awan', 'Alavi - Bohra', 'Dakhini', 'Dudekula',
   'Hanafi', 'Jat', 'Khoja', 'Labbay', 'Malik', 'Mappila', 'Marakayar',
@@ -244,7 +272,8 @@ function toOptionsWithOther(names: string[]): CasteOption[] {
 }
 
 export const CASTES_BY_RELIGION: Record<string, CasteOption[]> = {
-  Hindu: toOptionsWithOther(HINDU_CASTES),
+  // Tamil Nadu-focused Hindu caste list (primary audience) + "Other".
+  Hindu: toOptionsWithOther(TAMILNADU_HINDU_CASTES),
   Muslim: toOptionsWithOther(MUSLIM_CASTES),
   Christian: toOptionsWithOther(CHRISTIAN_DENOMINATIONS),
   Sikh: toOptionsWithOther(SIKH_CASTES),

@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import { Icon } from '@/components/ui/icon'
 import { Button } from '@/components/ui/button'
 import { BottomSheet } from '@/components/ui/bottom-sheet'
+import { LanguageSwitcher } from '@/components/shared/language-switcher'
 import { adminNav } from '@/lib/admin-nav'
 import { useAuthStore } from '@/src/stores/auth'
 import { logout } from '@/src/lib/auth-utils'
@@ -81,6 +82,7 @@ export function AdminShell({ activeHref, children }: AdminShellProps) {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <LanguageSwitcher />
             <span className="hidden items-center gap-2 rounded-full bg-secondary px-3 py-1.5 text-xs font-medium text-foreground sm:flex">
               <Icon name="user" size={14} />
               {roleLabel}

@@ -8,9 +8,13 @@ import { Icon } from '@/components/ui/icon'
 import { StatusBadge } from '@/components/ui/status-badge'
 import { Toaster, type ToastItem } from '@/components/ui/toast'
 import { photoApi } from '@/src/lib/api'
+import { compressImageIfNeeded } from '@/src/lib/imageCompression'
 
 const MAX_HOROSCOPE_PHOTOS = 2
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+// Compression target — oversized charts are downscaled in the browser before
+// upload rather than rejected. Kept under the backend's 5 MB limit.
+const COMPRESS_TARGET_BYTES = 4.5 * 1024 * 1024
+const MAX_SELECT_BYTES = 25 * 1024 * 1024
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 const ACCEPT_ATTR = 'image/jpeg,image/png,image/webp'
 
@@ -18,8 +22,8 @@ function validateFile(file: File): string | null {
   if (!ACCEPTED_TYPES.includes(file.type)) {
     return 'Invalid file format. Only JPEG, PNG, and WEBP are accepted.'
   }
-  if (file.size > MAX_FILE_SIZE) {
-    return 'File is too large. Maximum size is 5 MB.'
+  if (file.size > MAX_SELECT_BYTES) {
+    return 'File is too large. Please choose an image under 25 MB.'
   }
   return null
 }
@@ -87,7 +91,8 @@ export function HoroscopePhotoManager() {
       }
       setUploading(true)
       try {
-        const res = await photoApi.uploadHoroscopePhoto(file)
+        const toUpload = await compressImageIfNeeded(file, COMPRESS_TARGET_BYTES)
+        const res = await photoApi.uploadHoroscopePhoto(toUpload)
         setPhotos((prev) => [...prev, res.data])
         pushToast('Horoscope chart uploaded. It will be visible after admin approval.', 'success')
       } catch (err) {

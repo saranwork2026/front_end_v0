@@ -596,33 +596,54 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
               <Select
                 label="Father's status"
                 value={form.fatherStatus}
-                onChange={(e) => onChange({ fatherStatus: e.target.value })}
+                onChange={(e) => {
+                  const fatherStatus = e.target.value
+                  // Clear any stale profession when it no longer applies.
+                  onChange(
+                    fatherStatus === 'HOMEMAKER' || fatherStatus === 'PASSED_AWAY'
+                      ? { fatherStatus, fatherProfession: '' }
+                      : { fatherStatus },
+                  )
+                }}
               >
                 <option value="">Select</option>
                 {optionList(parentStatusOptions)}
               </Select>
-              <Input
-                label="Father's profession"
-                value={form.fatherProfession}
-                onChange={(e) =>
-                  onChange({ fatherProfession: e.target.value })
-                }
-              />
+              {/* Profession is meaningless for a homemaker — hide it when the
+                  status is HOMEMAKER (also PASSED_AWAY has no current job). */}
+              {form.fatherStatus !== 'HOMEMAKER' && form.fatherStatus !== 'PASSED_AWAY' && (
+                <Input
+                  label="Father's profession"
+                  value={form.fatherProfession}
+                  onChange={(e) =>
+                    onChange({ fatherProfession: e.target.value })
+                  }
+                />
+              )}
               <Select
                 label="Mother's status"
                 value={form.motherStatus}
-                onChange={(e) => onChange({ motherStatus: e.target.value })}
+                onChange={(e) => {
+                  const motherStatus = e.target.value
+                  onChange(
+                    motherStatus === 'HOMEMAKER' || motherStatus === 'PASSED_AWAY'
+                      ? { motherStatus, motherProfession: '' }
+                      : { motherStatus },
+                  )
+                }}
               >
                 <option value="">Select</option>
                 {optionList(parentStatusOptions)}
               </Select>
-              <Input
-                label="Mother's profession"
-                value={form.motherProfession}
-                onChange={(e) =>
-                  onChange({ motherProfession: e.target.value })
-                }
-              />
+              {form.motherStatus !== 'HOMEMAKER' && form.motherStatus !== 'PASSED_AWAY' && (
+                <Input
+                  label="Mother's profession"
+                  value={form.motherProfession}
+                  onChange={(e) =>
+                    onChange({ motherProfession: e.target.value })
+                  }
+                />
+              )}
             </FieldGrid>
           </div>
 
