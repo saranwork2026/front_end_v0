@@ -1,19 +1,24 @@
+import { useTranslation } from 'react-i18next'
+
 import { Badge, type badgeVariants } from '@/components/ui/badge'
 import type { VariantProps } from 'class-variance-authority'
 
 type Variant = VariantProps<typeof badgeVariants>['variant']
 
-const statusMap: Record<string, { label: string; variant: Variant }> = {
-  APPROVED: { label: 'Approved', variant: 'success' },
-  COMPLETED: { label: 'Completed', variant: 'success' },
-  ACCEPTED: { label: 'Accepted', variant: 'success' },
-  ACTIVE: { label: 'Active', variant: 'success' },
-  UNDER_REVIEW: { label: 'Under Review', variant: 'warning' },
-  PENDING: { label: 'Pending', variant: 'warning' },
-  DRAFT: { label: 'Draft', variant: 'neutral' },
-  REJECTED: { label: 'Rejected', variant: 'danger' },
-  BLOCKED: { label: 'Blocked', variant: 'danger' },
-  DEACTIVATED: { label: 'Deactivated', variant: 'neutral' },
+// Variant styling per status. The visible label is resolved via i18n
+// (status.<code>), falling back to a humanized version of the raw code.
+const variantMap: Record<string, Variant> = {
+  APPROVED: 'success',
+  COMPLETED: 'success',
+  ACCEPTED: 'success',
+  ACTIVE: 'success',
+  UNDER_REVIEW: 'warning',
+  PENDING: 'warning',
+  DRAFT: 'neutral',
+  REJECTED: 'danger',
+  BLOCKED: 'danger',
+  DEACTIVATED: 'neutral',
+  CANCELLED: 'neutral',
 }
 
 interface StatusBadgeProps {
@@ -22,17 +27,17 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
-  const entry = statusMap[status] ?? {
-    label: status
-      .toLowerCase()
-      .replace(/_/g, ' ')
-      .replace(/^\w/, (c) => c.toUpperCase()),
-    variant: 'neutral' as Variant,
-  }
+  const { t } = useTranslation()
+  const variant = variantMap[status] ?? 'neutral'
+  const humanized = status
+    .toLowerCase()
+    .replace(/_/g, ' ')
+    .replace(/^\w/, (c) => c.toUpperCase())
+  const label = t(`status.${status}` as never, { defaultValue: humanized })
 
   return (
-    <Badge variant={entry.variant} className={className}>
-      {entry.label}
+    <Badge variant={variant} className={className}>
+      {label}
     </Badge>
   )
 }

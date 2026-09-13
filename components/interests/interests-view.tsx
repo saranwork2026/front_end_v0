@@ -18,23 +18,25 @@ import { interestsApi } from '@/src/lib/api'
 const PAGE_SIZE = 10
 type Direction = 'received' | 'sent'
 
-const statusFilterOptions: { value: 'ALL' | InterestStatus; label: string }[] = [
-  { value: 'ALL', label: 'All statuses' },
-  { value: 'PENDING', label: 'Pending' },
-  { value: 'ACCEPTED', label: 'Accepted' },
-  { value: 'REJECTED', label: 'Rejected' },
-  { value: 'CANCELLED', label: 'Cancelled' },
+const statusFilterOptions: { value: 'ALL' | InterestStatus; labelKey: string }[] = [
+  { value: 'ALL', labelKey: 'page.interests.statusAll' },
+  { value: 'PENDING', labelKey: 'page.interests.statusPending' },
+  { value: 'ACCEPTED', labelKey: 'page.interests.statusAccepted' },
+  { value: 'REJECTED', labelKey: 'page.interests.statusRejected' },
+  { value: 'CANCELLED', labelKey: 'page.interests.statusCancelled' },
 ]
 
-function timeAgo(iso: string): string {
+type TFunc = ReturnType<typeof useTranslation>['t']
+
+function timeAgo(iso: string, t: TFunc): string {
   const diff = Date.now() - new Date(iso).getTime()
   const mins = Math.round(diff / 60000)
-  if (mins < 60) return mins <= 1 ? 'just now' : `${mins} min ago`
+  if (mins < 60) return mins <= 1 ? t('page.interests.timeJustNow') : t('page.interests.timeMin', { count: mins })
   const hours = Math.round(mins / 60)
-  if (hours < 24) return `${hours} hr${hours === 1 ? '' : 's'} ago`
+  if (hours < 24) return t('page.interests.timeHr', { count: hours })
   const days = Math.round(hours / 24)
-  if (days < 7) return `${days} day${days === 1 ? '' : 's'} ago`
-  return `${Math.round(days / 7)} wk ago`
+  if (days < 7) return t('page.interests.timeDay', { count: days })
+  return t('page.interests.timeWk', { count: Math.round(days / 7) })
 }
 
 type ViewState = 'ready' | 'loading' | 'empty'
@@ -112,7 +114,7 @@ export function InterestsView({ state }: InterestsViewProps) {
       setResults((prev) =>
         prev ? { ...prev, content: prev.content.map((i) => (i.interestId === interest.interestId ? { ...i, status: interest.status } : i)) } : prev,
       )
-      pushToast('Could not update the interest. Please try again.', 'error')
+      pushToast(t('page.interests.updateError'), 'error')
     } finally {
       setPending((k) => (k === key ? null : k))
     }
@@ -129,19 +131,19 @@ export function InterestsView({ state }: InterestsViewProps) {
       </header>
 
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div role="tablist" aria-label="Interest direction" className="inline-flex w-full rounded-xl border border-border bg-card p-1 sm:w-auto">
-          <TabButton active={tab === 'received'} onClick={() => changeTab('received')} icon="mail" label="Received" />
-          <TabButton active={tab === 'sent'} onClick={() => changeTab('sent')} icon="share" label="Sent" />
+        <div role="tablist" aria-label={t('page.interests.directionAria')} className="inline-flex w-full rounded-xl border border-border bg-card p-1 sm:w-auto">
+          <TabButton active={tab === 'received'} onClick={() => changeTab('received')} icon="mail" label={t('page.interests.received')} />
+          <TabButton active={tab === 'sent'} onClick={() => changeTab('sent')} icon="share" label={t('page.interests.sent')} />
         </div>
         <div className="w-full sm:w-52">
           <Select
-            aria-label="Filter by status"
+            aria-label={t('page.interests.filterStatusAria')}
             value={statusFilter}
             onChange={(e) => changeStatus(e.target.value as 'ALL' | InterestStatus)}
           >
             {statusFilterOptions.map((o) => (
               <option key={o.value} value={o.value}>
-                {o.label}
+                {t(o.labelKey as never)}
               </option>
             ))}
           </Select>
@@ -151,8 +153,8 @@ export function InterestsView({ state }: InterestsViewProps) {
       {!isLoading && (
         <p className="mb-3 text-sm text-muted-foreground" aria-live="polite">
           {items.length === 0
-            ? 'No interests'
-            : `${results?.totalElements ?? items.length} ${(results?.totalElements ?? items.length) === 1 ? 'interest' : 'interests'}`}
+            ? t('page.interests.countNone')
+            : t('page.interests.count', { count: results?.totalElements ?? items.length })}
         </p>
       )}
 
@@ -161,16 +163,16 @@ export function InterestsView({ state }: InterestsViewProps) {
       ) : items.length === 0 ? (
         <EmptyState
           icon="mail"
-          title={tab === 'received' ? 'No interests received yet' : 'No interests sent yet'}
+          title={tab === 'received' ? t('page.interests.emptyReceivedTitle') : t('page.interests.emptySentTitle')}
           description={
             tab === 'received'
-              ? 'When someone expresses interest in your profile, it will appear here.'
-              : 'Browse profiles and send an interest to start a connection.'
+              ? t('page.interests.emptyReceivedDesc')
+              : t('page.interests.emptySentDesc')
           }
           action={
             tab === 'sent' ? (
               <Link href="/search" className={buttonVariants()}>
-                Browse profiles
+                {t('page.interests.browseProfiles')}
               </Link>
             ) : undefined
           }
@@ -233,6 +235,7 @@ function InterestRow({
   pending: string | null
   onAction: (i: Interest, a: 'ACCEPTED' | 'REJECTED' | 'CANCELLED') => void
 }) {
+  const { t } = useTranslation()
   const fullName = [interest.otherFirstName, interest.otherLastName].filter(Boolean).join(' ')
   const initials = `${interest.otherFirstName?.[0] ?? ''}${interest.otherLastName?.[0] ?? ''}`
 
@@ -250,7 +253,7 @@ function InterestRow({
         <Link
           href={`/profile/${interest.otherProfileId}`}
           className="shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-          aria-label={`View ${fullName}'s profile`}
+          aria-label={t('page.interests.viewProfileAria', { name: fullName })}
         >
           {interest.otherPrimaryPhotoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -282,7 +285,7 @@ function InterestRow({
           {interest.otherCity && <p className="mt-0.5 truncate text-sm text-muted-foreground">{interest.otherCity}</p>}
           <p className="mt-1.5 flex items-center gap-1 text-xs text-muted-foreground">
             <Icon name="clock" size={12} />
-            {timeAgo(interest.createdAt)}
+            {timeAgo(interest.createdAt, t)}
           </p>
         </div>
 
@@ -303,7 +306,7 @@ function InterestRow({
                 className="w-full sm:w-auto"
               >
                 <Icon name="x" size={16} />
-                Decline
+                {t('page.interests.decline')}
               </Button>
               <Button
                 onClick={() => onAction(interest, 'ACCEPTED')}
@@ -312,7 +315,7 @@ function InterestRow({
                 className="w-full sm:w-auto"
               >
                 <Icon name="check" size={16} />
-                Accept
+                {t('page.interests.accept')}
               </Button>
             </>
           )}
@@ -325,7 +328,7 @@ function InterestRow({
               className="w-full sm:w-auto"
             >
               <Icon name="x" size={16} />
-              Cancel request
+              {t('page.interests.cancelRequest')}
             </Button>
           )}
         </div>

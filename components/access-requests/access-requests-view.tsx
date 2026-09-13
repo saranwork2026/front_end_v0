@@ -18,24 +18,25 @@ import { accessApi } from '@/src/lib/api'
 const PAGE_SIZE = 10
 type Direction = 'received' | 'sent'
 
-const statusFilterOptions: { value: 'ALL' | AccessRequestStatus; label: string }[] = [
-  { value: 'ALL', label: 'All statuses' },
-  { value: 'PENDING', label: 'Pending' },
-  { value: 'APPROVED', label: 'Approved' },
-  { value: 'REJECTED', label: 'Rejected' },
+const statusFilterOptions: { value: 'ALL' | AccessRequestStatus; labelKey: string }[] = [
+  { value: 'ALL', labelKey: 'page.accessRequests.statusAll' },
+  { value: 'PENDING', labelKey: 'page.accessRequests.statusPending' },
+  { value: 'APPROVED', labelKey: 'page.accessRequests.statusApproved' },
+  { value: 'REJECTED', labelKey: 'page.accessRequests.statusRejected' },
 ]
 
-const accessTypeLabel = (t: string) => (t === 'PHOTO' ? 'Photo access' : 'Contact access')
+type TFunc = ReturnType<typeof useTranslation>['t']
 
-function timeAgo(iso: string): string {
+function timeAgo(iso: string, t: TFunc): string {
   const diff = Date.now() - new Date(iso).getTime()
   const mins = Math.round(diff / 60000)
-  if (mins < 60) return mins <= 1 ? 'just now' : `${mins} min ago`
+  if (mins < 60)
+    return mins <= 1 ? t('page.accessRequests.timeJustNow') : t('page.accessRequests.timeMin', { count: mins })
   const hours = Math.round(mins / 60)
-  if (hours < 24) return `${hours} hr${hours === 1 ? '' : 's'} ago`
+  if (hours < 24) return t('page.accessRequests.timeHr', { count: hours })
   const days = Math.round(hours / 24)
-  if (days < 7) return `${days} day${days === 1 ? '' : 's'} ago`
-  return `${Math.round(days / 7)} wk ago`
+  if (days < 7) return t('page.accessRequests.timeDay', { count: days })
+  return t('page.accessRequests.timeWk', { count: Math.round(days / 7) })
 }
 
 type ViewState = 'ready' | 'loading' | 'empty'
@@ -106,12 +107,12 @@ export function AccessRequestsView({ state }: AccessRequestsViewProps) {
     )
     try {
       await accessApi.updateAccessRequestStatus(request.requestId, action)
-      pushToast(action === 'APPROVED' ? 'Access request approved.' : 'Access request declined.', 'success')
+      pushToast(action === 'APPROVED' ? t('page.accessRequests.approvedToast') : t('page.accessRequests.declinedToast'), 'success')
     } catch {
       setResults((prev) =>
         prev ? { ...prev, content: prev.content.map((r) => (r.requestId === request.requestId ? { ...r, status: request.status } : r)) } : prev,
       )
-      pushToast('Could not update the request. Please try again.', 'error')
+      pushToast(t('page.accessRequests.updateError'), 'error')
     } finally {
       setPending((k) => (k === key ? null : k))
     }
@@ -123,24 +124,24 @@ export function AccessRequestsView({ state }: AccessRequestsViewProps) {
         <p className="text-xs font-medium uppercase tracking-[0.14em] text-primary/80">{t('page.accessRequests.eyebrow')}</p>
         <h1 className="mt-1 font-serif text-2xl text-foreground sm:text-3xl">{t('page.accessRequests.title')}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Approve or decline members asking to see your photos and contact details, and track the requests you have sent.
+          {t('page.accessRequests.headerSubtitle')}
         </p>
       </header>
 
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div role="tablist" aria-label="Request direction" className="inline-flex w-full rounded-xl border border-border bg-card p-1 sm:w-auto">
-          <TabButton active={tab === 'received'} onClick={() => changeTab('received')} icon="lock" label="Received" />
-          <TabButton active={tab === 'sent'} onClick={() => changeTab('sent')} icon="share" label="Sent" />
+        <div role="tablist" aria-label={t('page.accessRequests.directionAria')} className="inline-flex w-full rounded-xl border border-border bg-card p-1 sm:w-auto">
+          <TabButton active={tab === 'received'} onClick={() => changeTab('received')} icon="lock" label={t('page.accessRequests.received')} />
+          <TabButton active={tab === 'sent'} onClick={() => changeTab('sent')} icon="share" label={t('page.accessRequests.sent')} />
         </div>
         <div className="w-full sm:w-52">
           <Select
-            aria-label="Filter by status"
+            aria-label={t('page.accessRequests.filterStatusAria')}
             value={statusFilter}
             onChange={(e) => changeStatus(e.target.value as 'ALL' | AccessRequestStatus)}
           >
             {statusFilterOptions.map((o) => (
               <option key={o.value} value={o.value}>
-                {o.label}
+                {t(o.labelKey as never)}
               </option>
             ))}
           </Select>
@@ -150,8 +151,8 @@ export function AccessRequestsView({ state }: AccessRequestsViewProps) {
       {!isLoading && (
         <p className="mb-3 text-sm text-muted-foreground" aria-live="polite">
           {items.length === 0
-            ? 'No requests'
-            : `${results?.totalElements ?? items.length} ${(results?.totalElements ?? items.length) === 1 ? 'request' : 'requests'}`}
+            ? t('page.accessRequests.countNone')
+            : t('page.accessRequests.count', { count: results?.totalElements ?? items.length })}
         </p>
       )}
 
@@ -160,16 +161,16 @@ export function AccessRequestsView({ state }: AccessRequestsViewProps) {
       ) : items.length === 0 ? (
         <EmptyState
           icon="lock"
-          title={tab === 'received' ? 'No access requests received' : 'No access requests sent'}
+          title={tab === 'received' ? t('page.accessRequests.emptyReceivedTitle') : t('page.accessRequests.emptySentTitle')}
           description={
             tab === 'received'
-              ? 'When someone requests access to your photos or contact details, it will appear here.'
-              : 'Request photo or contact access from a profile to start building trust.'
+              ? t('page.accessRequests.emptyReceivedDesc')
+              : t('page.accessRequests.emptySentDesc')
           }
           action={
             tab === 'sent' ? (
               <Link href="/search" className={buttonVariants()}>
-                Browse profiles
+                {t('page.accessRequests.browseProfiles')}
               </Link>
             ) : undefined
           }
@@ -238,6 +239,7 @@ function AccessRow({
       ? { profileId: request.requesterProfileId, firstName: request.requesterFirstName, lastName: request.requesterLastName, photo: request.requesterPrimaryPhotoUrl, focalX: request.requesterPhotoFocalX, focalY: request.requesterPhotoFocalY }
       : { profileId: request.ownerProfileId, firstName: request.ownerFirstName, lastName: request.ownerLastName, photo: request.ownerPrimaryPhotoUrl, focalX: request.ownerPhotoFocalX, focalY: request.ownerPhotoFocalY }
 
+  const { t } = useTranslation()
   const fullName = [party.firstName, party.lastName].filter(Boolean).join(' ')
   const initials = `${party.firstName?.[0] ?? ''}${party.lastName?.[0] ?? ''}`
 
@@ -252,7 +254,7 @@ function AccessRow({
         <Link
           href={`/profile/${party.profileId}`}
           className="shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-          aria-label={`View ${fullName}'s profile`}
+          aria-label={t('page.accessRequests.viewProfileAria', { name: fullName })}
         >
           {party.photo ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -279,11 +281,11 @@ function AccessRow({
           <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1 rounded-full bg-secondary/70 px-2 py-0.5 font-medium text-foreground/80">
               <Icon name={request.type === 'PHOTO' ? 'eye' : 'phone'} size={12} />
-              {accessTypeLabel(request.type)}
+              {request.type === 'PHOTO' ? t('page.accessRequests.photoAccess') : t('page.accessRequests.contactAccess')}
             </span>
             <span className="inline-flex items-center gap-1">
               <Icon name="clock" size={12} />
-              {timeAgo(request.createdAt)}
+              {timeAgo(request.createdAt, t)}
             </span>
           </div>
         </div>
@@ -303,7 +305,7 @@ function AccessRow({
             className="min-h-11 w-full sm:w-auto"
           >
             <Icon name="x" size={16} />
-            Decline
+            {t('page.accessRequests.decline')}
           </Button>
           <Button
             onClick={() => onAction(request, 'APPROVED')}
@@ -312,7 +314,7 @@ function AccessRow({
             className="min-h-11 w-full sm:w-auto"
           >
             <Icon name="check" size={16} />
-            Approve
+            {t('page.accessRequests.approve')}
           </Button>
         </div>
       )}
