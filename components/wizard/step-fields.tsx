@@ -243,40 +243,40 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
         <div className="flex flex-col gap-5">
           <FieldGrid>
             <Select
-              label="Religion"
+              label={t('wizard.fields.religion')}
               value={form.religion}
               onChange={(e) =>
                 onChange({ religion: e.target.value, sect: '', caste: '', gothram: '' })
               }
             >
-              <option value="">Select religion</option>
+              <option value="">{t('common.select')}</option>
               {optionList(religionOptions)}
             </Select>
 
             {showSect && sectOptions && (
               <Select
-                label="Sect"
+                label={t('wizard.fields.sect')}
                 value={form.sect}
                 onChange={(e) => onChange({ sect: e.target.value })}
               >
-                <option value="">Select sect</option>
+                <option value="">{t('common.select')}</option>
                 {optionList(sectOptions)}
               </Select>
             )}
 
             {showCaste && (
               <SearchableSelect
-                label="Caste / community"
+                label={t('wizard.fields.caste')}
                 value={form.caste}
                 onChange={(caste) => onChange({ caste })}
                 options={casteOptions}
-                placeholder="Search caste / community"
+                placeholder={t('common.search')}
               />
             )}
 
             {showCaste && (
               <Input
-                label="Sub caste"
+                label={t('wizard.fields.subCaste')}
                 value={form.subCaste}
                 onChange={(e) => onChange({ subCaste: e.target.value })}
               />
@@ -284,20 +284,20 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
 
             {showGothram && (
               <SearchableSelect
-                label="Gothram"
+                label={t('wizard.fields.gothram')}
                 value={form.gothram}
                 onChange={(gothram) => onChange({ gothram })}
                 options={GOTHRAM_OPTIONS}
-                placeholder="Search gothram"
+                placeholder={t('common.search')}
               />
             )}
 
             <Select
-              label="Manglik / Dhosam"
+              label={t('wizard.fields.manglik')}
               value={form.manglik}
               onChange={(e) => onChange({ manglik: e.target.value })}
             >
-              <option value="">Select</option>
+              <option value="">{t('common.select')}</option>
               {optionList(manglikOptions)}
             </Select>
           </FieldGrid>
@@ -305,8 +305,8 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
           <div className="flex flex-col gap-2.5">
             <CheckboxRow
               id="open-other-religion"
-              label="Open to other religion"
-              hint="Show me matches from other religions too."
+              label={t('wizard.fields.openToOtherReligion')}
+              hint={t('wizard.hints.openToOtherReligion')}
               checked={form.openToOtherReligion === 'true'}
               onChange={(checked) =>
                 onChange({ openToOtherReligion: checked ? 'true' : 'false' })
@@ -314,8 +314,8 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
             />
             <CheckboxRow
               id="open-other-caste"
-              label="Open to other caste"
-              hint="Show me matches from other castes / communities too."
+              label={t('wizard.fields.openToOtherCaste')}
+              hint={t('wizard.hints.openToOtherCaste')}
               checked={form.openToOtherCaste === 'true'}
               onChange={(checked) =>
                 onChange({ openToOtherCaste: checked ? 'true' : 'false' })
@@ -330,11 +330,11 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
       return (
         <FieldGrid>
           <Select
-            label="Highest education"
+            label={t('wizard.fields.education')}
             value={form.education}
             onChange={(e) => onChange({ education: e.target.value })}
           >
-            <option value="">Select education</option>
+            <option value="">{t('common.select')}</option>
             {educationOptions.map((o) => (
               <option key={o.value} value={o.value}>
                 {o.label}
@@ -342,27 +342,27 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
             ))}
           </Select>
           <SearchableSelect
-            label="Education detail (course)"
+            label={t('wizard.fields.educationDetail')}
             options={COURSE_OPTIONS}
             value={form.educationDetail}
             onChange={(educationDetail) => onChange({ educationDetail })}
-            placeholder="Search your course…"
+            placeholder={t('common.search')}
           />
           <Input
-            label="Profession"
+            label={t('wizard.fields.profession')}
             value={form.profession}
             onChange={(e) => onChange({ profession: e.target.value })}
           />
           <Select
-            label="Employed in"
+            label={t('wizard.fields.employedIn')}
             value={form.employedIn}
             onChange={(e) => onChange({ employedIn: e.target.value })}
           >
-            <option value="">Select</option>
+            <option value="">{t('common.select')}</option>
             {optionList(employedInOptions)}
           </Select>
           <Input
-            label="Annual income (LPA)"
+            label={t('wizard.fields.annualIncome')}
             type="number"
             inputMode="numeric"
             min={0}
@@ -370,13 +370,13 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
             onChange={(e) => onChange({ annualIncome: e.target.value })}
           />
           <Input
-            label="Company name"
+            label={t('wizard.fields.companyName')}
             value={form.companyName}
             onChange={(e) => onChange({ companyName: e.target.value })}
             autoComplete="organization"
           />
           <Input
-            label="Work location"
+            label={t('wizard.fields.workLocation')}
             value={form.workLocation}
             onChange={(e) => onChange({ workLocation: e.target.value })}
           />
@@ -387,32 +387,32 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
       return (
         <div className="flex flex-col gap-5">
           <div className="flex flex-col gap-3">
-            <GroupLabel>Current location</GroupLabel>
+            <GroupLabel>{t('wizard.groups.currentLocation')}</GroupLabel>
             <FieldGrid>
               <SearchableSelect
-                label="Current country"
+                label={t('wizard.fields.currentCountry')}
                 value={form.currentCountry}
                 onChange={(currentCountry) => onChange({ currentCountry })}
                 options={COUNTRIES}
-                placeholder="Search country"
+                placeholder={t('common.search')}
               />
               {form.currentCountry === 'India' ? (
                 <SearchableSelect
-                  label="Current state"
+                  label={t('wizard.fields.currentState')}
                   value={form.currentState}
                   onChange={(currentState) => onChange({ currentState })}
                   options={INDIAN_STATES}
-                  placeholder="Search state"
+                  placeholder={t('common.search')}
                 />
               ) : (
                 <Input
-                  label="Current state"
+                  label={t('wizard.fields.currentState')}
                   value={form.currentState}
                   onChange={(e) => onChange({ currentState: e.target.value })}
                 />
               )}
               <Input
-                label="Current city"
+                label={t('wizard.fields.currentCity')}
                 value={form.currentCity}
                 error={errors.currentCity}
                 onChange={(e) => onChange({ currentCity: e.target.value })}
@@ -423,8 +423,8 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
 
           <CheckboxRow
             id="native-same-as-current"
-            label="Native place same as current"
-            hint="Copies your current location into the native-place fields."
+            label={t('wizard.fields.nativeSameAsCurrent')}
+            hint={t('wizard.hints.nativeSameAsCurrent')}
             checked={form.currentSameAsNative}
             onChange={(checked) =>
               onChange(
@@ -441,38 +441,38 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
           />
 
           <div className="flex flex-col gap-3">
-            <GroupLabel>Native place</GroupLabel>
+            <GroupLabel>{t('wizard.groups.nativeLocation')}</GroupLabel>
             <FieldGrid>
               {form.currentSameAsNative ? (
-                <Input label="Native country" value={form.nativeCountry} disabled />
+                <Input label={t('wizard.fields.nativeCountry')} value={form.nativeCountry} disabled />
               ) : (
                 <SearchableSelect
-                  label="Native country"
+                  label={t('wizard.fields.nativeCountry')}
                   value={form.nativeCountry}
                   onChange={(nativeCountry) => onChange({ nativeCountry })}
                   options={COUNTRIES}
-                  placeholder="Search country"
+                  placeholder={t('common.search')}
                 />
               )}
               {form.currentSameAsNative ? (
-                <Input label="Native state" value={form.nativeState} disabled />
+                <Input label={t('wizard.fields.nativeState')} value={form.nativeState} disabled />
               ) : form.nativeCountry === 'India' ? (
                 <SearchableSelect
-                  label="Native state"
+                  label={t('wizard.fields.nativeState')}
                   value={form.nativeState}
                   onChange={(nativeState) => onChange({ nativeState })}
                   options={INDIAN_STATES}
-                  placeholder="Search state"
+                  placeholder={t('common.search')}
                 />
               ) : (
                 <Input
-                  label="Native state"
+                  label={t('wizard.fields.nativeState')}
                   value={form.nativeState}
                   onChange={(e) => onChange({ nativeState: e.target.value })}
                 />
               )}
               <Input
-                label="Native city"
+                label={t('wizard.fields.nativeCity')}
                 value={form.nativeCity}
                 disabled={form.currentSameAsNative}
                 onChange={(e) => onChange({ nativeCity: e.target.value })}
@@ -481,23 +481,23 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
           </div>
 
           <div className="flex flex-col gap-3">
-            <GroupLabel>Citizenship & residency</GroupLabel>
+            <GroupLabel>{t('wizard.groups.citizenship')}</GroupLabel>
             <FieldGrid>
               <SearchableSelect
-                label="Citizenship country"
+                label={t('wizard.fields.citizenshipCountry')}
                 value={form.citizenshipCountry}
                 onChange={(citizenshipCountry) => onChange({ citizenshipCountry })}
                 options={COUNTRIES}
-                placeholder="Search country"
+                placeholder={t('common.search')}
               />
               <Select
-                label="Residency status"
+                label={t('wizard.fields.residencyStatus')}
                 value={form.residencyStatus}
                 onChange={(e) =>
                   onChange({ residencyStatus: e.target.value })
                 }
               >
-                <option value="">Select</option>
+                <option value="">{t('common.select')}</option>
                 {optionList(residencyStatusOptions)}
               </Select>
             </FieldGrid>
@@ -509,11 +509,11 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
       return (
         <FieldGrid>
           <Select
-            label="Height"
+            label={t('wizard.fields.height')}
             value={form.heightCm}
             onChange={(e) => onChange({ heightCm: e.target.value })}
           >
-            <option value="">Select height</option>
+            <option value="">{t('common.select')}</option>
             {heightOptions.map((o) => (
               <option key={o.value} value={o.value}>
                 {o.label}
@@ -521,11 +521,11 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
             ))}
           </Select>
           <Select
-            label="Weight (kg)"
+            label={t('wizard.fields.weight')}
             value={form.weightKg}
             onChange={(e) => onChange({ weightKg: e.target.value })}
           >
-            <option value="">Select weight</option>
+            <option value="">{t('common.select')}</option>
             {weightOptions.map((o) => (
               <option key={o.value} value={o.value}>
                 {o.label}
@@ -533,35 +533,35 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
             ))}
           </Select>
           <Select
-            label="Blood group"
+            label={t('wizard.fields.bloodGroup')}
             value={form.bloodGroup}
             onChange={(e) => onChange({ bloodGroup: e.target.value })}
           >
-            <option value="">Select</option>
+            <option value="">{t('common.select')}</option>
             {optionList(bloodGroupOptions)}
           </Select>
           <Select
-            label="Complexion"
+            label={t('wizard.fields.complexion')}
             value={form.complexion}
             onChange={(e) => onChange({ complexion: e.target.value })}
           >
-            <option value="">Select</option>
+            <option value="">{t('common.select')}</option>
             {optionList(complexionOptions)}
           </Select>
           <Select
-            label="Physical status"
+            label={t('wizard.fields.physicalStatus')}
             value={form.physicalStatus}
             onChange={(e) => onChange({ physicalStatus: e.target.value })}
           >
-            <option value="">Select</option>
+            <option value="">{t('common.select')}</option>
             {optionList(physicalStatusOptions)}
           </Select>
           <Select
-            label="Body type"
+            label={t('wizard.fields.bodyType')}
             value={form.bodyType}
             onChange={(e) => onChange({ bodyType: e.target.value })}
           >
-            <option value="">Select</option>
+            <option value="">{t('common.select')}</option>
             {optionList(bodyTypeOptions)}
           </Select>
         </FieldGrid>
@@ -571,32 +571,32 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
       return (
         <div className="flex flex-col gap-5">
           <div className="flex flex-col gap-3">
-            <GroupLabel>Family</GroupLabel>
+            <GroupLabel>{t('wizard.groups.family')}</GroupLabel>
             <FieldGrid>
               <Select
-                label="Family type"
+                label={t('wizard.fields.familyType')}
                 value={form.familyType}
                 onChange={(e) => onChange({ familyType: e.target.value })}
               >
-                <option value="">Select</option>
+                <option value="">{t('common.select')}</option>
                 {optionList(familyTypeOptions)}
               </Select>
               <Select
-                label="Family values"
+                label={t('wizard.fields.familyValues')}
                 value={form.familyValues}
                 onChange={(e) => onChange({ familyValues: e.target.value })}
               >
-                <option value="">Select</option>
+                <option value="">{t('common.select')}</option>
                 {optionList(familyValuesOptions)}
               </Select>
             </FieldGrid>
           </div>
 
           <div className="flex flex-col gap-3">
-            <GroupLabel>Parents</GroupLabel>
+            <GroupLabel>{t('wizard.groups.parents')}</GroupLabel>
             <FieldGrid>
               <Select
-                label="Father's status"
+                label={t('wizard.fields.fatherStatus')}
                 value={form.fatherStatus}
                 onChange={(e) => {
                   const fatherStatus = e.target.value
@@ -608,14 +608,14 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
                   )
                 }}
               >
-                <option value="">Select</option>
+                <option value="">{t('common.select')}</option>
                 {optionList(parentStatusOptions)}
               </Select>
               {/* Profession is meaningless for a homemaker — hide it when the
                   status is HOMEMAKER (also PASSED_AWAY has no current job). */}
               {form.fatherStatus !== 'HOMEMAKER' && form.fatherStatus !== 'PASSED_AWAY' && (
                 <Input
-                  label="Father's profession"
+                  label={t('wizard.fields.fatherProfession')}
                   value={form.fatherProfession}
                   onChange={(e) =>
                     onChange({ fatherProfession: e.target.value })
@@ -623,7 +623,7 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
                 />
               )}
               <Select
-                label="Mother's status"
+                label={t('wizard.fields.motherStatus')}
                 value={form.motherStatus}
                 onChange={(e) => {
                   const motherStatus = e.target.value
@@ -634,12 +634,12 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
                   )
                 }}
               >
-                <option value="">Select</option>
+                <option value="">{t('common.select')}</option>
                 {optionList(parentStatusOptions)}
               </Select>
               {form.motherStatus !== 'HOMEMAKER' && form.motherStatus !== 'PASSED_AWAY' && (
                 <Input
-                  label="Mother's profession"
+                  label={t('wizard.fields.motherProfession')}
                   value={form.motherProfession}
                   onChange={(e) =>
                     onChange({ motherProfession: e.target.value })
@@ -650,50 +650,50 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
           </div>
 
           <div className="flex flex-col gap-3">
-            <GroupLabel>Siblings</GroupLabel>
+            <GroupLabel>{t('wizard.groups.siblings')}</GroupLabel>
             <FieldGrid>
               <Select
-                label="Number of brothers"
+                label={t('wizard.fields.brothers')}
                 value={form.brothers}
                 onChange={(e) => onChange({ brothers: e.target.value })}
               >
-                <option value="">Select</option>
+                <option value="">{t('common.select')}</option>
                 {optionList(siblingCountOptions)}
               </Select>
               <Select
-                label="Brothers married"
+                label={t('wizard.fields.brothersMarried')}
                 value={form.brothersMarried}
                 onChange={(e) =>
                   onChange({ brothersMarried: e.target.value })
                 }
               >
-                <option value="">Select</option>
+                <option value="">{t('common.select')}</option>
                 {optionList(siblingCountOptions)}
               </Select>
               <Select
-                label="Number of sisters"
+                label={t('wizard.fields.sisters')}
                 value={form.sisters}
                 onChange={(e) => onChange({ sisters: e.target.value })}
               >
-                <option value="">Select</option>
+                <option value="">{t('common.select')}</option>
                 {optionList(siblingCountOptions)}
               </Select>
               <Select
-                label="Sisters married"
+                label={t('wizard.fields.sistersMarried')}
                 value={form.sistersMarried}
                 onChange={(e) =>
                   onChange({ sistersMarried: e.target.value })
                 }
               >
-                <option value="">Select</option>
+                <option value="">{t('common.select')}</option>
                 {optionList(siblingCountOptions)}
               </Select>
               <Select
-                label="Birth order"
+                label={t('wizard.fields.birthOrder')}
                 value={form.birthOrder}
                 onChange={(e) => onChange({ birthOrder: e.target.value })}
               >
-                <option value="">Select</option>
+                <option value="">{t('common.select')}</option>
                 {optionList(birthOrderOptions)}
               </Select>
             </FieldGrid>
@@ -705,7 +705,7 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
                 htmlFor="asset-details"
                 className="text-sm font-medium text-foreground"
               >
-                Asset details
+                {t('wizard.fields.assetDetails')}
               </label>
               <textarea
                 id="asset-details"
@@ -733,18 +733,18 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
           <TamilCalendarPrefill form={form} onChange={onChange} />
           <FieldGrid>
             <Input
-              label="Birth time"
+              label={t('wizard.fields.birthTime')}
               type="time"
               value={form.birthTime}
               onChange={(e) => onChange({ birthTime: e.target.value })}
             />
             <Input
-              label="Birth city"
+              label={t('wizard.fields.birthCity')}
               value={form.birthCity}
               onChange={(e) => onChange({ birthCity: e.target.value })}
             />
             <Select
-              label="Nakshatra (birth star)"
+              label={t('wizard.fields.nakshatra')}
               value={form.nakshatra}
               onChange={(e) => {
                 const nakshatra = e.target.value
@@ -755,11 +755,11 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
                 onChange(derived ? { nakshatra, raasi: derived } : { nakshatra })
               }}
             >
-              <option value="">Select nakshatra</option>
+              <option value="">{t('common.select')}</option>
               {optionList(nakshatraOptions)}
             </Select>
             <Select
-              label="Padam (Pada)"
+              label={t('wizard.fields.padam')}
               value={form.padam}
               onChange={(e) => {
                 const padam = e.target.value
@@ -769,7 +769,7 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
                 onChange(derived ? { padam, raasi: derived } : { padam })
               }}
             >
-              <option value="">Select padam</option>
+              <option value="">{t('common.select')}</option>
               {padamOptions.map((o) => (
                 <option key={o.value} value={o.value}>
                   {o.label}
@@ -777,56 +777,56 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
               ))}
             </Select>
             <Select
-              label="Raasi (moon sign)"
+              label={t('wizard.fields.raasi')}
               value={form.raasi}
               onChange={(e) => onChange({ raasi: e.target.value })}
             >
-              <option value="">Select raasi (auto-filled from nakshatra + padam)</option>
+              <option value="">{t('common.select')}</option>
               {optionList(raasiOptions)}
             </Select>
             <Select
-              label="Dhosam"
+              label={t('wizard.fields.dhosam')}
               value={form.dhosam}
               onChange={(e) => onChange({ dhosam: e.target.value })}
             >
-              <option value="">Select</option>
+              <option value="">{t('common.select')}</option>
               {optionList(dhosamOptions)}
             </Select>
             <Input
-              label="Lagnam (ascendant)"
+              label={t('wizard.fields.lagnam')}
               value={form.lagnam}
               onChange={(e) => onChange({ lagnam: e.target.value })}
             />
             <Select
-              label="Tamil year (தமிழ் வருடம்)"
+              label={t('wizard.fields.tamilYear')}
               value={form.tamilYear}
               onChange={(e) => onChange({ tamilYear: e.target.value })}
             >
-              <option value="">Select (auto-filled from date of birth)</option>
+              <option value="">{t('common.select')}</option>
               {optionList(tamilYearOptions)}
             </Select>
             <Select
-              label="Tamil month (மாதம்)"
+              label={t('wizard.fields.tamilMonth')}
               value={form.tamilMonth}
               onChange={(e) => onChange({ tamilMonth: e.target.value })}
             >
-              <option value="">Select (auto-filled from date of birth)</option>
+              <option value="">{t('common.select')}</option>
               {optionList(tamilMonthOptions)}
             </Select>
             <Select
-              label="Tamil date (தேதி)"
+              label={t('wizard.fields.tamilDate')}
               value={form.tamilDate}
               onChange={(e) => onChange({ tamilDate: e.target.value })}
             >
-              <option value="">Select (auto-filled from date of birth)</option>
+              <option value="">{t('common.select')}</option>
               {optionList(tamilDateOptions)}
             </Select>
             <Select
-              label="Kilamai (கிழமை)"
+              label={t('wizard.fields.kilamai')}
               value={form.kilamai}
               onChange={(e) => onChange({ kilamai: e.target.value })}
             >
-              <option value="">Select (auto-filled from date of birth)</option>
+              <option value="">{t('common.select')}</option>
               {optionList(kilamaiOptions)}
             </Select>
           </FieldGrid>
@@ -834,8 +834,8 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
           <div className="flex flex-col gap-2.5">
             <CheckboxRow
               id="horoscope-available"
-              label="Horoscope available"
-              hint="I have my horoscope / jathagam ready to share."
+              label={t('wizard.fields.horoscopeAvailable')}
+              hint={t('wizard.hints.horoscopeAvailable')}
               checked={form.horoscopeAvailable}
               onChange={(horoscopeAvailable) =>
                 onChange({ horoscopeAvailable })
@@ -843,8 +843,8 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
             />
             <CheckboxRow
               id="willing-share-horoscope"
-              label="Willing to share horoscope"
-              hint="Allow connected members to view your horoscope."
+              label={t('wizard.fields.willingToShareHoroscope')}
+              hint={t('wizard.hints.willingToShareHoroscope')}
               checked={form.willingToShareHoroscope}
               onChange={(willingToShareHoroscope) =>
                 onChange({ willingToShareHoroscope })
