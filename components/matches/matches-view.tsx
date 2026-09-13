@@ -34,11 +34,11 @@ type MatchFilter =
 
 interface FilterDef {
   key: MatchFilter
-  label: string
+  labelKey: string
   /** Fetches a page and maps each row to the shared ProfileCard shape. */
   fetchPage: (page: number, size: number) => Promise<{ cards: ProfileCardProfile[]; totalPages: number; totalElements: number }>
-  emptyTitle: string
-  emptyDesc: string
+  emptyTitleKey: string
+  emptyDescKey: string
 }
 
 const PAGE_SIZE = 12
@@ -59,67 +59,67 @@ function mapPage<T>(
 const FILTERS: FilterDef[] = [
   {
     key: 'newest',
-    label: 'Newly joined',
+    labelKey: 'page.matches.filters.newest',
     fetchPage: (page, size) =>
       searchApi.getMatches({ page, size, sort: 'newest' }).then((r) => mapPage(r, toProfileCard)),
-    emptyTitle: 'No new matches yet',
-    emptyDesc: 'Newly joined profiles that fit your preferences will show up here first.',
+    emptyTitleKey: 'page.matches.empty.newestTitle',
+    emptyDescKey: 'page.matches.empty.newestDesc',
   },
   {
     key: 'all',
-    label: 'All matches',
+    labelKey: 'page.matches.filters.all',
     fetchPage: (page, size) =>
       searchApi.getMatches({ page, size }).then((r) => mapPage(r, toProfileCard)),
-    emptyTitle: 'No matches yet',
-    emptyDesc: "We couldn't find profiles that fit your current preferences. Widening them usually surfaces more matches.",
+    emptyTitleKey: 'page.matches.empty.allTitle',
+    emptyDescKey: 'page.matches.empty.allDesc',
   },
   {
     key: 'shortlistedYou',
-    label: 'Shortlisted you',
+    labelKey: 'page.matches.filters.shortlistedYou',
     fetchPage: (page, size) =>
       shortlistApi.getWhoShortlistedMe({ page, size }).then((r) => mapPage(r, toProfileCard)),
-    emptyTitle: 'No one has shortlisted you yet',
-    emptyDesc: 'When a member shortlists your profile, they will appear here.',
+    emptyTitleKey: 'page.matches.empty.shortlistedYouTitle',
+    emptyDescKey: 'page.matches.empty.shortlistedYouDesc',
   },
   {
     key: 'youShortlisted',
-    label: 'You shortlisted',
+    labelKey: 'page.matches.filters.youShortlisted',
     fetchPage: (page, size) =>
       shortlistApi.getShortlist({ page, size }).then((r) => mapPage(r, toProfileCard)),
-    emptyTitle: "You haven't shortlisted anyone",
-    emptyDesc: 'Shortlist profiles you like and they will collect here for easy review.',
+    emptyTitleKey: 'page.matches.empty.youShortlistedTitle',
+    emptyDescKey: 'page.matches.empty.youShortlistedDesc',
   },
   {
     key: 'viewedYou',
-    label: 'Viewed you',
+    labelKey: 'page.matches.filters.viewedYou',
     fetchPage: (page, size) =>
       profileViewsApi.getProfileViews({ page, size }).then((r) => mapPage(r, toCardFromView)),
-    emptyTitle: 'No profile views yet',
-    emptyDesc: 'Members who view your profile will appear here.',
+    emptyTitleKey: 'page.matches.empty.viewedYouTitle',
+    emptyDescKey: 'page.matches.empty.viewedYouDesc',
   },
   {
     key: 'youViewed',
-    label: 'You viewed',
+    labelKey: 'page.matches.filters.youViewed',
     fetchPage: (page, size) =>
       profileViewsApi.getProfilesIViewed({ page, size }).then((r) => mapPage(r, toCardFromView)),
-    emptyTitle: "You haven't viewed anyone yet",
-    emptyDesc: 'Profiles you open will be listed here so you can revisit them.',
+    emptyTitleKey: 'page.matches.empty.youViewedTitle',
+    emptyDescKey: 'page.matches.empty.youViewedDesc',
   },
   {
     key: 'youSentInterest',
-    label: 'You sent interest',
+    labelKey: 'page.matches.filters.youSentInterest',
     fetchPage: (page, size) =>
       interestsApi.getSentInterests({ page, size }).then((r) => mapPage(r, toCardFromInterest)),
-    emptyTitle: "You haven't sent any interests",
-    emptyDesc: 'Interests you send will be listed here with their status.',
+    emptyTitleKey: 'page.matches.empty.youSentInterestTitle',
+    emptyDescKey: 'page.matches.empty.youSentInterestDesc',
   },
   {
     key: 'otherSentInterest',
-    label: 'Received interest',
+    labelKey: 'page.matches.filters.otherSentInterest',
     fetchPage: (page, size) =>
       interestsApi.getReceivedInterests({ page, size }).then((r) => mapPage(r, toCardFromInterest)),
-    emptyTitle: 'No interests received yet',
-    emptyDesc: 'When someone expresses interest in your profile, they will appear here.',
+    emptyTitleKey: 'page.matches.empty.otherSentInterestTitle',
+    emptyDescKey: 'page.matches.empty.otherSentInterestDesc',
   },
 ]
 
@@ -190,12 +190,12 @@ export function MatchesView({ preview }: MatchesViewProps) {
   const isLoading = preview === 'loading' || loading
 
   const countLine = isLoading
-    ? 'Loading…'
+    ? t('page.matches.loading')
     : errorCode
-      ? 'Matches paused'
+      ? t('page.matches.paused')
       : cards.length === 0
-        ? activeDef.emptyTitle
-        : `${totalElements} ${totalElements === 1 ? 'profile' : 'profiles'}`
+        ? t(activeDef.emptyTitleKey as never)
+        : t('page.matches.countProfiles', { count: totalElements })
 
   return (
     <main className="mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-6 lg:px-8">
@@ -215,7 +215,7 @@ export function MatchesView({ preview }: MatchesViewProps) {
       {/* Filter selector — scrollable chip row (mirrors the Search filter styling). */}
       <div
         role="tablist"
-        aria-label="Match filter"
+        aria-label={t('page.matches.filterAria')}
         className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0"
       >
         {FILTERS.map((f) => {
@@ -234,7 +234,7 @@ export function MatchesView({ preview }: MatchesViewProps) {
                   : 'border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground',
               )}
             >
-              {f.label}
+              {t(f.labelKey as never)}
             </button>
           )
         })}
@@ -247,7 +247,7 @@ export function MatchesView({ preview }: MatchesViewProps) {
         {filter === 'newest' && !isLoading && !errorCode && cards.length > 0 && (
           <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-muted-foreground">
             <Icon name="sparkles" size={13} className="text-gold" />
-            Newest first
+            {t('page.matches.newestFirst')}
           </span>
         )}
       </div>
@@ -264,13 +264,13 @@ export function MatchesView({ preview }: MatchesViewProps) {
         ) : cards.length === 0 ? (
           <EmptyState
             icon="heart"
-            title={activeDef.emptyTitle}
-            description={activeDef.emptyDesc}
+            title={t(activeDef.emptyTitleKey as never)}
+            description={t(activeDef.emptyDescKey as never)}
             action={
               filter === 'all' || filter === 'newest' ? (
                 <Link href="/partner-preferences" className={buttonVariants()}>
                   <Icon name="settings" size={18} />
-                  Update preferences
+                  {t('page.matches.updatePreferences')}
                 </Link>
               ) : undefined
             }
@@ -306,16 +306,17 @@ export function MatchesView({ preview }: MatchesViewProps) {
 }
 
 function MatchesError({ code }: { code: MatchErrorCode }) {
+  const { t } = useTranslation()
   if (code === 'PREFERENCE_NOT_FOUND') {
     return (
       <EmptyState
         icon="settings"
-        title="Set your partner preferences"
-        description="Tell us what you're looking for — age, community, location and more — and we'll build your personalized matches."
+        title={t('page.matches.errPrefTitle')}
+        description={t('page.matches.errPrefDesc')}
         action={
           <Link href="/partner-preferences" className={buttonVariants()}>
             <Icon name="settings" size={18} />
-            Set preferences
+            {t('page.matches.errPrefCta')}
           </Link>
         }
       />
@@ -325,12 +326,12 @@ function MatchesError({ code }: { code: MatchErrorCode }) {
     return (
       <EmptyState
         icon="user"
-        title="Complete your profile first"
-        description="We need a few more details about you before we can find compatible matches. It only takes a couple of minutes."
+        title={t('page.matches.errProfileTitle')}
+        description={t('page.matches.errProfileDesc')}
         action={
           <Link href="/profile/wizard" className={buttonVariants()}>
             <Icon name="arrow-right" size={18} />
-            Complete profile
+            {t('page.matches.errProfileCta')}
           </Link>
         }
       />
@@ -340,9 +341,9 @@ function MatchesError({ code }: { code: MatchErrorCode }) {
     <div role="alert" className="flex items-start gap-3 rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-destructive">
       <Icon name="alert-circle" size={20} className="mt-0.5 shrink-0" />
       <div className="min-w-0">
-        <p className="font-semibold">We couldn&apos;t load these profiles</p>
+        <p className="font-semibold">{t('page.matches.errGenericTitle')}</p>
         <p className="mt-0.5 text-sm text-destructive/90">
-          Something went wrong on our end. Please refresh the page to try again.
+          {t('page.matches.errGenericDesc')}
         </p>
       </div>
     </div>

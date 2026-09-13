@@ -77,13 +77,14 @@ export function ShortlistView({ preview }: ShortlistViewProps) {
     }
   }
 
+  const savedCount = results?.totalElements ?? items.length
   const countLine = isLoading
-    ? 'Loading your shortlist…'
+    ? t('page.shortlist.loading')
     : error
-      ? 'Shortlist unavailable'
+      ? t('page.shortlist.unavailable')
       : items.length === 0
-        ? 'No saved profiles'
-        : `${results?.totalElements ?? items.length} saved ${(results?.totalElements ?? items.length) === 1 ? 'profile' : 'profiles'}`
+        ? t('page.shortlist.countNone')
+        : t('page.shortlist.countSaved', { count: savedCount })
 
   return (
     <main className="mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-6 lg:px-8">
@@ -117,21 +118,21 @@ export function ShortlistView({ preview }: ShortlistViewProps) {
           <div role="alert" className="flex items-start gap-3 rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-destructive">
             <Icon name="alert-circle" size={20} className="mt-0.5 shrink-0" />
             <div className="min-w-0">
-              <p className="font-semibold">We couldn&apos;t load your shortlist</p>
+              <p className="font-semibold">{t('page.shortlist.errorTitle')}</p>
               <p className="mt-0.5 text-sm text-destructive/90">
-                Something went wrong on our end. Please refresh the page to try again.
+                {t('page.shortlist.errorDesc')}
               </p>
             </div>
           </div>
         ) : items.length === 0 ? (
           <EmptyState
             icon="star"
-            title="Your shortlist is empty"
-            description="Tap the star on any profile to save it here for later. Your bookmarked profiles will stay in one place."
+            title={t('page.shortlist.emptyTitle')}
+            description={t('page.shortlist.emptyDesc')}
             action={
               <Link href="/search" className={buttonVariants()}>
                 <Icon name="search" size={18} />
-                Browse profiles
+                {t('page.shortlist.browseProfiles')}
               </Link>
             }
           />
