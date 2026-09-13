@@ -90,9 +90,9 @@ export function NotificationsView({
       await notificationsApi.markAllRead()
       setResults((prev) => (prev ? { ...prev, content: prev.content.map((x) => ({ ...x, isRead: true })) } : prev))
       notificationStore.getState().setUnreadCount(0)
-      pushToast('All notifications marked as read.', 'success')
+      pushToast(t('page.notifications.markAllReadToast'), 'success')
     } catch {
-      pushToast('Could not mark all as read. Please try again.', 'error')
+      pushToast(t('page.notifications.markAllReadError'), 'error')
     }
   }
 
@@ -101,10 +101,10 @@ export function NotificationsView({
       <div className="mb-6 flex items-end justify-between gap-4">
         <div>
           <h1 className="font-serif text-2xl text-foreground sm:text-3xl">{t('page.notifications.title')}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Interests, messages, and account updates.</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t('page.notifications.headerSubtitle')}</p>
         </div>
         <Button variant="ghost" size="sm" onClick={() => void markAllRead()} disabled={!hasUnread}>
-          Mark all read
+          {t('page.notifications.markAllRead')}
         </Button>
       </div>
 
@@ -122,18 +122,18 @@ export function NotificationsView({
         </div>
       ) : error ? (
         <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-6 text-center">
-          <p className="text-sm text-destructive">We could not load your notifications. Please try again.</p>
+          <p className="text-sm text-destructive">{t('page.notifications.errorLoad')}</p>
           <div className="mt-4 flex justify-center">
             <Button variant="secondary" onClick={() => void load()}>
-              Retry
+              {t('page.notifications.retry')}
             </Button>
           </div>
         </div>
       ) : items.length === 0 ? (
         <EmptyState
           icon="bell"
-          title="No notifications yet"
-          description="When you receive interests, messages, or account updates, they will appear here."
+          title={t('page.notifications.emptyTitle')}
+          description={t('page.notifications.emptyDesc')}
         />
       ) : (
         <>
@@ -158,7 +158,7 @@ export function NotificationsView({
                         <span className={cn('truncate text-sm', n.isRead ? 'font-medium text-foreground' : 'font-semibold text-foreground')}>
                           {n.title}
                         </span>
-                        {!n.isRead && <span className="h-2 w-2 shrink-0 rounded-full bg-primary" aria-label="Unread" />}
+                        {!n.isRead && <span className="h-2 w-2 shrink-0 rounded-full bg-primary" aria-label={t('page.notifications.unread')} />}
                       </span>
                       <span className="mt-1 line-clamp-2 block text-sm text-muted-foreground">{n.message}</span>
                       <span className="mt-1.5 block text-xs text-muted-foreground/80">{formatNotificationTime(n.createdAt)}</span>

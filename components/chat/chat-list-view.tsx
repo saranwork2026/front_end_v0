@@ -18,9 +18,11 @@ const MIN = 60_000
 const HOUR = 60 * MIN
 const DAY = 24 * HOUR
 
-function relativeTime(iso: string): string {
+type TFunc = ReturnType<typeof useTranslation>['t']
+
+function relativeTime(iso: string, t: TFunc): string {
   const diff = Date.now() - new Date(iso).getTime()
-  if (diff < MIN) return 'just now'
+  if (diff < MIN) return t('page.chat.timeJustNow')
   if (diff < HOUR) return `${Math.floor(diff / MIN)}m`
   if (diff < DAY) return `${Math.floor(diff / HOUR)}h`
   if (diff < 7 * DAY) return `${Math.floor(diff / DAY)}d`
@@ -83,19 +85,19 @@ export function ChatListView({ state }: { state?: ViewState }) {
           <ConversationSkeleton />
         ) : error ? (
           <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
-            <p className="font-medium">We could not load your conversations.</p>
+            <p className="font-medium">{t('page.chat.errorLoad')}</p>
             <Button variant="secondary" className="mt-3" onClick={() => void load()}>
-              Try again
+              {t('page.chat.tryAgain')}
             </Button>
           </div>
         ) : conversations.length === 0 ? (
           <EmptyState
             icon="chat"
-            title="No conversations yet"
-            description="When you connect with a member, your chats will appear here."
+            title={t('page.chat.emptyTitle')}
+            description={t('page.chat.emptyDesc')}
             action={
               <Link href="/search" className={buttonVariants({ variant: 'primary' })}>
-                Find matches
+                {t('page.chat.findMatches')}
               </Link>
             }
           />
@@ -112,6 +114,7 @@ export function ChatListView({ state }: { state?: ViewState }) {
 }
 
 function ConversationRow({ conversation: c }: { conversation: Conversation }) {
+  const { t } = useTranslation()
   const name = fullName(c)
   return (
     <li>
@@ -124,14 +127,14 @@ function ConversationRow({ conversation: c }: { conversation: Conversation }) {
           <div className="flex items-center gap-1.5">
             <span className="truncate text-sm font-medium text-foreground">{name}</span>
             {c.isBlocked && (
-              <Icon name="lock" className="size-3.5 shrink-0 text-muted-foreground" aria-label="Blocked" />
+              <Icon name="lock" className="size-3.5 shrink-0 text-muted-foreground" aria-label={t('page.chat.blocked')} />
             )}
             {c.lastMessageAt && (
-              <span className="ml-auto shrink-0 text-xs text-muted-foreground">{relativeTime(c.lastMessageAt)}</span>
+              <span className="ml-auto shrink-0 text-xs text-muted-foreground">{relativeTime(c.lastMessageAt, t)}</span>
             )}
           </div>
           <p className="mt-0.5 truncate text-sm text-muted-foreground">
-            {c.lastMessage ?? 'No messages yet'}
+            {c.lastMessage ?? t('page.chat.noMessages')}
           </p>
         </div>
       </Link>
