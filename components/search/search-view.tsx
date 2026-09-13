@@ -89,13 +89,13 @@ export function SearchView() {
       const res = await searchApi.searchProfiles(next, { page: searchPage, size: PAGE_SIZE })
       setResults(res.data)
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
+      const message = err instanceof Error ? err.message : t('page.search.genericError')
       setError(message)
       setResults(null)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   const patchDraft = (patch: Partial<SearchFilters>) => setDraft((d) => ({ ...d, ...patch }))
 
@@ -125,15 +125,16 @@ export function SearchView() {
   }
 
   const content = results?.content ?? []
+  const foundCount = results?.totalElements ?? content.length
   const countLine = !searched
-    ? 'Set your filters to begin'
+    ? t('page.search.countSetFilters')
     : loading
-      ? 'Searching profiles…'
+      ? t('page.search.countSearching')
       : error
-        ? 'Search paused'
+        ? t('page.search.countPaused')
         : content.length === 0
-          ? 'No profiles found'
-          : `${results?.totalElements ?? content.length} ${(results?.totalElements ?? content.length) === 1 ? 'profile' : 'profiles'} found`
+          ? t('page.search.countNone')
+          : t('page.search.countFound', { count: foundCount })
 
   return (
     <main className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6 lg:px-8">
@@ -151,14 +152,14 @@ export function SearchView() {
         <aside className="hidden lg:block">
           <div className="sticky top-20 rounded-2xl border border-border bg-card p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-serif text-lg font-bold text-foreground">Filters</h2>
+              <h2 className="font-serif text-lg font-bold text-foreground">{t('page.search.filters')}</h2>
               {activeCount > 0 && (
                 <button
                   type="button"
                   onClick={handleReset}
                   className="rounded-md px-1.5 py-0.5 text-sm font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
                 >
-                  Reset
+                  {t('page.search.reset')}
                 </button>
               )}
             </div>
@@ -168,7 +169,7 @@ export function SearchView() {
             <div className="mt-5 border-t border-border/70 pt-4">
               <Button className="w-full" loading={loading} onClick={() => void runSearch(draft, 0)}>
                 <Icon name="search" size={18} />
-                Search
+                {t('common.search')}
               </Button>
             </div>
           </div>
@@ -184,7 +185,7 @@ export function SearchView() {
                 className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-card px-4 text-sm font-semibold text-foreground shadow-sm transition-colors hover:border-primary/40 lg:hidden"
               >
                 <Icon name="filter" size={16} />
-                Filters
+                {t('page.search.filters')}
                 {activeCount > 0 && (
                   <span className="flex size-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                     {activeCount}
@@ -208,7 +209,7 @@ export function SearchView() {
                   onClick={handleReset}
                   className="shrink-0 whitespace-nowrap rounded-lg px-2 py-1 text-sm font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
                 >
-                  Clear all
+                  {t('page.search.clearAll')}
                 </button>
               </div>
             )}
@@ -222,11 +223,11 @@ export function SearchView() {
               >
                 <Icon name="alert-circle" size={20} className="mt-0.5 shrink-0" />
                 <div className="min-w-0">
-                  <p className="font-semibold">We couldn&apos;t run that search</p>
+                  <p className="font-semibold">{t('page.search.errorTitle')}</p>
                   <p className="mt-0.5 text-sm text-destructive/90">{error}</p>
                   <div className="mt-3">
                     <Button variant="secondary" size="sm" onClick={openSheet} className="lg:hidden">
-                      Adjust filters
+                      {t('page.search.adjustFilters')}
                     </Button>
                   </div>
                 </div>
@@ -234,12 +235,12 @@ export function SearchView() {
             ) : !searched ? (
               <EmptyState
                 icon="search"
-                title="Start your search"
-                description="Choose the criteria that matter — age, community, location, education, horoscope — and we'll find matching profiles."
+                title={t('page.search.emptyStartTitle')}
+                description={t('page.search.emptyStartDesc')}
                 action={
                   <Button onClick={openSheet} className="lg:hidden">
                     <Icon name="filter" size={18} />
-                    Open filters
+                    {t('page.search.openFilters')}
                   </Button>
                 }
               />
@@ -252,11 +253,11 @@ export function SearchView() {
             ) : content.length === 0 ? (
               <EmptyState
                 icon="search"
-                title="No profiles match your filters"
-                description="Try widening your age or height range, or removing a filter or two to see more matches."
+                title={t('page.search.emptyNoneTitle')}
+                description={t('page.search.emptyNoneDesc')}
                 action={
                   <Button variant="secondary" onClick={handleReset}>
-                    Clear all filters
+                    {t('page.search.clearAllFilters')}
                   </Button>
                 }
               />
@@ -293,14 +294,14 @@ export function SearchView() {
       <BottomSheet
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
-        title="Filters"
+        title={t('page.search.filters')}
         footer={
           <>
             <Button variant="secondary" className="flex-1" onClick={() => setDraft({})}>
-              Reset
+              {t('page.search.reset')}
             </Button>
             <Button className="flex-1" onClick={handleApplyFromSheet}>
-              Apply filters
+              {t('page.search.applyFilters')}
             </Button>
           </>
         }

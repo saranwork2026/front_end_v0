@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslation } from 'react-i18next'
 import type { SearchFilters } from '@matrimony/shared-core'
 
 import { Input } from '@/components/ui/input'
@@ -58,14 +59,15 @@ const toNum = (v: string) => (v === '' ? undefined : Number(v))
  * are the real shared-core SearchFilters shape.
  */
 export function FilterFields({ value, onChange }: FilterFieldsProps) {
+  const { t } = useTranslation()
   const casteList = value.religion ? getCasteOptions(value.religion) : []
 
   return (
     <div className="space-y-6">
-      <Group title="Basics">
+      <Group title={t('page.search.groupBasics')}>
         <div className="grid grid-cols-2 gap-3">
           <Input
-            label="Min age"
+            label={t('page.search.minAge')}
             type="number"
             inputMode="numeric"
             min={18}
@@ -74,7 +76,7 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
             onChange={(e) => onChange({ minAge: toNum(e.target.value) })}
           />
           <Input
-            label="Max age"
+            label={t('page.search.maxAge')}
             type="number"
             inputMode="numeric"
             min={18}
@@ -84,25 +86,25 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
           />
         </div>
         <Select
-          label="Marital status"
+          label={t('page.search.maritalStatus')}
           value={value.maritalStatus ?? ''}
           onChange={(e) =>
             onChange({ maritalStatus: (e.target.value || undefined) as SearchFilters['maritalStatus'] })
           }
         >
-          <option value="">Any</option>
+          <option value="">{t('page.search.any')}</option>
           {MARITAL_STATUSES.map((m) => (
             <option key={m.value} value={m.value}>
-              {m.label}
+              {t(`options.marital.${m.value}` as never, { defaultValue: m.label })}
             </option>
           ))}
         </Select>
         <Select
-          label="Mother tongue"
+          label={t('page.search.motherTongue')}
           value={value.motherTongue ?? ''}
           onChange={(e) => onChange({ motherTongue: e.target.value || undefined })}
         >
-          <option value="">Any</option>
+          <option value="">{t('page.search.any')}</option>
           {MOTHER_TONGUES.map((m) => (
             <option key={m.value} value={m.value}>
               {m.label}
@@ -111,13 +113,13 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
         </Select>
       </Group>
 
-      <Group title="Community">
+      <Group title={t('page.search.groupCommunity')}>
         <Select
-          label="Religion"
+          label={t('page.search.religion')}
           value={value.religion ?? ''}
           onChange={(e) => onChange({ religion: e.target.value || undefined, caste: undefined })}
         >
-          <option value="">Any</option>
+          <option value="">{t('page.search.any')}</option>
           {RELIGIONS.map((r) => (
             <option key={r.value} value={r.value}>
               {r.label}
@@ -125,12 +127,12 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
           ))}
         </Select>
         <Select
-          label="Caste / Community"
+          label={t('page.search.caste')}
           value={value.caste ?? ''}
           disabled={!value.religion}
           onChange={(e) => onChange({ caste: e.target.value || undefined })}
         >
-          <option value="">{value.religion ? 'Any' : 'Select religion first'}</option>
+          <option value="">{value.religion ? t('page.search.any') : t('page.search.selectReligionFirst')}</option>
           {casteList.map((c) => (
             <option key={c.value} value={c.value}>
               {c.label}
@@ -138,11 +140,11 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
           ))}
         </Select>
         <Select
-          label="Manglik / Dhosam"
+          label={t('page.search.manglik')}
           value={value.manglik ?? ''}
           onChange={(e) => onChange({ manglik: (e.target.value || undefined) as SearchFilters['manglik'] })}
         >
-          <option value="">Any</option>
+          <option value="">{t('page.search.any')}</option>
           {MANGLIK.map((m) => (
             <option key={m.value} value={m.value}>
               {m.label}
@@ -151,13 +153,13 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
         </Select>
       </Group>
 
-      <Group title="Location">
+      <Group title={t('page.search.groupLocation')}>
         <Select
-          label="Country"
+          label={t('page.search.country')}
           value={value.country ?? ''}
           onChange={(e) => onChange({ country: e.target.value || undefined })}
         >
-          <option value="">Any</option>
+          <option value="">{t('page.search.any')}</option>
           {COUNTRIES.map((c) => (
             <option key={c.value} value={c.value}>
               {c.label}
@@ -165,11 +167,11 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
           ))}
         </Select>
         <Select
-          label="State"
+          label={t('page.search.state')}
           value={value.state ?? ''}
           onChange={(e) => onChange({ state: e.target.value || undefined })}
         >
-          <option value="">Any</option>
+          <option value="">{t('page.search.any')}</option>
           {INDIAN_STATES.map((s) => (
             <option key={s.value} value={s.value}>
               {s.label}
@@ -177,20 +179,20 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
           ))}
         </Select>
         <Input
-          label="City"
-          placeholder="e.g. Chennai"
+          label={t('page.search.city')}
+          placeholder={t('page.search.cityPlaceholder')}
           value={value.city ?? ''}
           onChange={(e) => onChange({ city: e.target.value || undefined })}
         />
       </Group>
 
-      <Group title="Education & career">
+      <Group title={t('page.search.groupEducation')}>
         <Select
-          label="Education"
+          label={t('page.search.education')}
           value={value.education ?? ''}
           onChange={(e) => onChange({ education: e.target.value || undefined })}
         >
-          <option value="">Any</option>
+          <option value="">{t('page.search.any')}</option>
           {HIGHEST_EDUCATION_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
@@ -198,14 +200,14 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
           ))}
         </Select>
         <Input
-          label="Profession"
-          placeholder="e.g. Engineer"
+          label={t('page.search.profession')}
+          placeholder={t('page.search.professionPlaceholder')}
           value={value.profession ?? ''}
           onChange={(e) => onChange({ profession: e.target.value || undefined })}
         />
         <div className="grid grid-cols-2 gap-3">
           <Input
-            label="Min income (₹)"
+            label={t('page.search.minIncome')}
             type="number"
             inputMode="numeric"
             placeholder="0"
@@ -213,7 +215,7 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
             onChange={(e) => onChange({ minAnnualIncome: toNum(e.target.value) })}
           />
           <Input
-            label="Max income (₹)"
+            label={t('page.search.maxIncome')}
             type="number"
             inputMode="numeric"
             placeholder="5000000"
@@ -223,10 +225,10 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
         </div>
       </Group>
 
-      <Group title="Height">
+      <Group title={t('page.search.groupHeight')}>
         <div className="grid grid-cols-2 gap-3">
           <Input
-            label="Min height (cm)"
+            label={t('page.search.minHeight')}
             type="number"
             inputMode="numeric"
             min={120}
@@ -235,7 +237,7 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
             onChange={(e) => onChange({ minHeightCm: toNum(e.target.value) })}
           />
           <Input
-            label="Max height (cm)"
+            label={t('page.search.maxHeight')}
             type="number"
             inputMode="numeric"
             max={220}
@@ -246,13 +248,13 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
         </div>
       </Group>
 
-      <Group title="Horoscope">
+      <Group title={t('page.search.groupHoroscope')}>
         <Select
-          label="Nakshatra"
+          label={t('page.search.nakshatra')}
           value={value.nakshatra ?? ''}
           onChange={(e) => onChange({ nakshatra: e.target.value || undefined })}
         >
-          <option value="">Any</option>
+          <option value="">{t('page.search.any')}</option>
           {NAKSHATRA_OPTIONS.map((n) => (
             <option key={n.value} value={n.value}>
               {n.label}
@@ -260,11 +262,11 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
           ))}
         </Select>
         <Select
-          label="Raasi"
+          label={t('page.search.raasi')}
           value={value.raasi ?? ''}
           onChange={(e) => onChange({ raasi: e.target.value || undefined })}
         >
-          <option value="">Any</option>
+          <option value="">{t('page.search.any')}</option>
           {RAASI_OPTIONS.map((r) => (
             <option key={r.value} value={r.value}>
               {r.label}
@@ -272,11 +274,11 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
           ))}
         </Select>
         <Select
-          label="Dhosam"
+          label={t('page.search.dhosam')}
           value={value.dhosam ?? ''}
           onChange={(e) => onChange({ dhosam: e.target.value || undefined })}
         >
-          <option value="">Any</option>
+          <option value="">{t('page.search.any')}</option>
           {DHOSAMS.map((d) => (
             <option key={d.value} value={d.value}>
               {d.label}
