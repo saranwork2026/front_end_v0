@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import Link from 'next/link'
 import type { PaginatedResponse } from '@matrimony/shared-core'
 
@@ -130,6 +131,7 @@ interface MatchesViewProps {
 }
 
 export function MatchesView({ preview }: MatchesViewProps) {
+  const { t } = useTranslation()
   // Default filter: Newly joined (per product spec).
   const [filter, setFilter] = useState<MatchFilter>('newest')
   const [loading, setLoading] = useState(true)
@@ -200,13 +202,13 @@ export function MatchesView({ preview }: MatchesViewProps) {
       <header className="mb-5">
         <div className="flex items-center gap-2 text-primary">
           <Icon name="heart" size={18} />
-          <span className="text-xs font-semibold uppercase tracking-wide">Matches</span>
+          <span className="text-xs font-semibold uppercase tracking-wide">{t('page.matches.eyebrow')}</span>
         </div>
         <h1 className="mt-1.5 text-balance font-serif text-2xl font-bold text-foreground sm:text-3xl">
-          Your matches
+          {t('page.matches.title')}
         </h1>
         <p className="mt-1 max-w-prose text-sm text-muted-foreground">
-          Newly joined profiles first. Use the filters to switch between shortlists, profile views and interests.
+          {t('page.matches.subtitle')}
         </p>
       </header>
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import Link from 'next/link'
 import type { Interest, InterestStatus, PaginatedResponse } from '@matrimony/shared-core'
 
@@ -42,6 +43,7 @@ interface InterestsViewProps {
 }
 
 export function InterestsView({ state }: InterestsViewProps) {
+  const { t } = useTranslation()
   const [tab, setTab] = useState<Direction>('received')
   const [statusFilter, setStatusFilter] = useState<'ALL' | InterestStatus>('ALL')
   const [page, setPage] = useState(0)
@@ -119,10 +121,10 @@ export function InterestsView({ state }: InterestsViewProps) {
   return (
     <div className="mx-auto w-full max-w-4xl px-4 pb-16 pt-6 sm:px-6 sm:pt-8">
       <header className="mb-5">
-        <p className="text-xs font-medium uppercase tracking-[0.14em] text-primary/80">Connections</p>
-        <h1 className="mt-1 font-serif text-2xl text-foreground sm:text-3xl">Interests</h1>
+        <p className="text-xs font-medium uppercase tracking-[0.14em] text-primary/80">{t('page.interests.eyebrow')}</p>
+        <h1 className="mt-1 font-serif text-2xl text-foreground sm:text-3xl">{t('page.interests.title')}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Interests you have received and sent. Respond to pending requests to move a conversation forward.
+          {t('page.interests.subtitle')}
         </p>
       </header>
 

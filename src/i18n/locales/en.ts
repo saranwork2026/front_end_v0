@@ -203,6 +203,60 @@ export const en = {
       completeProfile: 'Complete your profile',
       viewAll: 'View all',
     },
+    page: {
+      search: {
+        title: 'Find your match',
+        subtitle: 'Search verified profiles by the details that matter to your family.',
+      },
+      matches: {
+        eyebrow: 'Matches',
+        title: 'Your matches',
+        subtitle:
+          'Newly joined profiles first. Use the filters to switch between shortlists, profile views and interests.',
+      },
+      shortlist: {
+        eyebrow: 'Saved for later',
+        title: 'My shortlist',
+        subtitle: "Profiles you've bookmarked. Remove one anytime by tapping its star.",
+      },
+      interests: {
+        eyebrow: 'Connections',
+        title: 'Interests',
+        subtitle:
+          'Interests you have received and sent. Respond to pending requests to move a conversation forward.',
+      },
+      chat: {
+        eyebrow: 'Conversations',
+        title: 'Messages',
+        subtitle: 'Chat privately with members you have connected with.',
+      },
+      notifications: {
+        eyebrow: 'Updates',
+        title: 'Notifications',
+        subtitle: 'Interests, approvals, and account updates.',
+      },
+      accessRequests: {
+        eyebrow: 'Privacy',
+        title: 'Access requests',
+        subtitle: 'Requests to view your contact details or photos.',
+      },
+      referrals: {
+        eyebrow: 'Refer & earn',
+        title: 'Invite friends, earn rewards',
+      },
+      wallet: {
+        eyebrow: 'Billing',
+        title: 'Wallet',
+      },
+      subscriptions: {
+        eyebrow: 'Membership',
+        title: 'Your membership',
+      },
+      account: {
+        eyebrow: 'Settings',
+        title: 'Account settings',
+      },
+    },
     options: {
       gender: { MALE: 'Male', FEMALE: 'Female' },
       marital: {

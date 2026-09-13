@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import Link from 'next/link'
 import type { SearchResult, PaginatedResponse } from '@matrimony/shared-core'
 
@@ -22,6 +23,7 @@ interface ShortlistViewProps {
 }
 
 export function ShortlistView({ preview }: ShortlistViewProps) {
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [results, setResults] = useState<PaginatedResponse<SearchResult> | null>(null)
@@ -88,13 +90,13 @@ export function ShortlistView({ preview }: ShortlistViewProps) {
       <header className="mb-5">
         <div className="flex items-center gap-2 text-gold">
           <Icon name="star-filled" size={18} />
-          <span className="text-xs font-semibold uppercase tracking-wide">Saved for later</span>
+          <span className="text-xs font-semibold uppercase tracking-wide">{t('page.shortlist.eyebrow')}</span>
         </div>
         <h1 className="mt-1.5 text-balance font-serif text-2xl font-bold text-foreground sm:text-3xl">
-          My shortlist
+          {t('page.shortlist.title')}
         </h1>
         <p className="mt-1 max-w-prose text-sm text-muted-foreground">
-          Profiles you&apos;ve bookmarked. Remove one anytime by tapping its star.
+          {t('page.shortlist.subtitle')}
         </p>
       </header>
 

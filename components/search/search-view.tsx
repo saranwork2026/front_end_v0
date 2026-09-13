@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import type { SearchFilters, SearchResult, PaginatedResponse } from '@matrimony/shared-core'
 
@@ -29,6 +30,7 @@ const PAGE_SIZE = 10
 
 export function SearchView() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   // `draft` is what the filter inputs edit; `applied` is what the results use.
   const [draft, setDraft] = useState<SearchFilters>({})
@@ -137,10 +139,10 @@ export function SearchView() {
     <main className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6 lg:px-8">
       <header className="mb-5">
         <h1 className="text-balance font-serif text-2xl font-bold text-foreground sm:text-3xl">
-          Find your match
+          {t('page.search.title')}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Search verified profiles by the details that matter to your family.
+          {t('page.search.subtitle')}
         </p>
       </header>
 

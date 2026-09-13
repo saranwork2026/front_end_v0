@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import Link from 'next/link'
 import type { Conversation } from '@matrimony/shared-core'
 
@@ -31,6 +32,7 @@ function fullName(c: Conversation): string {
 }
 
 export function ChatListView({ state }: { state?: ViewState }) {
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [conversations, setConversations] = useState<Conversation[]>([])
@@ -70,10 +72,10 @@ export function ChatListView({ state }: { state?: ViewState }) {
     <div className="min-h-dvh bg-background">
       <main className="mx-auto w-full max-w-3xl px-4 py-6 sm:py-8">
         <header className="mb-6">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">Conversations</p>
-          <h1 className="mt-1 font-serif text-3xl text-foreground text-balance">Messages</h1>
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">{t('page.chat.eyebrow')}</p>
+          <h1 className="mt-1 font-serif text-3xl text-foreground text-balance">{t('page.chat.title')}</h1>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            Chat privately with members you have connected with.
+            {t('page.chat.subtitle')}
           </p>
         </header>
 
