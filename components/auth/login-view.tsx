@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema, type LoginFormValues, type ApiError } from '@matrimony/shared-core'
 
@@ -28,6 +29,7 @@ const errorMessages: Record<string, string> = {
 }
 
 export function LoginView() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -145,13 +147,13 @@ export function LoginView() {
 
   return (
     <AuthShell
-      title="Welcome back"
-      subtitle="Sign in to continue your search for the right match."
+      title={t('auth.loginTitle')}
+      subtitle={t('auth.loginSubtitle')}
       footer={
         <>
-          New to Magizh?{' '}
+          {t('auth.newToApp')}{' '}
           <Link href="/register" className="font-medium text-primary hover:underline">
-            Create an account
+            {t('auth.createAccount')}
           </Link>
         </>
       }
@@ -193,7 +195,7 @@ export function LoginView() {
         )}
 
         <IconInput
-          label="Mobile number or email"
+          label={t('auth.identifier')}
           leadingIcon="user"
           autoComplete="username"
           inputMode="text"
@@ -203,11 +205,11 @@ export function LoginView() {
         />
 
         <IconInput
-          label="Password"
+          label={t('auth.password')}
           password
           leadingIcon="lock"
           autoComplete="current-password"
-          placeholder="Enter your password"
+          placeholder={t('auth.passwordPlaceholder')}
           error={fieldError(errors.password?.message)}
           {...register('password')}
         />
@@ -217,14 +219,14 @@ export function LoginView() {
         )}
 
         <Button type="submit" size="lg" loading={isSubmitting} className="mt-1 w-full">
-          {isSubmitting ? 'Signing in…' : 'Sign in'}
+          {isSubmitting ? t('auth.loggingIn') : t('auth.signIn')}
         </Button>
 
         <Link
           href="/forgot-password"
           className="text-center text-sm font-medium text-primary hover:underline"
         >
-          Forgot password?
+          {t('auth.forgotPassword')}
         </Link>
       </form>
     </AuthShell>

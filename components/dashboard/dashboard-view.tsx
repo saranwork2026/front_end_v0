@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import Link from 'next/link'
 import { useNavigate } from 'react-router-dom'
 import type {
@@ -30,6 +31,7 @@ interface DashboardViewProps {
 }
 
 export function DashboardView({ preview }: DashboardViewProps) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   const [loading, setLoading] = useState(true)
@@ -186,12 +188,18 @@ export function DashboardView({ preview }: DashboardViewProps) {
   return (
     <main className="mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-6 lg:px-8">
       <header className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-wide text-primary">{greeting()}</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+          {new Date().getHours() < 12
+            ? t('dashboard.greetingMorning')
+            : new Date().getHours() < 17
+              ? t('dashboard.greetingAfternoon')
+              : t('dashboard.greetingEvening')}
+        </p>
         <h1 className="mt-1 text-balance font-serif text-2xl font-bold text-foreground sm:text-3xl">
-          Welcome back, {firstName}
+          {t('dashboard.welcomeBack', { name: firstName })}
         </h1>
         <p className="mt-1 max-w-prose text-sm text-muted-foreground">
-          Here are today&apos;s curated matches and fresh recommendations based on your preferences.
+          {t('dashboard.intro')}
         </p>
       </header>
 
@@ -460,12 +468,7 @@ function AdCarousel({ banners }: { banners: AdBanner[] }) {
   )
 }
 
-function greeting(): string {
-  const h = new Date().getHours()
-  if (h < 12) return 'Good morning'
-  if (h < 17) return 'Good afternoon'
-  return 'Good evening'
-}
+
 
 function SectionHeading({
   id,
