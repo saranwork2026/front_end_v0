@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import type { WalletTransaction } from '@matrimony/shared-core'
 
@@ -51,6 +52,7 @@ function validateTopupAmount(raw: string): string | null {
 }
 
 export function WalletView(_props: WalletViewProps) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [page, setPage] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -124,8 +126,8 @@ export function WalletView(_props: WalletViewProps) {
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
       <header className="mb-6">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">Billing</p>
-        <h1 className="mt-1 font-serif text-3xl text-foreground text-balance">Wallet</h1>
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">{t('page.wallet.eyebrow')}</p>
+        <h1 className="mt-1 font-serif text-3xl text-foreground text-balance">{t('page.wallet.title')}</h1>
         <p className="mt-2 max-w-prose text-sm leading-relaxed text-muted-foreground">
           Top up your wallet to unlock contacts and pay for add-ons instantly.
         </p>

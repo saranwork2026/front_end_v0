@@ -2,6 +2,7 @@
 
 import { useNavigate } from 'react-router-dom'
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Notification, PaginatedResponse } from '@matrimony/shared-core'
 
 import { Button } from '@/components/ui/button'
@@ -30,6 +31,7 @@ export function NotificationsView({
   state?: ViewState
   initialPage?: number
 }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [page, setPage] = useState(initialPage - 1) // 0-indexed internally
   const [loading, setLoading] = useState(true)
@@ -98,7 +100,7 @@ export function NotificationsView({
     <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:py-10">
       <div className="mb-6 flex items-end justify-between gap-4">
         <div>
-          <h1 className="font-serif text-2xl text-foreground sm:text-3xl">Notifications</h1>
+          <h1 className="font-serif text-2xl text-foreground sm:text-3xl">{t('page.notifications.title')}</h1>
           <p className="mt-1 text-sm text-muted-foreground">Interests, messages, and account updates.</p>
         </div>
         <Button variant="ghost" size="sm" onClick={() => void markAllRead()} disabled={!hasUnread}>

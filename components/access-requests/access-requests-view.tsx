@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import Link from 'next/link'
 import type { AccessRequest, AccessRequestStatus, PaginatedResponse } from '@matrimony/shared-core'
 
@@ -43,6 +44,7 @@ interface AccessRequestsViewProps {
 }
 
 export function AccessRequestsView({ state }: AccessRequestsViewProps) {
+  const { t } = useTranslation()
   const [tab, setTab] = useState<Direction>('received')
   const [statusFilter, setStatusFilter] = useState<'ALL' | AccessRequestStatus>('ALL')
   const [page, setPage] = useState(0)
@@ -118,8 +120,8 @@ export function AccessRequestsView({ state }: AccessRequestsViewProps) {
   return (
     <div className="mx-auto w-full max-w-3xl px-4 pb-16 pt-6 sm:px-6 sm:pt-8">
       <header className="mb-5">
-        <p className="text-xs font-medium uppercase tracking-[0.14em] text-primary/80">Privacy</p>
-        <h1 className="mt-1 font-serif text-2xl text-foreground sm:text-3xl">Access requests</h1>
+        <p className="text-xs font-medium uppercase tracking-[0.14em] text-primary/80">{t('page.accessRequests.eyebrow')}</p>
+        <h1 className="mt-1 font-serif text-2xl text-foreground sm:text-3xl">{t('page.accessRequests.title')}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Approve or decline members asking to see your photos and contact details, and track the requests you have sent.
         </p>

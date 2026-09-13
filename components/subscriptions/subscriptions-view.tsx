@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 import Link from 'next/link'
 import { useNavigate } from 'react-router-dom'
 import type { PaymentMethod, SubscriptionPlan } from '@matrimony/shared-core'
@@ -85,6 +86,7 @@ function validityLabel(days: number): string {
 }
 
 export function SubscriptionsView({ planId }: SubscriptionsViewProps) {
+  const { t } = useTranslation()
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState(false)
   const [sub, setSub] = React.useState<ActiveSubscription | null>(null)
@@ -137,10 +139,10 @@ export function SubscriptionsView({ planId }: SubscriptionsViewProps) {
     <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 sm:py-10">
       <header className="mb-6">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-          Membership
+          {t('page.subscriptions.eyebrow')}
         </p>
         <h1 className="mt-1 font-serif text-2xl text-foreground text-balance sm:text-3xl">
-          Your subscription
+          {t('page.subscriptions.title')}
         </h1>
       </header>
 

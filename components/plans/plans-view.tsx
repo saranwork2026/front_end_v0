@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useNavigate } from 'react-router-dom'
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getApiError, type SubscriptionPlan } from '@matrimony/shared-core'
 
 import { Badge } from '@/components/ui/badge'
@@ -88,6 +89,7 @@ interface PlansViewProps {
 
 export function PlansView(_props: PlansViewProps) {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const searchParams = useSearchParams()
   // Reached as the final step of the post-submission onboarding flow
   // (partner preferences → packages → status). Packages are optional here —
@@ -152,15 +154,13 @@ export function PlansView(_props: PlansViewProps) {
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
       <header className="mx-auto max-w-2xl text-center">
         <p className="text-sm font-medium uppercase tracking-wide text-gold-foreground">
-          {onboarding ? 'Last step (optional)' : 'Membership'}
+          {onboarding ? t('page.plans.eyebrowOnboarding') : t('page.plans.eyebrowDefault')}
         </p>
         <h1 className="mt-2 text-pretty font-serif text-3xl font-semibold text-foreground sm:text-4xl">
-          {onboarding ? 'Pick a package to get noticed faster' : 'Choose the plan that fits your search'}
+          {onboarding ? t('page.plans.titleOnboarding') : t('page.plans.titleDefault')}
         </h1>
         <p className="mt-3 text-pretty leading-relaxed text-muted-foreground">
-          {onboarding
-            ? 'Your profile is in for review and the free Base plan is already active. Upgrade now for more contacts, chat, and priority visibility — or skip and do it later.'
-            : 'Upgrade anytime to unlock contacts, chat, and priority visibility. Every plan is a one-time purchase for its full validity — no auto-renewal.'}
+          {onboarding ? t('page.plans.subtitleOnboarding') : t('page.plans.subtitleDefault')}
         </p>
       </header>
 

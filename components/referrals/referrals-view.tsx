@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { ReferralSummary } from '@matrimony/shared-core'
 
 import { Icon, type IconName } from '@/components/ui/icon'
@@ -41,6 +42,7 @@ function LoadingState() {
 }
 
 export function ReferralsView(_props: { state?: string }) {
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [summary, setSummary] = useState<ReferralSummary | null>(null)
@@ -107,8 +109,8 @@ export function ReferralsView(_props: { state?: string }) {
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:py-10">
       <header className="mb-6">
-        <p className="text-xs font-medium uppercase tracking-[0.18em] text-primary">Refer &amp; earn</p>
-        <h1 className="mt-1 font-serif text-3xl text-foreground text-balance">Invite friends, earn rewards</h1>
+        <p className="text-xs font-medium uppercase tracking-[0.18em] text-primary">{t('page.referrals.eyebrow')}</p>
+        <h1 className="mt-1 font-serif text-3xl text-foreground text-balance">{t('page.referrals.title')}</h1>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground text-pretty">
           Share your invite link. When someone you invite subscribes, you both earn wallet credits.
         </p>

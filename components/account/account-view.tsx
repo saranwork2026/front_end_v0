@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useCallback, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -13,6 +14,7 @@ import { accountApi, authStore } from '@/src/lib/api'
 
 export function AccountView() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   const [deactivating, setDeactivating] = useState(false)
   const [activating, setActivating] = useState(false)
@@ -67,7 +69,7 @@ export function AccountView() {
   return (
     <main className="mx-auto w-full max-w-2xl px-4 py-8 sm:py-10">
       <div className="mb-6">
-        <h1 className="font-serif text-2xl text-foreground sm:text-3xl">Account settings</h1>
+        <h1 className="font-serif text-2xl text-foreground sm:text-3xl">{t('page.account.title')}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Manage your password and the status of your account.
         </p>

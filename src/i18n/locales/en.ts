@@ -256,6 +256,16 @@ export const en = {
         eyebrow: 'Settings',
         title: 'Account settings',
       },
+      plans: {
+        eyebrowOnboarding: 'Last step (optional)',
+        eyebrowDefault: 'Membership',
+        titleOnboarding: 'Pick a package to get noticed faster',
+        titleDefault: 'Choose the plan that fits your search',
+        subtitleOnboarding:
+          'Your profile is in for review and the free Base plan is already active. Upgrade now for more contacts, chat, and priority visibility — or skip and do it later.',
+        subtitleDefault:
+          'Upgrade anytime to unlock contacts, chat, and priority visibility. Every plan is a one-time purchase for its full validity — no auto-renewal.',
+      },
     },
     options: {
       gender: { MALE: 'Male', FEMALE: 'Female' },
