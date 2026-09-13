@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import { Icon } from '@/components/ui/icon'
@@ -28,6 +29,7 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   )
 
 export function UserLayout() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   // During the registration wizard the bottom tab bar is not needed — hiding it
@@ -114,7 +116,7 @@ export function UserLayout() {
           {navItems.map((item) => (
             <NavLink key={item.to} to={item.to} end={item.to === '/'} className={navLinkClass}>
               <Icon name={item.icon} size={20} className="shrink-0" />
-              <span>{item.label}</span>
+              <span>{t(item.labelKey as never, { defaultValue: item.label })}</span>
             </NavLink>
           ))}
         </nav>
@@ -243,7 +245,7 @@ export function UserLayout() {
                 }
               >
                 <Icon name={item.icon} size={22} />
-                <span className="mt-0.5">{item.label}</span>
+                <span className="mt-0.5">{t(item.labelKey as never, { defaultValue: item.label })}</span>
               </NavLink>
             ))}
           </div>
@@ -281,7 +283,7 @@ export function UserLayout() {
                   className={navLinkClass}
                 >
                   <Icon name={item.icon} size={20} className="shrink-0" />
-                  <span>{item.label}</span>
+                  <span>{t(item.labelKey as never, { defaultValue: item.label })}</span>
                 </NavLink>
               ))}
             </nav>

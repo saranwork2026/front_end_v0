@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { registerSchema, type RegisterFormValues, type ApiError } from '@matrimony/shared-core'
 
@@ -24,6 +25,7 @@ const errorMessages: Record<string, string> = {
 }
 
 export function RegisterView() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   // Referral code arrives via an invite link (?ref=SM123). Captured silently.
@@ -117,8 +119,8 @@ export function RegisterView() {
 
   return (
     <AuthShell
-      title="Create your account"
-      subtitle="A few details to begin. You will build your full profile next."
+      title={t('auth.registerTitle')}
+      subtitle={t('auth.registerSubtitle')}
       banner={
         referralCode ? (
           <div className="mb-5 flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-3 py-1.5 text-sm text-foreground">
@@ -131,9 +133,9 @@ export function RegisterView() {
       }
       footer={
         <>
-          Already have an account?{' '}
+          {t('auth.haveAccount')}{' '}
           <Link href="/login" className="font-medium text-primary hover:underline">
-            Sign in
+            {t('auth.signIn')}
           </Link>
         </>
       }
@@ -151,14 +153,14 @@ export function RegisterView() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <IconInput
-            label="First name"
+            label={t('auth.firstName')}
             leadingIcon="user"
             autoComplete="given-name"
             error={fieldError(errors.firstName?.message)}
             {...register('firstName')}
           />
           <IconInput
-            label="Last name"
+            label={t('auth.lastName')}
             leadingIcon="user"
             autoComplete="family-name"
             error={fieldError(errors.lastName?.message)}
@@ -167,7 +169,7 @@ export function RegisterView() {
         </div>
 
         <IconInput
-          label="Mobile number"
+          label={t('auth.mobile')}
           leadingIcon="phone"
           inputMode="numeric"
           autoComplete="tel"
@@ -178,7 +180,7 @@ export function RegisterView() {
         />
 
         <IconInput
-          label="Email (optional)"
+          label={t('auth.email')}
           leadingIcon="mail"
           type="email"
           autoComplete="email"
@@ -189,7 +191,7 @@ export function RegisterView() {
 
         <div className="flex flex-col gap-2">
           <IconInput
-            label="Password"
+            label={t('auth.password')}
             password
             blockPaste
             leadingIcon="lock"
@@ -221,7 +223,7 @@ export function RegisterView() {
         </div>
 
         <IconInput
-          label="Confirm password"
+          label={t('auth.confirmPassword')}
           password
           blockPaste
           leadingIcon="lock"
@@ -266,7 +268,7 @@ export function RegisterView() {
         )}
 
         <Button type="submit" size="lg" loading={isSubmitting} className="mt-1 w-full">
-          {isSubmitting ? 'Creating account…' : 'Create account'}
+          {isSubmitting ? t('auth.registering') : t('auth.createAccount')}
         </Button>
       </form>
     </AuthShell>
