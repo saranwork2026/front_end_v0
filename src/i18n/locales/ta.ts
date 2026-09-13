@@ -18,10 +18,10 @@ export const ta: Resources = {
       matches: 'பொருத்தங்கள்',
       chat: 'செய்திகள்',
       notifications: 'அறிவிப்புகள்',
-      shortlist: 'குறும்பட்டியல்',
+      shortlist: 'தேர்வுப் பட்டியல்',
       interests: 'விருப்பங்கள்',
       profileViews: 'சுயவிவரப் பார்வைகள்',
-      referrals: 'பரிந்துரைத்து சம்பாதி',
+      referrals: 'பரிந்துரைத்து பரிசு பெறுங்கள்',
       profile: 'சுயவிவரம்',
       photos: 'புகைப்படங்கள்',
       plans: 'திட்டங்கள்',
@@ -87,8 +87,8 @@ export const ta: Resources = {
         location: 'இருப்பிடம்',
         physical: 'உடல் விவரம்',
         family: 'குடும்பம்',
-        horoscope: 'ஜாதகம்',
-        review: 'மறுபரிசீலனை',
+        horoscope: 'பிறப்புக் குறிப்பு',
+        review: 'மதிப்பாய்வு',
       },
       fields: {
         firstName: 'முதல் பெயர்',
@@ -160,7 +160,7 @@ export const ta: Resources = {
       marital: {
         NEVER_MARRIED: 'திருமணமாகாதவர்',
         DIVORCED: 'விவாகரத்து',
-        WIDOWED: 'விதவை / விதுரர்',
+        WIDOWED: 'விதவை / விதவர்',
       },
       employedIn: {
         EMPLOYED_PRIVATE: 'தனியார் துறை',

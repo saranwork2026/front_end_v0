@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
@@ -45,6 +46,7 @@ export function WizardView({
   empty = false,
 }: WizardViewProps) {
   const router = useRouter()
+  const { t } = useTranslation()
   const [pageState, setPageState] = useState<WizardState>(initialState === 'loading' ? 'loading' : empty ? 'ready' : 'loading')
   const [form, setForm] = useState<WizardForm>(emptyForm)
   const [current, setCurrent] = useState(0)
@@ -197,10 +199,10 @@ export function WizardView({
           <div className="mb-3 flex items-baseline justify-between gap-3">
             <div className="min-w-0">
               <p className="text-xs font-medium uppercase tracking-wide text-primary">
-                Step {current + 1} of {steps.length}
+                {t('wizard.stepOf', { current: current + 1, total: steps.length })}
               </p>
               <h1 className="font-serif text-xl font-semibold text-foreground text-balance md:text-2xl">
-                {step.title}
+                {t(`wizard.steps.${step.key}`)}
               </h1>
             </div>
           </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
@@ -24,6 +25,7 @@ export function WizardProgress({
 }: WizardProgressProps) {
   const listRef = useRef<HTMLOListElement>(null)
   const activeRef = useRef<HTMLLIElement>(null)
+  const { t } = useTranslation()
 
   useEffect(() => {
     activeRef.current?.scrollIntoView({
@@ -79,7 +81,7 @@ export function WizardProgress({
                 >
                   {isDone ? <Icon name="check" size={13} /> : index + 1}
                 </span>
-                {step.label}
+                {t(`wizard.steps.${step.key}`)}
               </button>
             </li>
           )

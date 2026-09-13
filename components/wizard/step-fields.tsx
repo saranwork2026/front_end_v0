@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { profileApi } from '@/src/lib/api'
 import { Icon } from '@/components/ui/icon'
 import { Input } from '@/components/ui/input'
@@ -177,49 +178,50 @@ function TamilCalendarPrefill({
 }
 
 export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }: StepFieldsProps) {
+  const { t } = useTranslation()
   switch (step) {
     case 'basic':
       return (
         <FieldGrid>
           <Input
-            label="First name"
+            label={t('wizard.fields.firstName')}
             value={form.firstName}
             onChange={(e) => onChange({ firstName: e.target.value })}
             autoComplete="given-name"
           />
           <Input
-            label="Last name"
+            label={t('wizard.fields.lastName')}
             value={form.lastName}
             onChange={(e) => onChange({ lastName: e.target.value })}
             autoComplete="family-name"
           />
           <Input
-            label="Date of birth"
+            label={t('wizard.fields.dob')}
             type="date"
             value={form.dob}
             error={errors.dob}
             onChange={(e) => onChange({ dob: e.target.value })}
           />
           <Select
-            label="Gender"
+            label={t('wizard.fields.gender')}
             value={form.gender}
             error={errors.gender}
             onChange={(e) => onChange({ gender: e.target.value })}
           >
-            <option value="">Select gender</option>
+            <option value="">{t('common.select')}</option>
             {optionList(genderOptions)}
           </Select>
           <Select
-            label="Marital status"
+            label={t('wizard.fields.maritalStatus')}
             value={form.maritalStatus}
             error={errors.maritalStatus}
             onChange={(e) => onChange({ maritalStatus: e.target.value })}
           >
-            <option value="">Select status</option>
+            <option value="">{t('common.select')}</option>
             {optionList(maritalOptions)}
           </Select>
           <SearchableSelect
-            label="Mother tongue"
+            label={t('wizard.fields.motherTongue')}
             value={form.motherTongue}
             onChange={(motherTongue) => onChange({ motherTongue })}
             options={motherTongueOptions}
