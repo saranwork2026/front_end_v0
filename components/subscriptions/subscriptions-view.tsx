@@ -72,17 +72,13 @@ function termProgress(startIso: string, endIso: string): number {
   return (now - start) / (end - start)
 }
 
-function validityLabel(days: number): string {
-  if (days <= 0) return 'Forever'
-  if (days % 365 === 0) {
-    const y = days / 365
-    return `${y} ${y === 1 ? 'year' : 'years'}`
-  }
-  if (days % 30 === 0) {
-    const m = days / 30
-    return `${m} ${m === 1 ? 'month' : 'months'}`
-  }
-  return `${days} days`
+type TFunc = ReturnType<typeof useTranslation>['t']
+
+function validityLabel(days: number, t: TFunc): string {
+  if (days <= 0) return t('page.subscriptions.forever')
+  if (days % 365 === 0) return t('page.subscriptions.year', { count: days / 365 })
+  if (days % 30 === 0) return t('page.subscriptions.month', { count: days / 30 })
+  return t('page.subscriptions.days', { count: days })
 }
 
 export function SubscriptionsView({ planId }: SubscriptionsViewProps) {
@@ -173,6 +169,7 @@ export function SubscriptionsView({ planId }: SubscriptionsViewProps) {
  * activates. On a successful manual claim it swaps to a confirmation state.
  */
 function SubscriptionPurchaseSection({ plan }: { plan: SubscriptionPlan }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [initiating, setInitiating] = React.useState(false)
   const [manualMethod, setManualMethod] = React.useState<PaymentMethod>('CASH')
@@ -198,7 +195,7 @@ function SubscriptionPurchaseSection({ plan }: { plan: SubscriptionPlan }) {
     } catch (err) {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        'This plan is currently unavailable. Please try again.'
+        t('page.subscriptions.planUnavailable')
       pushToast(message, 'error')
     } finally {
       setInitiating(false)
@@ -218,7 +215,7 @@ function SubscriptionPurchaseSection({ plan }: { plan: SubscriptionPlan }) {
     } catch (err) {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        'We could not record your payment claim. Please try again.'
+        t('page.subscriptions.manualClaimError')
       pushToast(message, 'error')
     } finally {
       setManualSubmitting(false)
@@ -233,14 +230,19 @@ function SubscriptionPurchaseSection({ plan }: { plan: SubscriptionPlan }) {
             <Icon name="circle-check" size={26} />
           </span>
           <div className="flex flex-col gap-1">
-            <h2 className="font-serif text-xl text-foreground">Payment claim received</h2>
+            <h2 className="font-serif text-xl text-foreground">{t('page.subscriptions.claimReceivedTitle')}</h2>
             <p className="text-pretty text-sm text-muted-foreground">
-              We&apos;ll verify your {manualMethod === 'CASH' ? 'cash' : 'online'} payment for the{' '}
-              {plan.name} plan and activate it shortly. You&apos;ll be notified once it&apos;s confirmed.
+              {t('page.subscriptions.claimReceivedDesc', {
+                method:
+                  manualMethod === 'CASH'
+                    ? t('page.subscriptions.claimReceivedCash')
+                    : t('page.subscriptions.claimReceivedOnline'),
+                plan: plan.name,
+              })}
             </p>
           </div>
           <Link href="/" className={cn(buttonVariants())}>
-            Go to dashboard
+            {t('page.subscriptions.goToDashboard')}
           </Link>
         </section>
         <Toaster toasts={toasts} onDismiss={(id) => setToasts((t) => t.filter((x) => x.id !== id))} />
@@ -256,48 +258,48 @@ function SubscriptionPurchaseSection({ plan }: { plan: SubscriptionPlan }) {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-                Selected plan
+                {t('page.subscriptions.selectedPlan')}
               </p>
               <h2 className="mt-0.5 font-serif text-xl text-foreground">{plan.name}</h2>
             </div>
             <div className="text-right">
               <p className="font-serif text-2xl text-foreground">{INR.format(plan.price)}</p>
-              <p className="text-xs text-muted-foreground">{validityLabel(plan.validityDays)}</p>
+              <p className="text-xs text-muted-foreground">{validityLabel(plan.validityDays, t)}</p>
             </div>
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <Button size="lg" onClick={handleConfirm} loading={initiating}>
               <Icon name="lock" size={16} />
-              Confirm &amp; pay
+              {t('page.subscriptions.confirmPay')}
             </Button>
             <Link
               href="/plans"
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
-              Cancel
+              {t('page.subscriptions.cancel')}
             </Link>
           </div>
         </section>
 
         {/* Manual (cash/online) payment claim */}
         <section className="rounded-2xl border border-border bg-card p-5 sm:p-6">
-          <h2 className="font-serif text-lg text-foreground">Already paid by cash or online?</h2>
+          <h2 className="font-serif text-lg text-foreground">{t('page.subscriptions.manualTitle')}</h2>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            Submit your payment details and our team will verify and activate your plan.
+            {t('page.subscriptions.manualDesc')}
           </p>
           <div className="mt-4 flex flex-col gap-4">
             <Select
-              label="Payment method"
+              label={t('page.subscriptions.paymentMethod')}
               name="manual-payment-method"
               value={manualMethod}
               onChange={(e) => setManualMethod(e.target.value as PaymentMethod)}
             >
-              <option value="CASH">Cash</option>
-              <option value="ONLINE">Online transfer</option>
+              <option value="CASH">{t('page.subscriptions.methodCash')}</option>
+              <option value="ONLINE">{t('page.subscriptions.methodOnline')}</option>
             </Select>
             <div className="flex flex-col gap-1.5">
               <label htmlFor="reference-note" className="text-sm font-medium text-foreground">
-                Reference / note
+                {t('page.subscriptions.referenceNote')}
               </label>
               <textarea
                 id="reference-note"
@@ -307,8 +309,8 @@ function SubscriptionPurchaseSection({ plan }: { plan: SubscriptionPlan }) {
                 maxLength={500}
                 placeholder={
                   manualMethod === 'CASH'
-                    ? 'e.g. Paid cash at the branch on 5 Sep to Mr. Kumar'
-                    : 'e.g. UPI ref 1234567890 / bank transfer details'
+                    ? t('page.subscriptions.referencePlaceholderCash')
+                    : t('page.subscriptions.referencePlaceholderOnline')
                 }
                 className="w-full rounded-lg border border-input bg-card px-3.5 py-2.5 text-sm text-foreground shadow-sm outline-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/40"
               />
@@ -323,7 +325,7 @@ function SubscriptionPurchaseSection({ plan }: { plan: SubscriptionPlan }) {
               disabled={manualSubmitting || !referenceNote.trim()}
               className="w-full sm:w-auto"
             >
-              Submit payment claim
+              {t('page.subscriptions.submitClaim')}
             </Button>
           </div>
         </section>
@@ -336,6 +338,7 @@ function SubscriptionPurchaseSection({ plan }: { plan: SubscriptionPlan }) {
 /* ------------------------------- Active ------------------------------- */
 
 function ActiveSubscriptionCard({ sub }: { sub: ActiveSubscription }) {
+  const { t } = useTranslation()
   const remaining = daysRemaining(sub.expiryDate)
   const progress = Math.round(termProgress(sub.startDate, sub.expiryDate) * 100)
 
@@ -356,26 +359,26 @@ function ActiveSubscriptionCard({ sub }: { sub: ActiveSubscription }) {
             href="/plans"
             className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }))}
           >
-            Upgrade plan
+            {t('page.subscriptions.upgradePlan')}
           </Link>
         </div>
 
         {/* Term dates + remaining */}
         <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-[1fr_1fr_auto]">
           <div>
-            <p className="text-xs text-muted-foreground">Started</p>
+            <p className="text-xs text-muted-foreground">{t('page.subscriptions.started')}</p>
             <p className="mt-0.5 text-sm font-medium text-foreground">
               {formatDate(sub.startDate)}
             </p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Renews / ends</p>
+            <p className="text-xs text-muted-foreground">{t('page.subscriptions.renewsEnds')}</p>
             <p className="mt-0.5 text-sm font-medium text-foreground">
               {formatDate(sub.expiryDate)}
             </p>
           </div>
           <div className="col-span-2 sm:col-span-1 sm:text-right">
-            <p className="text-xs text-muted-foreground">Days left</p>
+            <p className="text-xs text-muted-foreground">{t('page.subscriptions.daysLeft')}</p>
             <p className="mt-0.5 font-serif text-lg text-primary">{remaining}</p>
           </div>
         </div>
@@ -394,26 +397,26 @@ function ActiveSubscriptionCard({ sub }: { sub: ActiveSubscription }) {
       {/* Usage */}
       <div className="p-5 sm:p-6">
         <h3 className="text-sm font-semibold text-foreground">
-          Usage this cycle
+          {t('page.subscriptions.usageThisCycle')}
         </h3>
         <ul className="mt-4 flex flex-col gap-4">
           <UsageRow
-            label="Contact views"
+            label={t('page.subscriptions.contactViews')}
             remaining={sub.remainingContactViews}
             total={sub.totalContactLimit}
           />
           <UsageRow
-            label="Photo views"
+            label={t('page.subscriptions.photoViews')}
             remaining={sub.remainingPhotoViews}
             total={sub.totalPhotoLimit}
           />
           <UsageRow
-            label="Messages"
+            label={t('page.subscriptions.messages')}
             remaining={sub.remainingMessages}
             total={sub.totalMessageLimit}
           />
           <UsageRow
-            label="Interests"
+            label={t('page.subscriptions.interests')}
             remaining={sub.remainingInterests}
             total={sub.totalInterestLimit}
           />
@@ -469,14 +472,15 @@ function UsageRow({
 /* ------------------------------- States ------------------------------- */
 
 function EmptySubscription() {
+  const { t } = useTranslation()
   return (
     <EmptyState
       icon="star"
-      title="No active subscription"
-      description="Upgrade to a premium plan to unlock contacts, photo requests, chat, and more."
+      title={t('page.subscriptions.emptyTitle')}
+      description={t('page.subscriptions.emptyDesc')}
       action={
         <Link href="/plans" className={cn(buttonVariants())}>
-          View plans
+          {t('page.subscriptions.viewPlans')}
         </Link>
       }
     />
@@ -508,6 +512,7 @@ function LoadingState() {
 }
 
 function ErrorState({ onRetry }: { onRetry: () => void }) {
+  const { t } = useTranslation()
   return (
     <div
       role="alert"
@@ -516,14 +521,14 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
       <Icon name="alert-circle" size={28} className="text-destructive" />
       <div>
         <p className="font-medium text-foreground">
-          We couldn&apos;t load your subscription
+          {t('page.subscriptions.errorTitle')}
         </p>
         <p className="mt-1 text-sm text-muted-foreground">
-          Please check your connection and try again.
+          {t('page.subscriptions.errorDesc')}
         </p>
       </div>
       <Button variant="secondary" size="sm" onClick={onRetry}>
-        Retry
+        {t('page.subscriptions.retry')}
       </Button>
     </div>
   )

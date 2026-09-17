@@ -50,36 +50,32 @@ interface PlanFeature {
   included: boolean
 }
 
+type TFunc = ReturnType<typeof useTranslation>['t']
+
 /** Derives the feature bullet list for a plan from its real quota/flag fields. */
-function planFeatures(plan: SubscriptionPlan): PlanFeature[] {
+function planFeatures(plan: SubscriptionPlan, t: TFunc): PlanFeature[] {
   return [
-    { icon: 'eye', label: `${plan.contactViewLimit} contact views`, included: plan.contactViewLimit > 0 },
-    { icon: 'mail', label: `${plan.messageLimit} messages`, included: plan.messageLimit > 0 },
-    { icon: 'heart', label: `${plan.interestLimit} interests`, included: plan.interestLimit > 0 },
+    { icon: 'eye', label: t('page.plans.featContactViews', { count: plan.contactViewLimit }), included: plan.contactViewLimit > 0 },
+    { icon: 'mail', label: t('page.plans.featMessages', { count: plan.messageLimit }), included: plan.messageLimit > 0 },
+    { icon: 'heart', label: t('page.plans.featInterests', { count: plan.interestLimit }), included: plan.interestLimit > 0 },
     {
       icon: plan.chatEnabled ? 'chat' : 'x',
-      label: plan.chatEnabled ? 'Chat enabled' : 'Chat not included',
+      label: plan.chatEnabled ? t('page.plans.featChatOn') : t('page.plans.featChatOff'),
       included: plan.chatEnabled,
     },
     {
       icon: plan.profileBoostEnabled ? 'star' : 'x',
-      label: plan.profileBoostEnabled ? 'Profile boost' : 'No profile boost',
+      label: plan.profileBoostEnabled ? t('page.plans.featBoostOn') : t('page.plans.featBoostOff'),
       included: plan.profileBoostEnabled,
     },
   ]
 }
 
-function validityLabel(days: number): string {
-  if (days <= 0) return 'Forever'
-  if (days % 365 === 0) {
-    const y = days / 365
-    return `${y} ${y === 1 ? 'year' : 'years'}`
-  }
-  if (days % 30 === 0) {
-    const m = days / 30
-    return `${m} ${m === 1 ? 'month' : 'months'}`
-  }
-  return `${days} days`
+function validityLabel(days: number, t: TFunc): string {
+  if (days <= 0) return t('page.plans.forever')
+  if (days % 365 === 0) return t('page.plans.year', { count: days / 365 })
+  if (days % 30 === 0) return t('page.plans.month', { count: days / 30 })
+  return t('page.plans.days', { count: days })
 }
 
 interface PlansViewProps {
@@ -177,11 +173,12 @@ export function PlansView(_props: PlansViewProps) {
               navigate('/', { replace: true })
             }}
           >
-            Remind me later
+            {t('page.plans.remindLater')}
           </Button>
           <p className="text-center text-xs text-muted-foreground sm:text-left">
-            You can upgrade any time from{' '}
-            <span className="font-medium text-foreground">Plans</span> in the menu.
+            {t('page.plans.upgradeAnytimePre')}
+            <span className="font-medium text-foreground">{t('page.plans.upgradeAnytimePlans')}</span>
+            {t('page.plans.upgradeAnytimePost')}
           </p>
         </div>
       )}
@@ -191,13 +188,12 @@ export function PlansView(_props: PlansViewProps) {
           <Icon name="star" className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
           <div className="text-sm">
             <p className="font-medium text-foreground">
-              You already have {activeSub.planName} active until {formatDate(activeSub.expiryDate)}.
+              {t('page.plans.activeBanner', { plan: activeSub.planName, date: formatDate(activeSub.expiryDate) })}
             </p>
             <p className="mt-0.5 text-muted-foreground">
-              Buying another plan won&apos;t charge you twice — it extends your
-              membership and adds its quota on top of what you have.{' '}
+              {t('page.plans.stackNotePre')}
               <Link href="/subscriptions" className="text-primary underline-offset-2 hover:underline">
-                View your subscription
+                {t('page.plans.stackNoteLink')}
               </Link>
               .
             </p>
@@ -220,9 +216,9 @@ export function PlansView(_props: PlansViewProps) {
       </div>
 
       <p className="mt-8 text-center text-xs text-muted-foreground">
-        Prices in INR, inclusive of taxes. Need help choosing?{' '}
+        {t('page.plans.footerPre')}
         <Link href="/subscriptions" className="text-primary underline-offset-2 hover:underline">
-          View your current subscription
+          {t('page.plans.footerLink')}
         </Link>
         .
       </p>
@@ -231,11 +227,12 @@ export function PlansView(_props: PlansViewProps) {
 }
 
 function PlanCard({ plan, onboarding }: { plan: SubscriptionPlan; onboarding: boolean }) {
+  const { t } = useTranslation()
   const tier = plan.name.toUpperCase()
   const isBase = tier === 'BASE'
   const isTopTier = tier === 'GOLD' || tier === 'PLATINUM'
   const premium = isTopTier
-  const features = planFeatures(plan)
+  const features = planFeatures(plan, t)
 
   return (
     <div
@@ -248,7 +245,7 @@ function PlanCard({ plan, onboarding }: { plan: SubscriptionPlan; onboarding: bo
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
           <Badge variant="gold" className="shadow-sm">
             <Icon name="star-filled" className="size-3" />
-            Premium
+            {t('page.plans.premium')}
           </Badge>
         </div>
       )}
@@ -257,7 +254,7 @@ function PlanCard({ plan, onboarding }: { plan: SubscriptionPlan; onboarding: bo
         <h2 className="font-serif text-xl font-semibold text-foreground">
           {plan.name}
         </h2>
-        {isBase && <Badge variant="neutral">Free</Badge>}
+        {isBase && <Badge variant="neutral">{t('page.plans.free')}</Badge>}
       </div>
 
       <p className="mt-1 min-h-10 text-sm leading-relaxed text-muted-foreground">
@@ -266,11 +263,11 @@ function PlanCard({ plan, onboarding }: { plan: SubscriptionPlan; onboarding: bo
 
       <div className="mt-4 flex items-baseline gap-1">
         <span className="font-serif text-3xl font-semibold text-foreground">
-          {plan.price === 0 ? 'Free' : INR.format(plan.price)}
+          {plan.price === 0 ? t('page.plans.free') : INR.format(plan.price)}
         </span>
         {plan.price > 0 && (
           <span className="text-sm text-muted-foreground">
-            / {validityLabel(plan.validityDays)}
+            / {validityLabel(plan.validityDays, t)}
           </span>
         )}
       </div>
@@ -307,7 +304,7 @@ function PlanCard({ plan, onboarding }: { plan: SubscriptionPlan; onboarding: bo
             )}
             aria-disabled="true"
           >
-            Current plan
+            {t('page.plans.currentPlan')}
           </span>
         ) : (
           <Link
@@ -320,7 +317,7 @@ function PlanCard({ plan, onboarding }: { plan: SubscriptionPlan; onboarding: bo
               'w-full',
             )}
           >
-            Subscribe
+            {t('page.plans.subscribe')}
             <Icon name="arrow-right" className="size-4" />
           </Link>
         )}
@@ -357,6 +354,7 @@ function PlansSkeleton() {
 }
 
 function ErrorBox({ onRetry }: { onRetry: () => void }) {
+  const { t } = useTranslation()
   return (
     <div
       role="alert"
@@ -367,11 +365,10 @@ function ErrorBox({ onRetry }: { onRetry: () => void }) {
       </span>
       <div>
         <h2 className="font-serif text-lg font-semibold text-foreground">
-          Could not load plans
+          {t('page.plans.errorTitle')}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Something went wrong while fetching membership plans. Please try
-          again.
+          {t('page.plans.errorDesc')}
         </p>
       </div>
       <button
@@ -380,7 +377,7 @@ function ErrorBox({ onRetry }: { onRetry: () => void }) {
         className={cn(buttonVariants({ variant: 'secondary' }))}
       >
         <Icon name="refresh" className="size-4" />
-        Retry
+        {t('page.plans.retry')}
       </button>
     </div>
   )
