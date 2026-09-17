@@ -40,14 +40,16 @@ interface WalletViewProps {
   initialState?: LoadState
 }
 
+type TFunc = ReturnType<typeof useTranslation>['t']
+
 /** Client-side range check (1–999999). Returns error message or null. */
-function validateTopupAmount(raw: string): string | null {
+function validateTopupAmount(raw: string, t: TFunc): string | null {
   const trimmed = raw.trim()
-  if (!trimmed) return 'Enter an amount to top up.'
+  if (!trimmed) return t('page.wallet.valEnterAmount')
   const value = Number(trimmed)
-  if (!Number.isFinite(value)) return 'Enter a valid amount.'
-  if (value < MIN_TOPUP) return `Minimum top-up is ${INR.format(MIN_TOPUP)}.`
-  if (value > MAX_TOPUP) return `Maximum top-up is ${INR.format(MAX_TOPUP)}.`
+  if (!Number.isFinite(value)) return t('page.wallet.valValidAmount')
+  if (value < MIN_TOPUP) return t('page.wallet.valMin', { amount: INR.format(MIN_TOPUP) })
+  if (value > MAX_TOPUP) return t('page.wallet.valMax', { amount: INR.format(MAX_TOPUP) })
   return null
 }
 
@@ -97,23 +99,23 @@ export function WalletView(_props: WalletViewProps) {
 
   async function handleTopup(e: React.FormEvent) {
     e.preventDefault()
-    const err = validateTopupAmount(amount)
+    const err = validateTopupAmount(amount, t)
     setAmountError(err)
     if (err) {
-      pushToast('Please fix the amount before continuing.', 'error')
+      pushToast(t('page.wallet.fixAmount'), 'error')
       return
     }
     setSubmitting(true)
     try {
       const res = await walletApi.topup({ amount: Number(amount), paymentGateway: gateway })
-      pushToast('Redirecting to payment…', 'success')
+      pushToast(t('page.wallet.redirecting'), 'success')
       navigate(`/payments/${res.data.paymentId}`, {
         state: { amount: res.data.amount, paymentType: 'WALLET_RECHARGE' as const },
       })
     } catch (topupErr) {
       const message =
         (topupErr as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        'We could not start your top-up. Please try again.'
+        t('page.wallet.topupError')
       pushToast(message, 'error')
     } finally {
       setSubmitting(false)
@@ -129,7 +131,7 @@ export function WalletView(_props: WalletViewProps) {
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">{t('page.wallet.eyebrow')}</p>
         <h1 className="mt-1 font-serif text-3xl text-foreground text-balance">{t('page.wallet.title')}</h1>
         <p className="mt-2 max-w-prose text-sm leading-relaxed text-muted-foreground">
-          Top up your wallet to unlock contacts and pay for add-ons instantly.
+          {t('page.wallet.subtitle')}
         </p>
       </header>
 
@@ -138,10 +140,10 @@ export function WalletView(_props: WalletViewProps) {
           role="alert"
           className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-6 text-center"
         >
-          <p className="text-sm text-destructive">We could not load your wallet. Please try again.</p>
+          <p className="text-sm text-destructive">{t('page.wallet.errorLoad')}</p>
           <div className="mt-4 flex justify-center">
             <Button variant="secondary" onClick={() => void load()}>
-              Retry
+              {t('page.wallet.retry')}
             </Button>
           </div>
         </div>
@@ -156,9 +158,9 @@ export function WalletView(_props: WalletViewProps) {
               className="rounded-2xl border border-border bg-card p-5 sm:p-6"
               noValidate
             >
-              <h2 className="font-serif text-xl text-foreground">Add money</h2>
+              <h2 className="font-serif text-xl text-foreground">{t('page.wallet.addMoney')}</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Enter an amount between {INR.format(MIN_TOPUP)} and {INR.format(MAX_TOPUP)}.
+                {t('page.wallet.amountRange', { min: INR.format(MIN_TOPUP), max: INR.format(MAX_TOPUP) })}
               </p>
 
               <div className="mt-4 flex flex-wrap gap-2">
@@ -179,7 +181,7 @@ export function WalletView(_props: WalletViewProps) {
 
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 <Input
-                  label="Amount (₹)"
+                  label={t('page.wallet.amountLabel')}
                   inputMode="decimal"
                   placeholder="0"
                   value={amount}
@@ -190,35 +192,35 @@ export function WalletView(_props: WalletViewProps) {
                   error={amountError ?? undefined}
                 />
                 <Select
-                  label="Payment gateway"
+                  label={t('page.wallet.gatewayLabel')}
                   value={gateway}
                   onChange={(e) => setGateway(e.target.value)}
                 >
-                  <option value="MOCK">Test gateway (Mock)</option>
+                  <option value="MOCK">{t('page.wallet.gatewayMock')}</option>
                 </Select>
               </div>
 
               <Button type="submit" size="lg" loading={submitting} className="mt-5 w-full">
-                {submitting ? 'Starting top-up…' : 'Top up wallet'}
+                {submitting ? t('page.wallet.topupCtaLoading') : t('page.wallet.topupCta')}
               </Button>
               <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Icon name="shield" size={13} />
-                You&apos;ll confirm the payment on the next screen before any money moves.
+                {t('page.wallet.securityNote')}
               </p>
             </form>
           </div>
 
           {/* Ledger */}
           <section className="mt-10">
-            <h2 className="mb-4 font-serif text-xl text-foreground">Transaction history</h2>
+            <h2 className="mb-4 font-serif text-xl text-foreground">{t('page.wallet.history')}</h2>
 
             {loading ? (
               <LedgerSkeleton />
             ) : transactions.length === 0 ? (
               <EmptyState
                 icon="wallet"
-                title="No wallet activity yet"
-                description="Once you top up or spend from your wallet, every entry will appear here."
+                title={t('page.wallet.emptyTitle')}
+                description={t('page.wallet.emptyDesc')}
               />
             ) : (
               <>
@@ -227,11 +229,11 @@ export function WalletView(_props: WalletViewProps) {
                   <table className="w-full text-left text-sm">
                     <thead>
                       <tr className="border-b border-border bg-secondary/50 text-xs uppercase tracking-wide text-muted-foreground">
-                        <th scope="col" className="px-4 py-3 font-medium">Reference</th>
-                        <th scope="col" className="px-4 py-3 font-medium">Date</th>
-                        <th scope="col" className="px-4 py-3 font-medium">Description</th>
-                        <th scope="col" className="px-4 py-3 text-right font-medium">Amount</th>
-                        <th scope="col" className="px-4 py-3 text-right font-medium">Balance</th>
+                        <th scope="col" className="px-4 py-3 font-medium">{t('page.wallet.colReference')}</th>
+                        <th scope="col" className="px-4 py-3 font-medium">{t('page.wallet.colDate')}</th>
+                        <th scope="col" className="px-4 py-3 font-medium">{t('page.wallet.colDescription')}</th>
+                        <th scope="col" className="px-4 py-3 text-right font-medium">{t('page.wallet.colAmount')}</th>
+                        <th scope="col" className="px-4 py-3 text-right font-medium">{t('page.wallet.colBalance')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -285,11 +287,12 @@ export function WalletView(_props: WalletViewProps) {
 }
 
 function BalanceCard({ balance, loading }: { balance: number; loading: boolean }) {
+  const { t } = useTranslation()
   return (
     <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-primary p-6 text-primary-foreground">
       <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-primary-foreground/70">
         <Icon name="wallet" size={15} />
-        Available balance
+        {t('page.wallet.availableBalance')}
       </div>
       {loading ? (
         <Skeleton className="mt-4 h-10 w-40 bg-primary-foreground/20" />
@@ -297,7 +300,7 @@ function BalanceCard({ balance, loading }: { balance: number; loading: boolean }
         <p className="mt-3 font-serif text-4xl tracking-tight">{INR.format(balance)}</p>
       )}
       <p className="mt-2 text-sm text-primary-foreground/70">
-        Spend on contact unlocks and premium add-ons.
+        {t('page.wallet.balanceNote')}
       </p>
     </div>
   )
@@ -314,6 +317,7 @@ function AmountText({ txn }: { txn: WalletTransaction }) {
 }
 
 function LedgerCard({ txn }: { txn: WalletTransaction }) {
+  const { t } = useTranslation()
   const credit = txn.type === 'CREDIT'
   return (
     <article className="rounded-xl border border-border bg-card p-4">
@@ -329,11 +333,11 @@ function LedgerCard({ txn }: { txn: WalletTransaction }) {
       </div>
       <div className="mt-4 flex items-end justify-between gap-3 border-t border-border pt-3 text-sm">
         <div>
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">Date</p>
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">{t('page.wallet.colDate')}</p>
           <p className="mt-0.5 text-foreground">{walletDate.format(new Date(txn.createdAt))}</p>
         </div>
         <div className="text-right">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">Balance</p>
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">{t('page.wallet.colBalance')}</p>
           <p className="mt-0.5 tabular-nums text-foreground">
             {INR.format(txn.balanceAfterTransaction)}
           </p>

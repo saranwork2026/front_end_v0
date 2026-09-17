@@ -33,25 +33,25 @@ export function AccountView() {
     setDeactivating(true)
     try {
       await accountApi.deactivateAccount()
-      pushToast('Your account has been deactivated.', 'success')
+      pushToast(t('page.account.deactivatedToast'), 'success')
     } catch {
-      pushToast('Could not deactivate your account. Please try again.', 'error')
+      pushToast(t('page.account.deactivateError'), 'error')
     } finally {
       setDeactivating(false)
     }
-  }, [pushToast])
+  }, [pushToast, t])
 
   const handleActivate = useCallback(async () => {
     setActivating(true)
     try {
       await accountApi.activateAccount()
-      pushToast('Your account has been reactivated.', 'success')
+      pushToast(t('page.account.reactivatedToast'), 'success')
     } catch {
-      pushToast('Could not reactivate your account. Please try again.', 'error')
+      pushToast(t('page.account.reactivateError'), 'error')
     } finally {
       setActivating(false)
     }
-  }, [pushToast])
+  }, [pushToast, t])
 
   const handleDelete = useCallback(async () => {
     setDeleting(true)
@@ -60,18 +60,18 @@ export function AccountView() {
       authStore.getState().clearAuth()
       navigate('/login', { replace: true })
     } catch {
-      pushToast('Could not delete your account. Please try again.', 'error')
+      pushToast(t('page.account.deleteError'), 'error')
       setDeleting(false)
       setShowDeleteDialog(false)
     }
-  }, [navigate, pushToast])
+  }, [navigate, pushToast, t])
 
   return (
     <main className="mx-auto w-full max-w-2xl px-4 py-8 sm:py-10">
       <div className="mb-6">
         <h1 className="font-serif text-2xl text-foreground sm:text-3xl">{t('page.account.title')}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Manage your password and the status of your account.
+          {t('page.account.subtitle')}
         </p>
       </div>
 
@@ -79,14 +79,14 @@ export function AccountView() {
         {/* Change password */}
         <SettingCard
           icon="lock"
-          title="Change password"
-          description="Update the password you use to sign in."
+          title={t('page.account.changePwTitle')}
+          description={t('page.account.changePwDesc')}
           action={
             <Link
               href="/change-password"
               className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }))}
             >
-              Change
+              {t('page.account.changePwCta')}
             </Link>
           }
         />
@@ -94,11 +94,11 @@ export function AccountView() {
         {/* Deactivate */}
         <SettingCard
           icon="eye-off"
-          title="Deactivate account"
-          description="Temporarily hide your profile from search. You can reactivate anytime."
+          title={t('page.account.deactivateTitle')}
+          description={t('page.account.deactivateDesc')}
           action={
             <Button variant="secondary" size="sm" loading={deactivating} onClick={() => void handleDeactivate()}>
-              Deactivate
+              {t('page.account.deactivateCta')}
             </Button>
           }
         />
@@ -106,11 +106,11 @@ export function AccountView() {
         {/* Reactivate */}
         <SettingCard
           icon="refresh"
-          title="Reactivate account"
-          description="Restore your profile so it can appear in search again after review."
+          title={t('page.account.reactivateTitle')}
+          description={t('page.account.reactivateDesc')}
           action={
             <Button variant="primary" size="sm" loading={activating} onClick={() => void handleActivate()}>
-              Reactivate
+              {t('page.account.reactivateCta')}
             </Button>
           }
         />
@@ -123,15 +123,15 @@ export function AccountView() {
                 <Icon name="trash" size={20} />
               </span>
               <div className="min-w-0">
-                <h2 className="text-base font-semibold text-foreground">Delete account</h2>
+                <h2 className="text-base font-semibold text-foreground">{t('page.account.deleteTitle')}</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Permanently delete your account and all associated data. This cannot be undone.
+                  {t('page.account.deleteDesc')}
                 </p>
               </div>
             </div>
             <div className="shrink-0">
               <Button variant="danger" size="sm" onClick={() => setShowDeleteDialog(true)}>
-                Delete
+                {t('page.account.deleteCta')}
               </Button>
             </div>
           </div>
@@ -143,8 +143,8 @@ export function AccountView() {
         onClose={() => {
           if (!deleting) setShowDeleteDialog(false)
         }}
-        title="Delete your account?"
-        description="This permanently deletes your profile, photos, messages, and all other data."
+        title={t('page.account.deleteDialogTitle')}
+        description={t('page.account.deleteDialogDesc')}
         footer={
           <>
             <Button
@@ -152,10 +152,10 @@ export function AccountView() {
               onClick={() => setShowDeleteDialog(false)}
               disabled={deleting}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button variant="danger" loading={deleting} onClick={() => void handleDelete()}>
-              Delete permanently
+              {t('page.account.deletePermanently')}
             </Button>
           </>
         }
@@ -163,8 +163,9 @@ export function AccountView() {
         <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4">
           <Icon name="alert-circle" size={20} className="mt-0.5 shrink-0 text-destructive" />
           <p className="text-sm text-foreground">
-            This action is <span className="font-semibold">irreversible</span>. Once deleted, your account
-            and data cannot be recovered.
+            {t('page.account.deleteWarningPre')}
+            <span className="font-semibold">{t('page.account.deleteWarningIrreversible')}</span>
+            {t('page.account.deleteWarningPost')}
           </p>
         </div>
       </Dialog>
