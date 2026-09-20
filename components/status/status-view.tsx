@@ -49,16 +49,16 @@ export function StatusView({ status, preview = false }: StatusViewProps) {
 
           <div className="flex flex-col items-center gap-2">
             <span className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              {config.eyebrow}
+              {t(config.eyebrow as never)}
             </span>
             <h1 className="font-serif text-2xl text-balance text-foreground sm:text-3xl">
-              {config.title}
+              {t(config.title as never)}
             </h1>
             <StatusBadge status={config.status} />
           </div>
 
           <p className="max-w-md text-pretty leading-relaxed text-muted-foreground">
-            {config.body}
+            {t(config.body as never)}
           </p>
         </div>
 
@@ -68,7 +68,7 @@ export function StatusView({ status, preview = false }: StatusViewProps) {
             {config.timeline && (
               <ol className="flex flex-col gap-4">
                 {config.timeline.map((step, index) => (
-                  <li key={step.label} className="flex items-center gap-3">
+                  <li key={step.label} className="flex items-center gap-3">{/* step.label is an i18n key */}
                     <span
                       className={cn(
                         'flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold',
@@ -89,7 +89,7 @@ export function StatusView({ status, preview = false }: StatusViewProps) {
                           : 'font-medium text-foreground',
                       )}
                     >
-                      {step.label}
+                      {t(step.label as never)}
                     </span>
                   </li>
                 ))}
@@ -108,7 +108,7 @@ export function StatusView({ status, preview = false }: StatusViewProps) {
                     {t('page.statusPage.reviewerNote')}
                   </span>
                   <p className="text-sm leading-relaxed text-muted-foreground">
-                    {config.note}
+                    {t(config.note as never)}
                   </p>
                 </div>
               </div>
@@ -132,7 +132,7 @@ export function StatusView({ status, preview = false }: StatusViewProps) {
                   'w-full sm:w-auto',
                 )}
               >
-                {action.label}
+                {t(action.label as never)}
                 {index === 0 && action.variant === 'primary' && (
                   <Icon name="arrow-right" className="size-4" />
                 )}
@@ -142,7 +142,7 @@ export function StatusView({ status, preview = false }: StatusViewProps) {
 
           {config.helper && (
             <p className="text-center text-xs text-muted-foreground sm:text-left">
-              {config.helper}
+              {t(config.helper as never)}
             </p>
           )}
         </div>

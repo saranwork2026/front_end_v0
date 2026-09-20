@@ -1199,6 +1199,45 @@ export const en = {
       statusPage: {
         reviewerNote: 'Reviewer note',
         previewStates: 'Preview states:',
+        tlSubmitted: 'Profile submitted',
+        tlReview: 'Under review by our team',
+        tlDecision: 'Decision & go live',
+        draftEyebrow: 'Keep going',
+        draftTitle: 'Your profile is still a draft',
+        draftBody:
+          'Finish filling in your profile and reach at least 70% completion to submit it for review. It only takes a few minutes.',
+        draftContinue: 'Continue my profile',
+        draftView: 'View my profile',
+        draftHelper: 'Profiles become visible to matches only after admin approval.',
+        completedEyebrow: 'In progress',
+        completedTitle: 'Your profile is submitted for review',
+        completedBody:
+          "Thanks for completing your profile. Our team is verifying your details and will approve it before it goes live to matches. You'll get a notification as soon as it's approved — no action needed right now.",
+        completedEdit: 'Edit my profile',
+        completedPlans: 'Explore membership plans',
+        completedHelper: 'Verification usually takes less than 24 hours.',
+        reviewEyebrow: 'In progress',
+        reviewTitle: 'Your profile is under review',
+        reviewBody:
+          "Our team is verifying your details to keep the community safe and genuine. You'll get a notification as soon as it's approved — no action needed from you right now.",
+        reviewEdit: 'Edit my profile',
+        reviewPlans: 'Explore membership plans',
+        reviewHelper: 'Most profiles are reviewed within 24 hours.',
+        rejectedEyebrow: 'Action needed',
+        rejectedTitle: 'Your profile needs a few changes',
+        rejectedBody:
+          'We could not approve your profile in its current form. Please review the note below, update the flagged details, and resubmit for verification.',
+        rejectedNote:
+          'One or more photos did not clearly show your face, and the profession details need to be more specific. Please update these and resubmit.',
+        rejectedEdit: 'Edit & resubmit',
+        rejectedSupport: 'Contact support',
+        rejectedHelper: 'Once resubmitted, your profile returns to review.',
+        approvedEyebrow: 'You are live',
+        approvedTitle: 'Your profile is approved',
+        approvedBody:
+          'Congratulations! Your profile is now visible to matches. Start discovering people who share your values and preferences.',
+        approvedDashboard: 'Go to dashboard',
+        approvedMatches: 'Browse matches',
       },
       errorsPage: {
         accessDeniedTitle: 'Access denied',
