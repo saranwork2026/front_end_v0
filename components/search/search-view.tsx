@@ -74,12 +74,12 @@ export function SearchView() {
   const activeCount = countActiveFilters(applied)
 
   const runSearch = useCallback(async (next: SearchFilters, searchPage: number) => {
-    const validationError = validateFilters(next)
+    const validationErrorKey = validateFilters(next)
     setApplied(next)
     setSearched(true)
     setPage(searchPage)
-    if (validationError) {
-      setError(validationError)
+    if (validationErrorKey) {
+      setError(t(validationErrorKey as never))
       setResults(null)
       return
     }

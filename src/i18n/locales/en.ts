@@ -335,6 +335,9 @@ export const en = {
         countFound_one: '{{count}} profile found',
         countFound_other: '{{count}} profiles found',
         genericError: 'Something went wrong. Please try again.',
+        rangeAgeError: 'Minimum age is greater than maximum age. Please adjust the age range.',
+        rangeHeightError: 'Minimum height is greater than maximum height. Please adjust the height range.',
+        rangeIncomeError: 'Minimum income is greater than maximum income. Please adjust the income range.',
         errorTitle: "We couldn't run that search",
         emptyStartTitle: 'Start your search',
         emptyStartDesc:

@@ -63,13 +63,16 @@ export function countActiveFilters(f: SearchFilters): number {
   return buildActiveChips(f).length
 }
 
-/** Returns an error message for impossible ranges, else null. */
+/**
+ * Returns an i18n KEY for impossible ranges, else null. The caller resolves
+ * the key via t() (this module has no React context).
+ */
 export function validateFilters(f: SearchFilters): string | null {
   if (f.minAge && f.maxAge && f.minAge > f.maxAge)
-    return 'Minimum age is greater than maximum age. Please adjust the age range.'
+    return 'page.search.rangeAgeError'
   if (f.minHeightCm && f.maxHeightCm && f.minHeightCm > f.maxHeightCm)
-    return 'Minimum height is greater than maximum height. Please adjust the height range.'
+    return 'page.search.rangeHeightError'
   if (f.minAnnualIncome && f.maxAnnualIncome && f.minAnnualIncome > f.maxAnnualIncome)
-    return 'Minimum income is greater than maximum income. Please adjust the income range.'
+    return 'page.search.rangeIncomeError'
   return null
 }
