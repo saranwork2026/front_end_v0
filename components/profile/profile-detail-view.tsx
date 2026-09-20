@@ -346,6 +346,7 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
           contactState={unlocking ? 'unlocking' : contactState}
           contactQuota={contactQuota}
           onSendInterest={() => void handleSendInterest()}
+          onMessage={() => navigate(`/chat/${profileId}`)}
           onShortlistToggle={handleShortlistToggle}
           onShare={handleShare}
           onRequestPhotoAccess={handleRequestPhotoAccess}
@@ -451,6 +452,7 @@ interface ReadyContentProps {
   onReport: (reason: string, description?: string) => void
   onBlock: () => void
   onUnblock: () => void
+  onMessage: () => void
 }
 
 function ReadyContent({
@@ -476,6 +478,7 @@ function ReadyContent({
   onReport,
   onBlock,
   onUnblock,
+  onMessage,
 }: ReadyContentProps) {
   const { t } = useTranslation()
   const name = [profile.firstName, profile.lastName].filter(Boolean).join(' ')
@@ -574,6 +577,7 @@ function ReadyContent({
                   onShortlistToggle={onShortlistToggle}
                   onShare={onShare}
                   onRequestPhotoAccess={onRequestPhotoAccess}
+                  onMessage={onMessage}
                 />
               </div>
             )}

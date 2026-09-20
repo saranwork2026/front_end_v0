@@ -14,6 +14,7 @@ interface ConnectPanelProps {
   onShortlistToggle: () => void
   onShare: () => void
   onRequestPhotoAccess: () => void
+  onMessage: () => void
 }
 
 /**
@@ -29,6 +30,7 @@ export function ConnectPanel({
   onShortlistToggle,
   onShare,
   onRequestPhotoAccess,
+  onMessage,
 }: ConnectPanelProps) {
   const { t } = useTranslation()
   return (
@@ -52,6 +54,20 @@ export function ConnectPanel({
             size={18}
           />
           {interestState === 'sent' ? t('page.profile.interestSent') : t('page.profile.sendInterest')}
+        </Button>
+
+        {/* Message: opens the 1:1 chat with this member. Chat itself is gated
+            server-side (needs an accepted interest + a chat-enabled plan); the
+            conversation view surfaces the appropriate prompt if not yet
+            allowed, so this is a always-available entry point. */}
+        <Button
+          variant="secondary"
+          size="lg"
+          className="w-full"
+          onClick={onMessage}
+        >
+          <Icon name="chat" size={18} />
+          {t('page.profile.message')}
         </Button>
 
         <div className="flex gap-2.5">

@@ -3,7 +3,6 @@
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import Link from 'next/link'
-import { useNavigate } from 'react-router-dom'
 import { describeQuota, type PaymentMethod, type SubscriptionPlan } from '@matrimony/shared-core'
 
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -170,8 +169,6 @@ export function SubscriptionsView({ planId }: SubscriptionsViewProps) {
  */
 function SubscriptionPurchaseSection({ plan }: { plan: SubscriptionPlan }) {
   const { t } = useTranslation()
-  const navigate = useNavigate()
-  const [initiating, setInitiating] = React.useState(false)
   const [manualMethod, setManualMethod] = React.useState<PaymentMethod>('CASH')
   const [referenceNote, setReferenceNote] = React.useState('')
   const [manualSubmitting, setManualSubmitting] = React.useState(false)
@@ -183,23 +180,6 @@ function SubscriptionPurchaseSection({ plan }: { plan: SubscriptionPlan }) {
       ...t,
       { id: Date.now() + Math.floor(Math.random() * 1000), message, variant },
     ])
-  }
-
-  async function handleConfirm() {
-    setInitiating(true)
-    try {
-      const res = await paymentsApi.initSubscription({ planId: plan.planId, paymentGateway: 'MOCK' })
-      navigate(`/payments/${res.data.paymentId}`, {
-        state: { amount: res.data.amount, paymentType: res.data.paymentType },
-      })
-    } catch (err) {
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        t('page.subscriptions.planUnavailable')
-      pushToast(message, 'error')
-    } finally {
-      setInitiating(false)
-    }
   }
 
   async function handleManualSubmit() {
@@ -253,7 +233,10 @@ function SubscriptionPurchaseSection({ plan }: { plan: SubscriptionPlan }) {
   return (
     <>
       <div className="mb-6 flex flex-col gap-4">
-        {/* Confirm & pay (instant gateway) */}
+        {/* Selected plan summary. Instant "Confirm & pay" is intentionally
+            removed until a real payment gateway is integrated — until then all
+            purchases go through the admin-verified cash/UPI claim below, so a
+            plan can never self-activate without verification. */}
         <section className="rounded-2xl border border-primary/30 bg-secondary/40 p-5 sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -267,18 +250,9 @@ function SubscriptionPurchaseSection({ plan }: { plan: SubscriptionPlan }) {
               <p className="text-xs text-muted-foreground">{validityLabel(plan.validityDays, t)}</p>
             </div>
           </div>
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <Button size="lg" onClick={handleConfirm} loading={initiating}>
-              <Icon name="lock" size={16} />
-              {t('page.subscriptions.confirmPay')}
-            </Button>
-            <Link
-              href="/plans"
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {t('page.subscriptions.cancel')}
-            </Link>
-          </div>
+          <p className="mt-3 text-sm text-muted-foreground text-pretty">
+            {t('page.subscriptions.verifyNote')}
+          </p>
         </section>
 
         {/* Manual (cash/online) payment claim */}

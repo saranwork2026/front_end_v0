@@ -639,6 +639,8 @@ export const en = {
         selectedPlan: 'Selected plan',
         confirmPay: 'Confirm & pay',
         cancel: 'Cancel',
+        verifyNote:
+          'Payments are verified by our team before your plan is activated. Submit your cash/UPI payment details below.',
         manualTitle: 'Already paid by cash or online?',
         manualDesc: 'Submit your payment details and our team will verify and activate your plan.',
         paymentMethod: 'Payment method',
@@ -820,6 +822,7 @@ export const en = {
         // connect panel
         connect: 'Connect',
         connectDesc: "Express interest to start a conversation once it's accepted.",
+        message: 'Message',
         shortlisted: 'Shortlisted',
         shortlist: 'Shortlist',
         photoRequestSent: 'Photo request sent',
