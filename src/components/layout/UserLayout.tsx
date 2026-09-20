@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import { Icon } from '@/components/ui/icon'
+import { LanguageSwitcher } from '@/components/shared/language-switcher'
 import { cn, focalPosition } from '@/lib/utils'
 import { navItems, bottomNavItems, mobileMenuItems } from './navConfig'
 import { useAuthStore } from '@/src/stores/auth'
@@ -140,6 +141,10 @@ export function UserLayout() {
           </span>
 
           <div className="flex-1" />
+
+          {/* Global language switcher (globe icon) — available on every
+              authenticated page for both desktop and mobile. */}
+          <LanguageSwitcher className="mr-1" />
 
           <button
             type="button"

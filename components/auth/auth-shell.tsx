@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Icon } from '@/components/ui/icon'
+import { LanguageSwitcher } from '@/components/shared/language-switcher'
 
 interface AuthShellProps {
   title: string
@@ -23,6 +24,12 @@ export function AuthShell({ title, subtitle, children, footer, banner }: AuthShe
   return (
     <main className="relative flex min-h-dvh flex-col bg-brand-warm px-4 py-8 sm:py-12">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-brand-maroon opacity-[0.06]" />
+
+      {/* Global language switcher — lets users pick their language before they
+          sign in (auth screens own their own shell, outside UserLayout). */}
+      <div className="absolute right-4 top-4 z-10">
+        <LanguageSwitcher />
+      </div>
 
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col">
         <header className="flex flex-col items-center gap-2 pb-6 text-center">
