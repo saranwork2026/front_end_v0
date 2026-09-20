@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { GenerateChartResponse } from '@matrimony/shared-core'
 
 import { Button } from '@/components/ui/button'
@@ -30,6 +31,7 @@ export function HoroscopeChartPanel({
   form: WizardForm
   onChange: (patch: Partial<WizardForm>) => void
 }) {
+  const { t } = useTranslation()
   const [result, setResult] = useState<GenerateChartResponse | null>(null)
   const [generating, setGenerating] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -88,9 +90,9 @@ export function HoroscopeChartPanel({
 
   // Guard: DOB (from Basic step), birth time, and a resolvable place required.
   const missing: string[] = []
-  if (!form.dob) missing.push('date of birth')
-  if (!form.birthTime) missing.push('birth time')
-  if (!form.birthLatitude || !form.birthLongitude) missing.push('birth place coordinates')
+  if (!form.dob) missing.push(t('page.horoscope.missDob'))
+  if (!form.birthTime) missing.push(t('page.horoscope.missBirthTime'))
+  if (!form.birthLatitude || !form.birthLongitude) missing.push(t('page.horoscope.missCoords'))
   const canGenerate = missing.length === 0
 
   const generate = useCallback(async () => {
@@ -121,13 +123,13 @@ export function HoroscopeChartPanel({
       const status = (e as { response?: { status?: number } })?.response?.status
       setError(
         status === 422
-          ? 'Birth time and birth place are required to generate the chart.'
-          : 'Could not generate the chart. Please check the details and try again.',
+          ? t('page.horoscope.errGenerate422')
+          : t('page.horoscope.errGenerate'),
       )
     } finally {
       setGenerating(false)
     }
-  }, [form, timezone, onChange])
+  }, [form, timezone, onChange, t])
 
   const confirm = useCallback(async () => {
     if (!result) return
@@ -143,48 +145,51 @@ export function HoroscopeChartPanel({
       setOwnCharts(result)
       setResult(null)
     } catch {
-      setError('Could not save the chart. Please try again.')
+      setError(t('page.horoscope.errSave'))
     } finally {
       setSaving(false)
     }
-  }, [result])
+  }, [result, t])
 
   const showing = result ?? ownCharts
 
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-border bg-card/50 p-4">
       <div className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-foreground">Digital birth chart (Raasi & Amsam)</span>
+        <span className="text-sm font-medium text-foreground">{t('page.horoscope.panelTitle')}</span>
         <p className="text-xs text-muted-foreground">
-          Generate your Raasi (D1) and Amsam (D9) charts from your date of birth, birth time, and
-          birth place. Review them and save — you can edit the values above before saving.
+          {t('page.horoscope.panelDesc')}
         </p>
       </div>
 
       <div className="flex flex-col gap-3">
         <SearchableSelect
-          label="Birth place"
+          label={t('page.horoscope.birthPlace')}
           options={BIRTH_PLACE_OPTIONS}
           value={form.birthPlaceLabel}
           onChange={selectPlace}
-          placeholder="Search your birth city / town…"
+          placeholder={t('page.horoscope.birthPlacePlaceholder')}
         />
 
         {form.birthPlaceLabel && !showManual && (
           <p className="text-xs text-muted-foreground">
             {form.birthLatitude && form.birthLongitude ? (
               <>
-                Coordinates: {form.birthLatitude}, {form.birthLongitude} · {form.birthTimezone || timezone}.{' '}
+                {t('page.horoscope.coordinates', {
+                  lat: form.birthLatitude,
+                  lon: form.birthLongitude,
+                  tz: form.birthTimezone || timezone,
+                })}
               </>
             ) : (
-              <>Place not in the list — please enter coordinates manually. </>
+              <>{t('page.horoscope.placeNotInList')}</>
             )}
             <button
               type="button"
               className="underline underline-offset-2 hover:text-foreground"
               onClick={() => setShowManual(true)}
             >
-              Enter coordinates manually
+              {t('page.horoscope.enterManually')}
             </button>
           </p>
         )}
@@ -192,23 +197,23 @@ export function HoroscopeChartPanel({
         {(showManual || (!!form.birthPlaceLabel && !findBirthPlace(form.birthPlaceLabel))) && (
           <div className="grid gap-3 sm:grid-cols-2">
             <Input
-              label="Latitude"
+              label={t('page.horoscope.latitude')}
               type="number"
               inputMode="decimal"
               value={form.birthLatitude}
               onChange={(e) => onChange({ birthLatitude: e.target.value })}
-              placeholder="e.g. 10.79"
+              placeholder={t('page.horoscope.latPlaceholder')}
             />
             <Input
-              label="Longitude"
+              label={t('page.horoscope.longitude')}
               type="number"
               inputMode="decimal"
               value={form.birthLongitude}
               onChange={(e) => onChange({ birthLongitude: e.target.value })}
-              placeholder="e.g. 79.13"
+              placeholder={t('page.horoscope.lonPlaceholder')}
             />
             <Input
-              label="Timezone"
+              label={t('page.horoscope.timezone')}
               value={form.birthTimezone}
               onChange={(e) => onChange({ birthTimezone: e.target.value })}
               placeholder={timezone}
@@ -219,11 +224,11 @@ export function HoroscopeChartPanel({
 
       {!canGenerate && (
         <p className="text-xs text-warning-foreground">
-          To generate the chart, add your {missing.join(', ')}.
+          {t('page.horoscope.addToGenerate', { fields: missing.join(', ') })}
         </p>
       )}
       {error && <p className="text-xs text-destructive">{error}</p>}
-      {saved && <p className="text-xs text-success">Chart saved. It will be shared per your horoscope settings.</p>}
+      {saved && <p className="text-xs text-success">{t('page.horoscope.savedNote')}</p>}
 
       <div className="flex flex-wrap gap-2">
         <Button
@@ -234,11 +239,11 @@ export function HoroscopeChartPanel({
           loading={generating}
           disabled={!canGenerate || generating}
         >
-          {showing ? 'Regenerate chart' : 'Generate chart'}
+          {showing ? t('page.horoscope.regenerate') : t('page.horoscope.generate')}
         </Button>
         {result && (
           <Button type="button" variant="success" size="sm" onClick={confirm} loading={saving}>
-            Save chart
+            {t('page.horoscope.saveChart')}
           </Button>
         )}
       </div>
@@ -248,17 +253,17 @@ export function HoroscopeChartPanel({
           {result && (
             <>
               <p className="text-xs text-muted-foreground">
-                Review the generated values below — edit any of them if needed, then click Save chart.
+                {t('page.horoscope.reviewNote')}
               </p>
               {/* Editable panchangam fields, pre-filled from the generated chart
                   and bound to the wizard form so edits persist on save. */}
               <div className="grid gap-3 sm:grid-cols-2">
                 <Select
-                  label="Nakshatra (birth star)"
+                  label={t('page.horoscope.nakshatra')}
                   value={form.nakshatra}
                   onChange={(e) => onChange({ nakshatra: e.target.value })}
                 >
-                  <option value="">Select nakshatra</option>
+                  <option value="">{t('page.horoscope.selectNakshatra')}</option>
                   {nakshatraOptions.map((o) => (
                     <option key={o.value} value={o.value}>
                       {o.label}
@@ -266,11 +271,11 @@ export function HoroscopeChartPanel({
                   ))}
                 </Select>
                 <Select
-                  label="Padam (Pada)"
+                  label={t('page.horoscope.padam')}
                   value={form.padam}
                   onChange={(e) => onChange({ padam: e.target.value })}
                 >
-                  <option value="">Select padam</option>
+                  <option value="">{t('page.horoscope.selectPadam')}</option>
                   {padamOptions.map((o) => (
                     <option key={o.value} value={o.value}>
                       {o.label}
@@ -278,11 +283,11 @@ export function HoroscopeChartPanel({
                   ))}
                 </Select>
                 <Select
-                  label="Raasi (moon sign)"
+                  label={t('page.horoscope.raasi')}
                   value={form.raasi}
                   onChange={(e) => onChange({ raasi: e.target.value })}
                 >
-                  <option value="">Select raasi</option>
+                  <option value="">{t('page.horoscope.selectRaasi')}</option>
                   {raasiOptions.map((o) => (
                     <option key={o.value} value={o.value}>
                       {o.label}
@@ -290,11 +295,11 @@ export function HoroscopeChartPanel({
                   ))}
                 </Select>
                 <Select
-                  label="Lagnam (ascendant)"
+                  label={t('page.horoscope.lagnam')}
                   value={form.lagnam}
                   onChange={(e) => onChange({ lagnam: e.target.value })}
                 >
-                  <option value="">Select lagnam</option>
+                  <option value="">{t('page.horoscope.selectLagnam')}</option>
                   {raasiOptions.map((o) => (
                     <option key={o.value} value={o.value}>
                       {o.label}
@@ -306,11 +311,11 @@ export function HoroscopeChartPanel({
           )}
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col items-center gap-1.5">
-              <span className="text-xs font-medium text-muted-foreground">Raasi (D1)</span>
+              <span className="text-xs font-medium text-muted-foreground">{t('page.horoscope.rasiD1')}</span>
               <SouthIndianChart chart={showing.rasiChart} />
             </div>
             <div className="flex flex-col items-center gap-1.5">
-              <span className="text-xs font-medium text-muted-foreground">Amsam (D9)</span>
+              <span className="text-xs font-medium text-muted-foreground">{t('page.horoscope.amsamD9')}</span>
               <SouthIndianChart chart={showing.navamsaChart} />
             </div>
           </div>

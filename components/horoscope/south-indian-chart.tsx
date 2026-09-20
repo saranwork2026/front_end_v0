@@ -1,5 +1,7 @@
 'use client'
 
+import { useTranslation } from 'react-i18next'
+
 import { GRAHA_TAMIL, type ChartData, type Graha } from '@matrimony/shared-core'
 
 /**
@@ -51,6 +53,7 @@ interface SouthIndianChartProps {
 }
 
 export function SouthIndianChart({ chart, title, className }: SouthIndianChartProps) {
+  const { t } = useTranslation()
   const centreLabel = title ?? (chart.chartType === 'NAVAMSA' ? 'அம்சம்' : 'இராசி')
 
   // Build a 4×4 matrix of cells; null = part of the centre label block.
@@ -69,7 +72,7 @@ export function SouthIndianChart({ chart, title, className }: SouthIndianChartPr
       <div
         className="relative grid aspect-square w-full max-w-xs grid-cols-4 grid-rows-4 overflow-hidden rounded-lg border border-border bg-card text-foreground"
         role="img"
-        aria-label={`${centreLabel} chart`}
+        aria-label={t('page.horoscope.chartAria', { name: centreLabel })}
       >
         {cells.flatMap((rowArr, r) =>
           rowArr.map((sign, c) => {

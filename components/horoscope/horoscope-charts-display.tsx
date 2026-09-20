@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { ChartData } from '@matrimony/shared-core'
 
 import { profileApi } from '@/src/lib/api'
@@ -13,6 +14,7 @@ import { SouthIndianChart } from '@/components/horoscope/south-indian-chart'
  * nothing when there are no charts, so it can be dropped into any profile view.
  */
 export function HoroscopeChartsDisplay({ profileId }: { profileId?: string }) {
+  const { t } = useTranslation()
   const [charts, setCharts] = useState<ChartData[]>([])
 
   useEffect(() => {
@@ -36,13 +38,13 @@ export function HoroscopeChartsDisplay({ profileId }: { profileId?: string }) {
     <div className="grid gap-4 sm:grid-cols-2">
       {rasi && (
         <div className="flex flex-col items-center gap-1.5">
-          <span className="text-xs font-medium text-muted-foreground">Raasi (D1)</span>
+          <span className="text-xs font-medium text-muted-foreground">{t('page.horoscope.rasiD1')}</span>
           <SouthIndianChart chart={rasi} />
         </div>
       )}
       {navamsa && (
         <div className="flex flex-col items-center gap-1.5">
-          <span className="text-xs font-medium text-muted-foreground">Amsam (D9)</span>
+          <span className="text-xs font-medium text-muted-foreground">{t('page.horoscope.amsamD9')}</span>
           <SouthIndianChart chart={navamsa} />
         </div>
       )}
