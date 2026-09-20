@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 
 import { buttonVariants } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
@@ -28,6 +29,7 @@ interface StatusViewProps {
 }
 
 export function StatusView({ status, preview = false }: StatusViewProps) {
+  const { t } = useTranslation()
   const config = statusConfig[status]
 
   return (
@@ -103,7 +105,7 @@ export function StatusView({ status, preview = false }: StatusViewProps) {
                 />
                 <div className="flex flex-col gap-1">
                   <span className="text-sm font-semibold text-foreground">
-                    Reviewer note
+                    {t('page.statusPage.reviewerNote')}
                   </span>
                   <p className="text-sm leading-relaxed text-muted-foreground">
                     {config.note}
@@ -149,7 +151,7 @@ export function StatusView({ status, preview = false }: StatusViewProps) {
       {/* Status switcher for design-preview only (?preview=1). */}
       {preview && (
         <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-          <span className="text-xs text-muted-foreground">Preview states:</span>
+          <span className="text-xs text-muted-foreground">{t('page.statusPage.previewStates')}</span>
           {(Object.keys(statusConfig) as ProfileStatus[]).map((s) => (
             <Link
               key={s}

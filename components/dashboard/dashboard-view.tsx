@@ -212,12 +212,12 @@ export function DashboardView({ preview }: DashboardViewProps) {
       ) : !hasAnything ? (
         <EmptyState
           icon="heart"
-          title="No recommendations yet"
-          description="Set your partner preferences so we can start curating matches for you. It only takes a minute and makes your matches far more relevant."
+          title={t('dashboard.emptyTitle')}
+          description={t('dashboard.emptyDesc')}
           action={
             <Link href="/partner-preferences" className={buttonVariants()}>
               <Icon name="settings" size={18} />
-              Set preferences
+              {t('dashboard.setPreferences')}
             </Link>
           }
         />
@@ -225,7 +225,7 @@ export function DashboardView({ preview }: DashboardViewProps) {
         <>
           {dailyCards.length > 0 && (
             <section aria-labelledby="todays-matches" className="mb-10">
-              <SectionHeading id="todays-matches" eyebrow="Today's matches" title="Handpicked for you today" icon="sparkles" />
+              <SectionHeading id="todays-matches" eyebrow={t('dashboard.todaysMatchesEyebrow')} title={t('dashboard.todaysMatchesTitle')} icon="sparkles" />
               <div className="mt-4 grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {dailyCards.map((profileItem) => (
                   <ProfileCard
@@ -240,7 +240,7 @@ export function DashboardView({ preview }: DashboardViewProps) {
 
           {matchContent.length > 0 && (
             <section aria-labelledby="recommended">
-              <SectionHeading id="recommended" eyebrow="Recommended matches" title="More profiles you may like" icon="heart" />
+              <SectionHeading id="recommended" eyebrow={t('dashboard.recommendedEyebrow')} title={t('dashboard.recommendedTitle')} icon="heart" />
               {loadingResults ? (
                 <DashboardSkeleton />
               ) : (
@@ -272,7 +272,7 @@ export function DashboardView({ preview }: DashboardViewProps) {
           of match availability (best-effort; each hides when empty). */}
       {!isLoading && viewedMe.length > 0 && (
         <section aria-labelledby="viewed-me" className="mt-10">
-          <SectionHeading id="viewed-me" eyebrow="Profile views" title="Who viewed your profile" icon="eye" />
+          <SectionHeading id="viewed-me" eyebrow={t('dashboard.viewedMeEyebrow')} title={t('dashboard.viewedMeTitle')} icon="eye" />
           <div className="mt-4 grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {viewedMe.map((v) => (
               <ProfileCard
@@ -287,7 +287,7 @@ export function DashboardView({ preview }: DashboardViewProps) {
               href="/profile-views"
               className="text-sm font-medium text-primary underline-offset-4 hover:underline"
             >
-              View all
+              {t('dashboard.viewAll')}
             </Link>
           </div>
         </section>
@@ -295,7 +295,7 @@ export function DashboardView({ preview }: DashboardViewProps) {
 
       {!isLoading && iViewed.length > 0 && (
         <section aria-labelledby="i-viewed" className="mt-10">
-          <SectionHeading id="i-viewed" eyebrow="Recently viewed" title="Profiles you viewed" icon="eye" />
+          <SectionHeading id="i-viewed" eyebrow={t('dashboard.recentlyViewedEyebrow')} title={t('dashboard.recentlyViewedTitle')} icon="eye" />
           <div className="mt-4 grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {iViewed.map((v) => (
               <ProfileCard
@@ -326,6 +326,7 @@ export function DashboardView({ preview }: DashboardViewProps) {
 
 /** #5 — Magizh does both matrimony registration and event management. */
 function ServicesCard() {
+  const { t } = useTranslation()
   return (
     <section
       aria-labelledby="our-services"
@@ -333,14 +334,13 @@ function ServicesCard() {
     >
       <div className="flex items-center gap-2 text-gold">
         <Icon name="sparkles" size={16} />
-        <span className="text-xs font-semibold uppercase tracking-wide">Our services</span>
+        <span className="text-xs font-semibold uppercase tracking-wide">{t('dashboard.ourServices')}</span>
       </div>
       <h2 id="our-services" className="mt-1 font-serif text-xl font-bold text-foreground">
-        Matrimony &amp; Event Management
+        {t('dashboard.servicesTitle')}
       </h2>
       <p className="mt-2 text-sm text-muted-foreground text-pretty">
-        Wedding registration for all communities, and complete service for all
-        auspicious events (நிகழ்ச்சி மேலாண்மை).
+        {t('dashboard.servicesDesc')}
       </p>
       <dl className="mt-4 space-y-2.5 text-sm">
         <div className="flex items-start gap-2.5">
@@ -371,6 +371,7 @@ function ServicesCard() {
 
 /** #7 — support/help contact for matrimony assistance. */
 function SupportCard() {
+  const { t } = useTranslation()
   return (
     <section
       aria-labelledby="need-help"
@@ -378,14 +379,13 @@ function SupportCard() {
     >
       <div className="flex items-center gap-2 text-primary">
         <Icon name="phone" size={16} />
-        <span className="text-xs font-semibold uppercase tracking-wide">Need help?</span>
+        <span className="text-xs font-semibold uppercase tracking-wide">{t('dashboard.needHelp')}</span>
       </div>
       <h2 id="need-help" className="mt-1 font-serif text-xl font-bold text-foreground">
-        We&apos;re here to help
+        {t('dashboard.helpTitle')}
       </h2>
       <p className="mt-2 text-sm text-muted-foreground text-pretty">
-        If you need support from Magizh Matrimony, please call us and our team
-        will be glad to assist you.
+        {t('dashboard.helpDesc')}
       </p>
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">
         <a
@@ -405,7 +405,7 @@ function SupportCard() {
       </div>
       <div className="mt-3">
         <Link href="/support" className="text-sm font-medium text-primary underline-offset-4 hover:underline">
-          Visit the help centre
+          {t('dashboard.visitHelpCentre')}
         </Link>
       </div>
     </section>
@@ -414,6 +414,7 @@ function SupportCard() {
 
 /** #6 Rotating vendor/promo banner carousel (auto-advances when >1 banner). */
 function AdCarousel({ banners }: { banners: AdBanner[] }) {
+  const { t } = useTranslation()
   const [index, setIndex] = useState(0)
   const count = banners.length
 
@@ -435,7 +436,7 @@ function AdCarousel({ banners }: { banners: AdBanner[] }) {
   )
 
   return (
-    <section aria-label="Sponsored" className="mb-8">
+    <section aria-label={t('dashboard.sponsored')} className="mb-8">
       <div className="relative overflow-hidden rounded-2xl border border-border bg-muted">
         <div className="aspect-[5/2] w-full sm:aspect-[3/1]">
           {current.linkUrl ? (

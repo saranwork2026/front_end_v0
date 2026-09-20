@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { UnlockedContact } from '@matrimony/shared-core'
 
 import { Badge } from '@/components/ui/badge'
@@ -27,9 +28,9 @@ const sourceVariant: Record<UnlockedContact['paymentSource'], 'success' | 'gold'
   PAYMENT: 'success',
   SUBSCRIPTION: 'gold',
 }
-const sourceLabel: Record<UnlockedContact['paymentSource'], string> = {
-  PAYMENT: 'Paid',
-  SUBSCRIPTION: 'Plan',
+const sourceLabelKey: Record<UnlockedContact['paymentSource'], string> = {
+  PAYMENT: 'page.contacts.sourcePaid',
+  SUBSCRIPTION: 'page.contacts.sourcePlan',
 }
 
 function fullName(c: UnlockedContact) {
@@ -41,6 +42,7 @@ function formatUnlockedDate(iso: string): string {
 }
 
 export function ContactsView({ state }: { state?: ViewState }) {
+  const { t } = useTranslation()
   const [page, setPage] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -76,9 +78,9 @@ export function ContactsView({ state }: { state?: ViewState }) {
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:py-10">
       <div className="mb-6">
-        <h1 className="font-serif text-2xl text-foreground sm:text-3xl">Unlocked contacts</h1>
+        <h1 className="font-serif text-2xl text-foreground sm:text-3xl">{t('page.contacts.title')}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Phone numbers and emails you have unlocked. Reach out directly.
+          {t('page.contacts.subtitle')}
         </p>
       </div>
 
@@ -96,21 +98,21 @@ export function ContactsView({ state }: { state?: ViewState }) {
         </div>
       ) : error ? (
         <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-6 text-center">
-          <p className="text-sm text-destructive">We could not load your contacts. Please try again.</p>
+          <p className="text-sm text-destructive">{t('page.contacts.errorDesc')}</p>
           <div className="mt-4 flex justify-center">
             <Button variant="secondary" onClick={() => void load()}>
-              Retry
+              {t('page.contacts.retry')}
             </Button>
           </div>
         </div>
       ) : all.length === 0 ? (
         <EmptyState
           icon="phone"
-          title="No unlocked contacts yet"
-          description="When you unlock a member's phone or email, their contact details will be saved here for easy access."
+          title={t('page.contacts.emptyTitle')}
+          description={t('page.contacts.emptyDesc')}
           action={
             <Link href="/matches" className={cn(buttonVariants({ variant: 'primary' }))}>
-              Browse matches
+              {t('page.contacts.browseMatches')}
             </Link>
           }
         />
@@ -121,12 +123,12 @@ export function ContactsView({ state }: { state?: ViewState }) {
             <table className="w-full min-w-[720px] text-left text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
-                  <th className="px-4 py-3 font-medium">Profile</th>
-                  <th className="px-4 py-3 font-medium">Mobile</th>
-                  <th className="px-4 py-3 font-medium">Email</th>
-                  <th className="px-4 py-3 text-right font-medium">Amount</th>
-                  <th className="px-4 py-3 font-medium">Source</th>
-                  <th className="px-4 py-3 font-medium">Unlocked</th>
+                  <th className="px-4 py-3 font-medium">{t('page.contacts.colProfile')}</th>
+                  <th className="px-4 py-3 font-medium">{t('page.contacts.colMobile')}</th>
+                  <th className="px-4 py-3 font-medium">{t('page.contacts.colEmail')}</th>
+                  <th className="px-4 py-3 text-right font-medium">{t('page.contacts.colAmount')}</th>
+                  <th className="px-4 py-3 font-medium">{t('page.contacts.colSource')}</th>
+                  <th className="px-4 py-3 font-medium">{t('page.contacts.colUnlocked')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -153,10 +155,10 @@ export function ContactsView({ state }: { state?: ViewState }) {
                       )}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-right tabular-nums text-foreground">
-                      {c.amountCharged > 0 ? INR.format(c.amountCharged) : 'Free'}
+                      {c.amountCharged > 0 ? INR.format(c.amountCharged) : t('page.contacts.free')}
                     </td>
                     <td className="px-4 py-3">
-                      <Badge variant={sourceVariant[c.paymentSource]}>{sourceLabel[c.paymentSource]}</Badge>
+                      <Badge variant={sourceVariant[c.paymentSource]}>{t(sourceLabelKey[c.paymentSource] as never)}</Badge>
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatUnlockedDate(c.unlockedAt)}</td>
                   </tr>
@@ -174,7 +176,7 @@ export function ContactsView({ state }: { state?: ViewState }) {
                     <Avatar contact={c} />
                     <span className="truncate font-medium text-foreground">{fullName(c)}</span>
                   </Link>
-                  <Badge variant={sourceVariant[c.paymentSource]}>{sourceLabel[c.paymentSource]}</Badge>
+                  <Badge variant={sourceVariant[c.paymentSource]}>{t(sourceLabelKey[c.paymentSource] as never)}</Badge>
                 </div>
                 <dl className="mt-3 grid grid-cols-1 gap-2 text-sm">
                   <div className="flex items-center gap-2">
@@ -192,8 +194,8 @@ export function ContactsView({ state }: { state?: ViewState }) {
                     </div>
                   )}
                   <div className="mt-1 flex items-center justify-between border-t border-border pt-2 text-xs text-muted-foreground">
-                    <span>{c.amountCharged > 0 ? INR.format(c.amountCharged) : 'Free'}</span>
-                    <span>Unlocked {formatUnlockedDate(c.unlockedAt)}</span>
+                    <span>{c.amountCharged > 0 ? INR.format(c.amountCharged) : t('page.contacts.free')}</span>
+                    <span>{t('page.contacts.unlockedPrefix')} {formatUnlockedDate(c.unlockedAt)}</span>
                   </div>
                 </dl>
               </li>
