@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import Link from 'next/link'
 import type { ApiError, Conversation, Message } from '@matrimony/shared-core'
 
@@ -39,19 +40,26 @@ function clockTime(iso: string): string {
   return new Intl.DateTimeFormat('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(iso))
 }
 
-function dayLabel(iso: string): string {
+/**
+ * Day-divider label. Returns an i18n KEY for Today/Yesterday (resolved by the
+ * component via t()) or a pre-formatted absolute date for anything older. Also
+ * returns a stable `groupId` so messages group correctly regardless of locale.
+ */
+function dayLabel(iso: string): { groupId: string; labelKey?: string; labelText?: string } {
   const d = new Date(iso)
   const today = new Date()
   const yest = new Date()
   yest.setDate(today.getDate() - 1)
   const sameDay = (a: Date, b: Date) =>
     a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
-  if (sameDay(d, today)) return 'Today'
-  if (sameDay(d, yest)) return 'Yesterday'
-  return new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }).format(d)
+  if (sameDay(d, today)) return { groupId: 'today', labelKey: 'page.chat.dayToday' }
+  if (sameDay(d, yest)) return { groupId: 'yesterday', labelKey: 'page.chat.dayYesterday' }
+  const text = new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }).format(d)
+  return { groupId: text, labelText: text }
 }
 
 export function ChatConversationView({ profileId, state = 'ready' }: Props) {
+  const { t } = useTranslation()
   const currentProfileId = authStore.getState().profileId
 
   const [messages, setMessages] = useState<Message[]>([])
@@ -391,10 +399,10 @@ export function ChatConversationView({ profileId, state = 'ready' }: Props) {
             </p>
           ) : (
             grouped.map((group) => (
-              <div key={group.label} className="space-y-2">
+              <div key={group.groupId} className="space-y-2">
                 <div className="flex justify-center">
                   <span className="rounded-full bg-secondary px-3 py-1 text-[11px] font-medium text-muted-foreground">
-                    {group.label}
+                    {group.labelKey ? t(group.labelKey as never) : group.labelText}
                   </span>
                 </div>
                 {group.messages.map((m) => (
@@ -514,12 +522,12 @@ function Spinner() {
 }
 
 function groupByDay(messages: Message[]) {
-  const groups: Array<{ label: string; messages: Message[] }> = []
+  const groups: Array<{ groupId: string; labelKey?: string; labelText?: string; messages: Message[] }> = []
   for (const m of messages) {
-    const label = dayLabel(m.sentAt)
+    const { groupId, labelKey, labelText } = dayLabel(m.sentAt)
     const last = groups[groups.length - 1]
-    if (last && last.label === label) last.messages.push(m)
-    else groups.push({ label, messages: [m] })
+    if (last && last.groupId === groupId) last.messages.push(m)
+    else groups.push({ groupId, labelKey, labelText, messages: [m] })
   }
   return groups
 }

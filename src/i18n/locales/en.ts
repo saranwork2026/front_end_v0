@@ -500,6 +500,8 @@ export const en = {
         timeMin: '{{count}}m',
         timeHr: '{{count}}h',
         timeDay: '{{count}}d',
+        dayToday: 'Today',
+        dayYesterday: 'Yesterday',
       },
       notifications: {
         eyebrow: 'Updates',

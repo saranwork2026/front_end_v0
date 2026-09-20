@@ -490,6 +490,8 @@ export const ta: Resources = {
         timeMin: '{{count}}நி',
         timeHr: '{{count}}ம',
         timeDay: '{{count}}நா',
+        dayToday: 'இன்று',
+        dayYesterday: 'நேற்று',
       },
       notifications: {
         eyebrow: 'புதுப்பிப்புகள்',
