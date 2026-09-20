@@ -1,5 +1,9 @@
+import type { useTranslation } from 'react-i18next'
+
 import type { IconName } from '@/components/ui/icon'
 import type { Notification, NotificationType } from '@matrimony/shared-core'
+
+type TFunc = ReturnType<typeof useTranslation>['t']
 
 /** Backend NotificationType → stroke Icon (fixes the spec's emoji gap). */
 const ICON: Record<NotificationType, IconName> = {
@@ -88,14 +92,18 @@ export function notificationHref(n: Notification): string | undefined {
   }
 }
 
-export function formatNotificationTime(iso: string): string {
+/**
+ * Relative time for a notification. Takes t() because this module has no React
+ * context; the caller (notifications-view) passes its useTranslation t.
+ */
+export function formatNotificationTime(iso: string, t: TFunc): string {
   const min = Math.round((Date.now() - new Date(iso).getTime()) / 60000)
-  if (min < 1) return 'Just now'
-  if (min < 60) return `${min}m ago`
+  if (min < 1) return t('page.notifications.timeJustNow')
+  if (min < 60) return t('page.notifications.timeMin', { count: min })
   const hr = Math.round(min / 60)
-  if (hr < 24) return `${hr}h ago`
+  if (hr < 24) return t('page.notifications.timeHr', { count: hr })
   const day = Math.round(hr / 24)
-  if (day < 7) return `${day}d ago`
+  if (day < 7) return t('page.notifications.timeDay', { count: day })
   return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 

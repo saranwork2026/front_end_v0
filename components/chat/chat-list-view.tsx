@@ -23,9 +23,9 @@ type TFunc = ReturnType<typeof useTranslation>['t']
 function relativeTime(iso: string, t: TFunc): string {
   const diff = Date.now() - new Date(iso).getTime()
   if (diff < MIN) return t('page.chat.timeJustNow')
-  if (diff < HOUR) return `${Math.floor(diff / MIN)}m`
-  if (diff < DAY) return `${Math.floor(diff / HOUR)}h`
-  if (diff < 7 * DAY) return `${Math.floor(diff / DAY)}d`
+  if (diff < HOUR) return t('page.chat.timeMin', { count: Math.floor(diff / MIN) })
+  if (diff < DAY) return t('page.chat.timeHr', { count: Math.floor(diff / HOUR) })
+  if (diff < 7 * DAY) return t('page.chat.timeDay', { count: Math.floor(diff / DAY) })
   return new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short' }).format(new Date(iso))
 }
 

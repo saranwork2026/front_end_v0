@@ -161,7 +161,7 @@ export function NotificationsView({
                         {!n.isRead && <span className="h-2 w-2 shrink-0 rounded-full bg-primary" aria-label={t('page.notifications.unread')} />}
                       </span>
                       <span className="mt-1 line-clamp-2 block text-sm text-muted-foreground">{n.message}</span>
-                      <span className="mt-1.5 block text-xs text-muted-foreground/80">{formatNotificationTime(n.createdAt)}</span>
+                      <span className="mt-1.5 block text-xs text-muted-foreground/80">{formatNotificationTime(n.createdAt, t)}</span>
                     </span>
                     <Icon name="arrow-right" className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
                   </button>

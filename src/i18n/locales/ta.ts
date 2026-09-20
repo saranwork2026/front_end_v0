@@ -482,6 +482,9 @@ export const ta: Resources = {
         noMessages: 'இதுவரை செய்திகள் இல்லை',
         blocked: 'தடுக்கப்பட்டது',
         timeJustNow: 'இப்போதுதான்',
+        timeMin: '{{count}}நி',
+        timeHr: '{{count}}ம',
+        timeDay: '{{count}}நா',
       },
       notifications: {
         eyebrow: 'புதுப்பிப்புகள்',
@@ -497,6 +500,10 @@ export const ta: Resources = {
         emptyDesc:
           'நீங்கள் விருப்பங்கள், செய்திகள் அல்லது கணக்கு புதுப்பிப்புகளைப் பெறும்போது, அவை இங்கே தோன்றும்.',
         unread: 'படிக்கப்படாதது',
+        timeJustNow: 'இப்போதுதான்',
+        timeMin: '{{count}}நி முன்',
+        timeHr: '{{count}}ம முன்',
+        timeDay: '{{count}}நா முன்',
       },
       accessRequests: {
         eyebrow: 'தனியுரிமை',

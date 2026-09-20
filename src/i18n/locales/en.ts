@@ -492,6 +492,9 @@ export const en = {
         noMessages: 'No messages yet',
         blocked: 'Blocked',
         timeJustNow: 'just now',
+        timeMin: '{{count}}m',
+        timeHr: '{{count}}h',
+        timeDay: '{{count}}d',
       },
       notifications: {
         eyebrow: 'Updates',
@@ -507,6 +510,10 @@ export const en = {
         emptyDesc:
           'When you receive interests, messages, or account updates, they will appear here.',
         unread: 'Unread',
+        timeJustNow: 'Just now',
+        timeMin: '{{count}}m ago',
+        timeHr: '{{count}}h ago',
+        timeDay: '{{count}}d ago',
       },
       accessRequests: {
         eyebrow: 'Privacy',
