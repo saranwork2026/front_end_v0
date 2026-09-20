@@ -32,12 +32,14 @@ export function isPasswordValid(value: string): boolean {
   return c.length && c.upper && c.lower && c.digit && c.special
 }
 
-export const passwordRules: { key: keyof PasswordChecks; label: string }[] = [
-  { key: 'length', label: 'At least 8 characters' },
-  { key: 'upper', label: 'One uppercase letter' },
-  { key: 'lower', label: 'One lowercase letter' },
-  { key: 'digit', label: 'One number' },
-  { key: 'special', label: 'One special character' },
+// labelKey holds an i18n key (this module has no React context); the auth
+// screens resolve it via t() when rendering the password checklist.
+export const passwordRules: { key: keyof PasswordChecks; labelKey: string }[] = [
+  { key: 'length', labelKey: 'auth.pwRuleLength' },
+  { key: 'upper', labelKey: 'auth.pwRuleUpper' },
+  { key: 'lower', labelKey: 'auth.pwRuleLower' },
+  { key: 'digit', labelKey: 'auth.pwRuleDigit' },
+  { key: 'special', labelKey: 'auth.pwRuleSpecial' },
 ]
 
 // Backend error codes mapped to human banners (spec §"maps ...").

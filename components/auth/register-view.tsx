@@ -214,7 +214,7 @@ export function RegisterView() {
                     className={`flex items-center gap-1.5 text-xs ${met ? 'text-success' : 'text-muted-foreground'}`}
                   >
                     <Icon name={met ? 'circle-check' : 'alert-circle'} size={13} />
-                    {rule.label}
+                    {t(rule.labelKey as never)}
                   </li>
                 )
               })}
