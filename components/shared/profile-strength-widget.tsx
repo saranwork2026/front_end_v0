@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 
 import { Icon } from '@/components/ui/icon'
 import { buttonVariants } from '@/components/ui/button'
@@ -22,12 +23,13 @@ export function ProfileStrengthWidget({
   missing = [],
   className,
 }: ProfileStrengthWidgetProps) {
+  const { t } = useTranslation()
   const pct = Math.max(0, Math.min(100, Math.round(strength)))
   const complete = pct >= 100
 
   return (
     <section
-      aria-label="Profile strength"
+      aria-label={t('page.shared.strengthAria')}
       className={cn(
         'rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6',
         className,
@@ -41,7 +43,7 @@ export function ProfileStrengthWidget({
             background: `conic-gradient(var(--color-gold) ${pct * 3.6}deg, var(--color-secondary) 0deg)`,
           }}
           role="img"
-          aria-label={`Profile ${pct}% complete`}
+          aria-label={t('page.shared.strengthCompleteAria', { pct })}
         >
           <span className="flex size-12 items-center justify-center rounded-full bg-card font-serif text-base font-bold text-foreground sm:size-16 sm:text-lg">
             {pct}%
@@ -52,18 +54,18 @@ export function ProfileStrengthWidget({
           <div className="flex items-center gap-2 text-gold">
             <Icon name="sparkles" size={16} />
             <span className="text-xs font-semibold uppercase tracking-wide">
-              Profile strength
+              {t('page.shared.strengthLabel')}
             </span>
           </div>
           <h2 className="mt-1 text-balance font-serif text-lg font-bold text-foreground">
             {complete
-              ? 'Your profile is all set'
-              : 'Complete your profile to get noticed'}
+              ? t('page.shared.strengthAllSet')
+              : t('page.shared.strengthGetNoticed')}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {complete
-              ? 'A complete profile keeps you at the top of relevant matches.'
-              : 'Profiles with more detail receive significantly more interest.'}
+              ? t('page.shared.strengthAllSetDesc')
+              : t('page.shared.strengthIncompleteDesc')}
           </p>
         </div>
       </div>
@@ -89,7 +91,7 @@ export function ProfileStrengthWidget({
         className={cn(buttonVariants({ variant: complete ? 'secondary' : 'primary' }), 'mt-5 w-full sm:w-auto')}
       >
         <Icon name="edit" size={16} />
-        {complete ? 'View profile' : 'Complete profile'}
+        {complete ? t('page.shared.viewProfileBtn') : t('page.shared.completeProfileBtn')}
       </Link>
     </section>
   )

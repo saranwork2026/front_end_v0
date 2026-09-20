@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { PhotoResponse } from '@matrimony/shared-core'
 
 import { Icon } from '@/components/ui/icon'
@@ -44,6 +45,7 @@ function educationLabel(code: string): string | undefined {
 }
 
 export function ReviewStep({ form, onChangeStep }: ReviewStepProps) {
+  const { t } = useTranslation()
   // Photos are a separate resource uploaded directly via photoApi (not part of
   // the wizard form), so the review summary reflects what's actually uploaded.
   const [photos, setPhotos] = useState<PhotoResponse[]>([])
@@ -72,128 +74,128 @@ export function ReviewStep({ form, onChangeStep }: ReviewStepProps) {
   }[] = [
     {
       key: 'basic',
-      title: 'Basic details',
+      title: t('page.review.secBasic'),
       icon: 'user',
       rows: [
-        { label: 'Name', value: [form.firstName, form.lastName].filter(Boolean).join(' ') },
-        { label: 'Date of birth', value: form.dob },
-        { label: 'Gender', value: form.gender ? lbl(genderOptions, form.gender) : undefined },
-        { label: 'Marital status', value: form.maritalStatus ? lbl(maritalOptions, form.maritalStatus) : undefined },
-        { label: 'Mother tongue', value: form.motherTongue },
+        { label: t('page.review.rName'), value: [form.firstName, form.lastName].filter(Boolean).join(' ') },
+        { label: t('page.review.rDob'), value: form.dob },
+        { label: t('page.review.rGender'), value: form.gender ? lbl(genderOptions, form.gender) : undefined },
+        { label: t('page.review.rMaritalStatus'), value: form.maritalStatus ? lbl(maritalOptions, form.maritalStatus) : undefined },
+        { label: t('page.review.rMotherTongue'), value: form.motherTongue },
       ],
     },
     {
       key: 'religious',
-      title: 'Religious background',
+      title: t('page.review.secReligious'),
       icon: 'sparkles',
       rows: [
-        { label: 'Religion', value: form.religion },
-        { label: 'Sect', value: form.sect },
-        { label: 'Caste / community', value: form.caste },
-        { label: 'Sub caste', value: form.subCaste },
-        { label: 'Gothram', value: form.gothram },
-        { label: 'Manglik', value: form.manglik ? lbl(manglikOptions, form.manglik) : undefined },
-        { label: 'Open to other religion', value: form.openToOtherReligion === 'true' ? 'Yes' : form.openToOtherReligion === 'false' ? 'No' : undefined },
-        { label: 'Open to other caste', value: form.openToOtherCaste === 'true' ? 'Yes' : form.openToOtherCaste === 'false' ? 'No' : undefined },
+        { label: t('page.review.rReligion'), value: form.religion },
+        { label: t('page.review.rSect'), value: form.sect },
+        { label: t('page.review.rCaste'), value: form.caste },
+        { label: t('page.review.rSubCaste'), value: form.subCaste },
+        { label: t('page.review.rGothram'), value: form.gothram },
+        { label: t('page.review.rManglik'), value: form.manglik ? lbl(manglikOptions, form.manglik) : undefined },
+        { label: t('page.review.rOpenReligion'), value: form.openToOtherReligion === 'true' ? t('page.review.yes') : form.openToOtherReligion === 'false' ? t('page.review.no') : undefined },
+        { label: t('page.review.rOpenCaste'), value: form.openToOtherCaste === 'true' ? t('page.review.yes') : form.openToOtherCaste === 'false' ? t('page.review.no') : undefined },
       ],
     },
     {
       key: 'professional',
-      title: 'Education & career',
+      title: t('page.review.secProfessional'),
       icon: 'settings',
       rows: [
-        { label: 'Education', value: educationLabel(form.education) },
-        { label: 'Education detail', value: form.educationDetail },
-        { label: 'Profession', value: form.profession },
-        { label: 'Employed in', value: form.employedIn ? lbl(employedInOptions, form.employedIn) : undefined },
+        { label: t('page.review.rEducation'), value: educationLabel(form.education) },
+        { label: t('page.review.rEducationDetail'), value: form.educationDetail },
+        { label: t('page.review.rProfession'), value: form.profession },
+        { label: t('page.review.rEmployedIn'), value: form.employedIn ? lbl(employedInOptions, form.employedIn) : undefined },
         {
-          label: 'Annual income',
+          label: t('page.review.rAnnualIncome'),
           value: form.annualIncome ? `₹${Number(form.annualIncome).toLocaleString('en-IN')}` : undefined,
         },
-        { label: 'Company', value: form.companyName },
-        { label: 'Work location', value: form.workLocation },
+        { label: t('page.review.rCompany'), value: form.companyName },
+        { label: t('page.review.rWorkLocation'), value: form.workLocation },
       ],
     },
     {
       key: 'location',
-      title: 'Location',
+      title: t('page.review.secLocation'),
       icon: 'map-pin',
       rows: [
         {
-          label: 'Native place',
+          label: t('page.review.rNativePlace'),
           value: [form.nativeCity, form.nativeState, form.nativeCountry]
             .filter(Boolean)
             .join(', '),
         },
         {
-          label: 'Current place',
+          label: t('page.review.rCurrentPlace'),
           value: [form.currentCity, form.currentState, form.currentCountry]
             .filter(Boolean)
             .join(', '),
         },
-        { label: 'Citizenship', value: form.citizenshipCountry },
-        { label: 'Residency status', value: form.residencyStatus ? lbl(residencyStatusOptions, form.residencyStatus) : undefined },
+        { label: t('page.review.rCitizenship'), value: form.citizenshipCountry },
+        { label: t('page.review.rResidencyStatus'), value: form.residencyStatus ? lbl(residencyStatusOptions, form.residencyStatus) : undefined },
       ],
     },
     {
       key: 'physical',
-      title: 'Physical attributes',
+      title: t('page.review.secPhysical'),
       icon: 'heart',
       rows: [
         {
-          label: 'Height',
+          label: t('page.review.rHeight'),
           value: form.heightCm ? `${form.heightCm} cm` : undefined,
         },
         {
-          label: 'Weight',
+          label: t('page.review.rWeight'),
           value: form.weightKg ? `${form.weightKg} kg` : undefined,
         },
-        { label: 'Blood group', value: form.bloodGroup ? lbl(bloodGroupOptions, form.bloodGroup) : undefined },
-        { label: 'Complexion', value: form.complexion ? lbl(complexionOptions, form.complexion) : undefined },
-        { label: 'Physical status', value: form.physicalStatus ? lbl(physicalStatusOptions, form.physicalStatus) : undefined },
-        { label: 'Body type', value: form.bodyType ? lbl(bodyTypeOptions, form.bodyType) : undefined },
+        { label: t('page.review.rBloodGroup'), value: form.bloodGroup ? lbl(bloodGroupOptions, form.bloodGroup) : undefined },
+        { label: t('page.review.rComplexion'), value: form.complexion ? lbl(complexionOptions, form.complexion) : undefined },
+        { label: t('page.review.rPhysicalStatus'), value: form.physicalStatus ? lbl(physicalStatusOptions, form.physicalStatus) : undefined },
+        { label: t('page.review.rBodyType'), value: form.bodyType ? lbl(bodyTypeOptions, form.bodyType) : undefined },
       ],
     },
     {
       key: 'family',
-      title: 'Family',
+      title: t('page.review.secFamily'),
       icon: 'users',
       rows: [
-        { label: 'Family type', value: form.familyType ? lbl(familyTypeOptions, form.familyType) : undefined },
-        { label: 'Family status', value: form.familyValues ? lbl(familyValuesOptions, form.familyValues) : undefined },
-        { label: "Father's status", value: form.fatherStatus ? lbl(parentStatusOptions, form.fatherStatus) : undefined },
-        { label: "Father's profession", value: form.fatherProfession },
-        { label: "Mother's status", value: form.motherStatus ? lbl(parentStatusOptions, form.motherStatus) : undefined },
-        { label: "Mother's profession", value: form.motherProfession },
-        { label: 'Brothers', value: form.brothers },
-        { label: 'Brothers married', value: form.brothersMarried },
-        { label: 'Sisters', value: form.sisters },
-        { label: 'Sisters married', value: form.sistersMarried },
-        { label: 'Asset details', value: form.assetDetails },
+        { label: t('page.review.rFamilyType'), value: form.familyType ? lbl(familyTypeOptions, form.familyType) : undefined },
+        { label: t('page.review.rFamilyStatus'), value: form.familyValues ? lbl(familyValuesOptions, form.familyValues) : undefined },
+        { label: t('page.review.rFatherStatus'), value: form.fatherStatus ? lbl(parentStatusOptions, form.fatherStatus) : undefined },
+        { label: t('page.review.rFatherProfession'), value: form.fatherProfession },
+        { label: t('page.review.rMotherStatus'), value: form.motherStatus ? lbl(parentStatusOptions, form.motherStatus) : undefined },
+        { label: t('page.review.rMotherProfession'), value: form.motherProfession },
+        { label: t('page.review.rBrothers'), value: form.brothers },
+        { label: t('page.review.rBrothersMarried'), value: form.brothersMarried },
+        { label: t('page.review.rSisters'), value: form.sisters },
+        { label: t('page.review.rSistersMarried'), value: form.sistersMarried },
+        { label: t('page.review.rAssetDetails'), value: form.assetDetails },
       ],
     },
     {
       key: 'horoscope',
-      title: 'Horoscope',
+      title: t('page.review.secHoroscope'),
       icon: 'star',
       rows: [
-        { label: 'Birth time', value: form.birthTime },
-        { label: 'Birth city', value: form.birthCity },
-        { label: 'Nakshatra', value: form.nakshatra },
+        { label: t('page.review.rBirthTime'), value: form.birthTime },
+        { label: t('page.review.rBirthCity'), value: form.birthCity },
+        { label: t('page.review.rNakshatra'), value: form.nakshatra },
         {
-          label: 'Padam (Pada)',
-          value: form.padam ? `Padam ${form.padam}` : undefined,
+          label: t('page.review.rPadam'),
+          value: form.padam ? t('page.review.rPadamValue', { n: form.padam }) : undefined,
         },
-        { label: 'Raasi', value: form.raasi },
-        { label: 'Dhosam', value: form.dhosam ? lbl(dhosamOptions, form.dhosam) : undefined },
-        { label: 'Lagnam', value: form.lagnam },
+        { label: t('page.review.rRaasi'), value: form.raasi },
+        { label: t('page.review.rDhosam'), value: form.dhosam ? lbl(dhosamOptions, form.dhosam) : undefined },
+        { label: t('page.review.rLagnam'), value: form.lagnam },
         {
-          label: 'Horoscope available',
-          value: form.horoscopeAvailable ? 'Yes' : undefined,
+          label: t('page.review.rHoroscopeAvailable'),
+          value: form.horoscopeAvailable ? t('page.review.yes') : undefined,
         },
         {
-          label: 'Willing to share',
-          value: form.willingToShareHoroscope ? 'Yes' : undefined,
+          label: t('page.review.rWillingToShare'),
+          value: form.willingToShareHoroscope ? t('page.review.yes') : undefined,
         },
       ],
     },
@@ -206,14 +208,14 @@ export function ReviewStep({ form, onChangeStep }: ReviewStepProps) {
         <div className="mb-3 flex items-center justify-between gap-3">
           <h3 className="flex items-center gap-2 font-medium text-foreground">
             <Icon name="camera" size={17} className="text-primary" />
-            Photos
+            {t('page.review.photos')}
           </h3>
           <button
             type="button"
             onClick={() => onChangeStep('photos')}
             className="rounded-md text-sm font-medium text-primary underline-offset-4 hover:underline"
           >
-            Change
+            {t('page.review.change')}
           </button>
         </div>
         {photos.length > 0 ? (
@@ -224,24 +226,24 @@ export function ReviewStep({ form, onChangeStep }: ReviewStepProps) {
                   {photo.photoUrl ? (
                     <img
                       src={photo.thumbnailUrl ?? photo.photoUrl}
-                      alt="Profile photo"
+                      alt={t('page.review.photos')}
                       className="h-full w-full object-cover"
                       loading="lazy"
                     />
                   ) : (
                     <span className="flex h-full w-full items-center justify-center text-center text-[9px] text-muted-foreground">
-                      Processing…
+                      {t('page.review.processing')}
                     </span>
                   )}
                 </div>
                 <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-secondary-foreground">
-                  {photo.isPrimary ? 'Primary' : photo.status.replace(/_/g, ' ').toLowerCase()}
+                  {photo.isPrimary ? t('page.review.primary') : photo.status.replace(/_/g, ' ').toLowerCase()}
                 </span>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">No photos added yet.</p>
+          <p className="text-sm text-muted-foreground">{t('page.review.noPhotos')}</p>
         )}
       </section>
 
@@ -262,7 +264,7 @@ export function ReviewStep({ form, onChangeStep }: ReviewStepProps) {
                 onClick={() => onChangeStep(section.key)}
                 className="rounded-md text-sm font-medium text-primary underline-offset-4 hover:underline"
               >
-                Change
+                {t('page.review.change')}
               </button>
             </div>
             {filled.length > 0 ? (
@@ -283,7 +285,7 @@ export function ReviewStep({ form, onChangeStep }: ReviewStepProps) {
               </dl>
             ) : section.key === 'horoscope' && horoscopePhotos.length > 0 ? null : (
               <p className="text-sm text-muted-foreground">
-                Not provided yet.
+                {t('page.review.notProvided')}
               </p>
             )}
             {section.key === 'horoscope' && horoscopePhotos.length > 0 && (
@@ -292,21 +294,21 @@ export function ReviewStep({ form, onChangeStep }: ReviewStepProps) {
                   {horoscopePhotos[0].photoUrl ? (
                     <img
                       src={horoscopePhotos[0].thumbnailUrl ?? horoscopePhotos[0].photoUrl}
-                      alt="Horoscope chart"
+                      alt={t('page.review.secHoroscope')}
                       className="h-full w-full object-cover"
                       loading="lazy"
                     />
                   ) : (
                     <span className="flex h-full w-full items-center justify-center text-center text-[9px] text-muted-foreground">
-                      Processing…
+                      {t('page.review.processing')}
                     </span>
                   )}
                 </div>
                 <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
                   <Icon name="circle-check" size={15} className="text-primary" />
                   {horoscopePhotos.length === 1
-                    ? 'Horoscope chart attached'
-                    : `${horoscopePhotos.length} horoscope charts attached`}
+                    ? t('page.review.chartAttached')
+                    : t('page.review.chartsAttached', { count: horoscopePhotos.length })}
                 </span>
               </div>
             )}
@@ -316,7 +318,7 @@ export function ReviewStep({ form, onChangeStep }: ReviewStepProps) {
 
       {form.aboutMe.trim() && (
         <section className="rounded-xl border border-border bg-card p-4">
-          <h3 className="mb-2 font-medium text-foreground">About me</h3>
+          <h3 className="mb-2 font-medium text-foreground">{t('page.review.aboutMe')}</h3>
           <p className="text-sm leading-relaxed text-muted-foreground text-pretty">
             {form.aboutMe}
           </p>

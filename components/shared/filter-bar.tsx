@@ -1,5 +1,7 @@
 'use client'
 
+import { useTranslation } from 'react-i18next'
+
 import { cn } from '@/lib/utils'
 import { Icon } from '@/components/ui/icon'
 
@@ -15,6 +17,7 @@ interface FilterChipProps {
 }
 
 export function FilterChip({ label, active, onClick, onRemove }: FilterChipProps) {
+  const { t } = useTranslation()
   if (onRemove) {
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 py-1.5 pl-3 pr-1.5 text-sm font-medium text-primary">
@@ -22,7 +25,7 @@ export function FilterChip({ label, active, onClick, onRemove }: FilterChipProps
         <button
           type="button"
           onClick={onRemove}
-          aria-label={`Remove ${label} filter`}
+          aria-label={t('page.shared.removeFilter', { label })}
           className="rounded-full p-0.5 text-primary/70 transition-colors hover:bg-primary/15 hover:text-primary"
         >
           <Icon name="x" size={14} />
@@ -68,6 +71,7 @@ export function FilterBar({
   onClear,
   className,
 }: FilterBarProps) {
+  const { t } = useTranslation()
   return (
     <div className={cn('flex flex-wrap items-center gap-2.5', className)}>
       <button
@@ -76,7 +80,7 @@ export function FilterBar({
         className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground shadow-sm transition-colors hover:border-primary/40"
       >
         <Icon name="filter" size={16} />
-        Filters
+        {t('page.shared.filters')}
         {activeFilters.length > 0 && (
           <span className="flex size-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
             {activeFilters.length}
@@ -94,7 +98,7 @@ export function FilterBar({
           onClick={onClear}
           className="rounded-lg px-2 py-1 text-sm font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
         >
-          Clear all
+          {t('page.shared.clearAll')}
         </button>
       )}
     </div>

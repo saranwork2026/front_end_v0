@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 
 import { Badge } from '@/components/ui/badge'
 import { Icon } from '@/components/ui/icon'
@@ -54,6 +55,7 @@ export function ProfileCard({
   onShortlistToggle,
   onClick,
 }: ProfileCardProps) {
+  const { t } = useTranslation()
   const height = cmToFeet(profile.heightCm)
   const name = [profile.firstName, profile.lastName].filter(Boolean).join(' ')
 
@@ -64,7 +66,7 @@ export function ProfileCard({
     ? ({ children }: { children: React.ReactNode }) => (
         <Link
           href={href}
-          aria-label={`View ${name}'s profile`}
+          aria-label={t('page.shared.viewProfileAria', { name })}
           className={cardClassName}
         >
           {children}
@@ -95,7 +97,7 @@ export function ProfileCard({
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={profile.primaryPhotoUrl || '/placeholder.svg'}
-              alt={`Photo of ${name}`}
+              alt={t('page.shared.photoOf', { name })}
               loading="lazy"
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
               style={{ objectPosition: focalPosition(profile.photoFocalX, profile.photoFocalY) }}
@@ -115,10 +117,10 @@ export function ProfileCard({
             {profile.featured ? (
               <span
                 className="flex items-center gap-1 rounded-full bg-gold px-2 py-1 text-xs font-semibold text-gold-foreground shadow-sm sm:pl-2 sm:pr-2.5"
-                aria-label="Featured profile"
+                aria-label={t('page.shared.featuredAria')}
               >
                 <Icon name="star-filled" size={12} className="shrink-0" />
-                <span className="hidden sm:inline">Featured</span>
+                <span className="hidden sm:inline">{t('page.shared.featured')}</span>
               </span>
             ) : (
               <span aria-hidden="true" />
@@ -128,7 +130,7 @@ export function ProfileCard({
                 variant="primary"
                 className="shrink-0 bg-primary text-primary-foreground shadow-sm"
               >
-                {profile.matchScore}% match
+                {t('page.shared.matchPct', { pct: profile.matchScore })}
               </Badge>
             )}
           </div>
@@ -137,7 +139,7 @@ export function ProfileCard({
         {showShortlistButton && (
           <button
             type="button"
-            aria-label={isShortlisted ? 'Remove from shortlist' : 'Add to shortlist'}
+            aria-label={isShortlisted ? t('page.shared.removeFromShortlist') : t('page.shared.addToShortlist')}
             aria-pressed={isShortlisted}
             onClick={(e) => {
               e.preventDefault()
@@ -165,8 +167,8 @@ export function ProfileCard({
           {profile.verified && (
             <span
               className="shrink-0 text-[oklch(0.6_0.13_240)]"
-              title="Verified profile"
-              aria-label="Verified profile"
+              title={t('page.shared.verifiedProfile')}
+              aria-label={t('page.shared.verifiedProfile')}
             >
               <Icon name="shield" size={16} />
             </span>
@@ -191,7 +193,7 @@ export function ProfileCard({
                 profile.activityStatus === 'ONLINE' ? 'bg-success' : 'bg-warning',
               )}
             />
-            {profile.activityStatus === 'ONLINE' ? 'Online now' : 'Active recently'}
+            {profile.activityStatus === 'ONLINE' ? t('page.shared.onlineNow') : t('page.shared.activeRecently')}
           </span>
         )}
       </div>

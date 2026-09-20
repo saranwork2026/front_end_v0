@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { PaginatedResponse, ProfileView } from '@matrimony/shared-core'
 
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -20,18 +21,21 @@ interface ActiveSubscriptionResponse {
   planName: string
 }
 
-function formatViewedTime(iso: string): string {
+type TFunc = ReturnType<typeof useTranslation>['t']
+
+function formatViewedTime(iso: string, t: TFunc): string {
   const min = Math.round((Date.now() - new Date(iso).getTime()) / 60000)
-  if (min < 1) return 'Just now'
-  if (min < 60) return `${min}m ago`
+  if (min < 1) return t('page.profileViews.timeJustNow')
+  if (min < 60) return t('page.profileViews.timeMin', { count: min })
   const hr = Math.round(min / 60)
-  if (hr < 24) return `${hr}h ago`
+  if (hr < 24) return t('page.profileViews.timeHr', { count: hr })
   const day = Math.round(hr / 24)
-  if (day < 7) return `${day}d ago`
+  if (day < 7) return t('page.profileViews.timeDay', { count: day })
   return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 export function ProfileViewsView({ state }: { state?: ViewState }) {
+  const { t } = useTranslation()
   const [page, setPage] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -84,11 +88,11 @@ export function ProfileViewsView({ state }: { state?: ViewState }) {
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:py-10">
       <div className="mb-6">
-        <h1 className="font-serif text-2xl text-foreground sm:text-3xl">Profile views</h1>
+        <h1 className="font-serif text-2xl text-foreground sm:text-3xl">{t('page.profileViews.title')}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {count && count > 0
-            ? `${count} members have viewed your profile.`
-            : 'Members who recently viewed your profile.'}
+            ? t('page.profileViews.subtitleCount', { count })
+            : t('page.profileViews.subtitleDefault')}
         </p>
       </div>
 
@@ -106,21 +110,21 @@ export function ProfileViewsView({ state }: { state?: ViewState }) {
         </div>
       ) : error ? (
         <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-6 text-center">
-          <p className="text-sm text-destructive">We could not load your profile views. Please try again.</p>
+          <p className="text-sm text-destructive">{t('page.profileViews.errorDesc')}</p>
           <div className="mt-4 flex justify-center">
             <Button variant="secondary" onClick={() => void fetchViews(page)}>
-              Retry
+              {t('page.profileViews.retry')}
             </Button>
           </div>
         </div>
       ) : items.length === 0 ? (
         <EmptyState
           icon="eye"
-          title="No profile views yet"
-          description="When members view your profile, they will show up here. Keep your profile complete to attract more visits."
+          title={t('page.profileViews.emptyTitle')}
+          description={t('page.profileViews.emptyDesc')}
           action={
             <Link href="/profile/wizard" className={cn(buttonVariants({ variant: 'primary' }))}>
-              Improve my profile
+              {t('page.profileViews.improveProfile')}
             </Link>
           }
         />
@@ -133,14 +137,14 @@ export function ProfileViewsView({ state }: { state?: ViewState }) {
                   <Icon name="lock" className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="text-sm font-semibold text-foreground">Upgrade to see who viewed you</p>
+                  <p className="text-sm font-semibold text-foreground">{t('page.profileViews.upgradeTitle')}</p>
                   <p className="mt-0.5 text-sm text-muted-foreground">
-                    {count ?? items.length} members viewed your profile. Unlock their details with a premium plan.
+                    {t('page.profileViews.upgradeDesc', { count: count ?? items.length })}
                   </p>
                 </div>
               </div>
               <Link href="/plans" className={cn(buttonVariants({ variant: 'gold' }), 'shrink-0')}>
-                Upgrade
+                {t('page.profileViews.upgrade')}
               </Link>
             </div>
           )}
@@ -165,10 +169,11 @@ export function ProfileViewsView({ state }: { state?: ViewState }) {
 }
 
 function ViewerCard({ viewer, premium }: { viewer: ProfileView; premium: boolean }) {
+  const { t } = useTranslation()
   const initial = viewer.viewerFirstName.charAt(0).toUpperCase()
   const meta = premium
-    ? [viewer.viewerAge ? `${viewer.viewerAge} yrs` : null, viewer.viewerCity].filter(Boolean).join(' · ') ||
-      'Details on profile'
+    ? [viewer.viewerAge ? t('page.profileViews.yrs', { count: viewer.viewerAge }) : null, viewer.viewerCity].filter(Boolean).join(' · ') ||
+      t('page.profileViews.detailsOnProfile')
     : '28 yrs · Chennai'
 
   return (
@@ -185,12 +190,12 @@ function ViewerCard({ viewer, premium }: { viewer: ProfileView; premium: boolean
 
       <div className="min-w-0 flex-1">
         <p className={cn('truncate text-sm font-semibold text-foreground', !premium && 'select-none blur-[5px]')}>
-          {premium ? viewer.viewerFirstName : 'Premium member'}
+          {premium ? viewer.viewerFirstName : t('page.profileViews.premiumMember')}
         </p>
         <p className={cn('mt-0.5 truncate text-sm text-muted-foreground', !premium && 'select-none blur-[5px]')}>
           {meta}
         </p>
-        <p className="mt-1 text-xs text-muted-foreground/80">{formatViewedTime(viewer.viewedAt)}</p>
+        <p className="mt-1 text-xs text-muted-foreground/80">{formatViewedTime(viewer.viewedAt, t)}</p>
       </div>
 
       {premium ? (
@@ -198,12 +203,12 @@ function ViewerCard({ viewer, premium }: { viewer: ProfileView; premium: boolean
           href={`/profile/${viewer.viewerProfileId}`}
           className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'shrink-0')}
         >
-          View
+          {t('page.profileViews.view')}
         </Link>
       ) : (
         <Link
           href="/plans"
-          aria-label="Upgrade to view this member"
+          aria-label={t('page.profileViews.upgradeToView')}
           className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'shrink-0 text-muted-foreground')}
         >
           <Icon name="lock" className="h-4 w-4" />
