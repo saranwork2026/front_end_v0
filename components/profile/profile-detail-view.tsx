@@ -25,6 +25,7 @@ import {
   interestsApi,
   accessApi,
   reportApi,
+  contactsApi,
 } from '@/src/lib/api'
 import { useAuthStore } from '@/src/stores/auth'
 import { useShortlist } from '@/src/hooks/useShortlist'
@@ -211,6 +212,31 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
       active = false
     }
   }, [isOwnProfile, reloadKey])
+
+  // Reveal an ALREADY-unlocked contact on load. A previously unlocked contact
+  // must show immediately on revisiting the profile (not require clicking
+  // "Unlock" again). Look this profile up in the viewer's unlocked-contacts
+  // list (idempotent GET, never charges) and, if present, show it unlocked.
+  useEffect(() => {
+    if (isOwnProfile) return
+    let active = true
+    contactsApi
+      .getUnlockedContacts()
+      .then((res) => {
+        if (!active) return
+        const match = (res.data ?? []).find((u) => u.targetProfileId === profileId)
+        if (match) {
+          setRevealedContact({ phone: match.targetMobileNo ?? '', email: match.targetEmail ?? '' })
+          setContactState('unlocked')
+        }
+      })
+      .catch(() => {
+        /* non-fatal: fall back to the locked state + unlock CTA */
+      })
+    return () => {
+      active = false
+    }
+  }, [isOwnProfile, profileId, reloadKey])
 
   /* ----------------------------- handlers ----------------------------- */
   const handleSendInterest = async () => {

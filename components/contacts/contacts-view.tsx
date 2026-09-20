@@ -34,7 +34,7 @@ const sourceLabelKey: Record<UnlockedContact['paymentSource'], string> = {
 }
 
 function fullName(c: UnlockedContact) {
-  return [c.firstName, c.lastName].filter(Boolean).join(' ').trim() || c.profileId
+  return [c.targetFirstName, c.targetLastName].filter(Boolean).join(' ').trim() || c.targetProfileId
 }
 
 function formatUnlockedDate(iso: string): string {
@@ -133,22 +133,22 @@ export function ContactsView({ state }: { state?: ViewState }) {
               </thead>
               <tbody>
                 {items.map((c) => (
-                  <tr key={c.profileId} className="border-b border-border last:border-0">
+                  <tr key={c.targetProfileId} className="border-b border-border last:border-0">
                     <td className="px-4 py-3">
-                      <Link href={`/profile/${c.profileId}`} className="flex items-center gap-3 hover:underline">
+                      <Link href={`/profile/${c.targetProfileId}`} className="flex items-center gap-3 hover:underline">
                         <Avatar contact={c} />
                         <span className="font-medium text-foreground">{fullName(c)}</span>
                       </Link>
                     </td>
                     <td className="whitespace-nowrap px-4 py-3">
-                      <a href={`tel:${c.mobileNo.replace(/\s/g, '')}`} className="font-mono text-foreground hover:underline">
-                        {c.mobileNo}
+                      <a href={`tel:${c.targetMobileNo.replace(/\s/g, '')}`} className="font-mono text-foreground hover:underline">
+                        {c.targetMobileNo}
                       </a>
                     </td>
                     <td className="max-w-[220px] px-4 py-3">
-                      {c.email ? (
-                        <a href={`mailto:${c.email}`} className="block truncate text-foreground hover:underline">
-                          {c.email}
+                      {c.targetEmail ? (
+                        <a href={`mailto:${c.targetEmail}`} className="block truncate text-foreground hover:underline">
+                          {c.targetEmail}
                         </a>
                       ) : (
                         <span className="text-muted-foreground">—</span>
@@ -170,9 +170,9 @@ export function ContactsView({ state }: { state?: ViewState }) {
           {/* Mobile: card list */}
           <ul className="space-y-3 md:hidden">
             {items.map((c) => (
-              <li key={c.profileId} className="rounded-xl border border-border bg-card p-4">
+              <li key={c.targetProfileId} className="rounded-xl border border-border bg-card p-4">
                 <div className="flex items-center justify-between gap-3">
-                  <Link href={`/profile/${c.profileId}`} className="flex min-w-0 items-center gap-3">
+                  <Link href={`/profile/${c.targetProfileId}`} className="flex min-w-0 items-center gap-3">
                     <Avatar contact={c} />
                     <span className="truncate font-medium text-foreground">{fullName(c)}</span>
                   </Link>
@@ -181,15 +181,15 @@ export function ContactsView({ state }: { state?: ViewState }) {
                 <dl className="mt-3 grid grid-cols-1 gap-2 text-sm">
                   <div className="flex items-center gap-2">
                     <Icon name="phone" className="h-4 w-4 shrink-0 text-muted-foreground" />
-                    <a href={`tel:${c.mobileNo.replace(/\s/g, '')}`} className="font-mono text-foreground">
-                      {c.mobileNo}
+                    <a href={`tel:${c.targetMobileNo.replace(/\s/g, '')}`} className="font-mono text-foreground">
+                      {c.targetMobileNo}
                     </a>
                   </div>
-                  {c.email && (
+                  {c.targetEmail && (
                     <div className="flex items-center gap-2">
                       <Icon name="mail" className="h-4 w-4 shrink-0 text-muted-foreground" />
-                      <a href={`mailto:${c.email}`} className="truncate text-foreground">
-                        {c.email}
+                      <a href={`mailto:${c.targetEmail}`} className="truncate text-foreground">
+                        {c.targetEmail}
                       </a>
                     </div>
                   )}

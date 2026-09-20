@@ -8,12 +8,18 @@ export interface UnlockContactResponse {
   message: string;
 }
 
+// Matches the backend ContactUnlockResponse JSON exactly (fields are prefixed
+// with "target" because they describe the unlocked target member). Previously
+// this type used bare names (profileId/mobileNo/email) that did not match the
+// API, so the Contacts page and profile contact-reveal read undefined values.
 export interface UnlockedContact {
-  profileId: string;
-  firstName: string;
-  lastName: string | null;
-  mobileNo: string;
-  email: string | null;
+  unlockId: number;
+  targetUserId: string;
+  targetProfileId: string;
+  targetFirstName: string | null;
+  targetLastName: string | null;
+  targetMobileNo: string;
+  targetEmail: string | null;
   amountCharged: number;
   paymentSource: 'SUBSCRIPTION' | 'PAYMENT';
   unlockedAt: string;
