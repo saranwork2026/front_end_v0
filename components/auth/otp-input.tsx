@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/lib/utils'
 
@@ -24,9 +25,11 @@ export function OtpInput({
   length = 6,
   disabled,
   verified,
-  ariaLabel = 'One-time password',
+  ariaLabel,
   autoFocus,
 }: OtpInputProps) {
+  const { t } = useTranslation()
+  const groupLabel = ariaLabel ?? t('auth.oneTimePassword')
   const refs = React.useRef<(HTMLInputElement | null)[]>([])
   const digits = React.useMemo(() => value.split('').slice(0, length), [value, length])
 
@@ -69,7 +72,7 @@ export function OtpInput({
   }
 
   return (
-    <div className="flex justify-between gap-2" role="group" aria-label={ariaLabel}>
+    <div className="flex justify-between gap-2" role="group" aria-label={groupLabel}>
       {Array.from({ length }).map((_, i) => (
         <input
           key={i}
@@ -82,7 +85,7 @@ export function OtpInput({
           disabled={disabled}
           autoFocus={autoFocus && i === 0}
           value={digits[i] ?? ''}
-          aria-label={`Digit ${i + 1}`}
+          aria-label={t('auth.digit', { n: i + 1 })}
           onChange={(e) => handleChange(i, e.target.value)}
           onKeyDown={(e) => handleKeyDown(i, e)}
           onPaste={handlePaste}

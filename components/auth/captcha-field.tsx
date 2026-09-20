@@ -1,5 +1,7 @@
 'use client'
 
+import { useTranslation } from 'react-i18next'
+
 import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
 
@@ -15,6 +17,7 @@ interface CaptchaFieldProps {
  * real provider.
  */
 export function CaptchaField({ checked, onChange, error }: CaptchaFieldProps) {
+  const { t } = useTranslation()
   return (
     <div className="flex flex-col gap-1.5">
       <button
@@ -35,7 +38,7 @@ export function CaptchaField({ checked, onChange, error }: CaptchaFieldProps) {
         >
           {checked && <Icon name="check" size={14} />}
         </span>
-        <span className="flex-1 text-foreground">I&apos;m not a robot</span>
+        <span className="flex-1 text-foreground">{t('auth.imNotRobot')}</span>
         <Icon name="shield" size={20} className="text-muted-foreground" />
       </button>
       {error && (

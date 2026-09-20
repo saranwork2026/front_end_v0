@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { Icon } from '@/components/ui/icon'
 
@@ -18,6 +19,7 @@ interface AuthShellProps {
  * ("narrow centered card on a warm gradient; logo + tagline header").
  */
 export function AuthShell({ title, subtitle, children, footer, banner }: AuthShellProps) {
+  const { t } = useTranslation()
   return (
     <main className="relative flex min-h-dvh flex-col bg-brand-warm px-4 py-8 sm:py-12">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-brand-maroon opacity-[0.06]" />
@@ -35,7 +37,7 @@ export function AuthShell({ title, subtitle, children, footer, banner }: AuthShe
               Magizh
             </span>
           </Link>
-          <p className="text-sm text-muted-foreground">Where hearts meet & families unite</p>
+          <p className="text-sm text-muted-foreground">{t('auth.tagline')}</p>
         </header>
 
         <div className="rounded-2xl border border-border/70 bg-card p-6 shadow-sm sm:p-8">
@@ -53,16 +55,16 @@ export function AuthShell({ title, subtitle, children, footer, banner }: AuthShe
 
         <footer className="mt-auto flex flex-wrap items-center justify-center gap-x-4 gap-y-1 pt-8 text-xs text-muted-foreground">
           <Link href="/terms" className="hover:text-foreground">
-            Terms
+            {t('auth.footerTerms')}
           </Link>
           <Link href="/privacy-policy" className="hover:text-foreground">
-            Privacy
+            {t('auth.footerPrivacy')}
           </Link>
           <Link href="/support" className="hover:text-foreground">
-            Support
+            {t('auth.footerSupport')}
           </Link>
           <span className="w-full text-center text-muted-foreground/70 sm:w-auto">
-            © {new Date().getFullYear()} Magizh Matrimony
+            {t('auth.footerCopyright', { year: new Date().getFullYear() })}
           </span>
         </footer>
       </div>

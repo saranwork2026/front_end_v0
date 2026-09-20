@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { AuthShell } from '@/components/auth/auth-shell'
 import { IconInput } from '@/components/auth/icon-input'
@@ -12,6 +13,7 @@ import { forgotPasswordSchema } from '@matrimony/shared-core'
 import { authApi } from '@/src/lib/api'
 
 export function ForgotPasswordView() {
+  const { t } = useTranslation()
   const [identifier, setIdentifier] = useState('')
   const [error, setError] = useState<string | undefined>()
   const [loading, setLoading] = useState(false)
@@ -35,7 +37,7 @@ export function ForgotPasswordView() {
     } catch (err: unknown) {
       const code = (err as { response?: { data?: { errorCode?: string } } })?.response?.data?.errorCode
       if (code === 'PASSWORD_RESET_TOO_FREQUENT') {
-        setError('A password reset was already requested today. Please try again after 24 hours.')
+        setError(t('auth.resetTooFrequent'))
         setLoading(false)
         return
       }
@@ -47,15 +49,11 @@ export function ForgotPasswordView() {
 
   return (
     <AuthShell
-      title={sent ? 'Check your messages' : 'Forgot password'}
-      subtitle={
-        sent
-          ? undefined
-          : 'Enter your registered mobile number and we will send a reset code.'
-      }
+      title={sent ? t('auth.checkMessages') : t('auth.forgotTitle')}
+      subtitle={sent ? undefined : t('auth.forgotSubtitle')}
       footer={
         <Link href="/login" className="font-medium text-primary hover:underline">
-          Back to sign in
+          {t('auth.backToSignIn')}
         </Link>
       }
     >
@@ -65,28 +63,27 @@ export function ForgotPasswordView() {
             <Icon name="circle-check" size={28} />
           </span>
           <p className="text-pretty text-sm text-muted-foreground">
-            If an account exists for <span className="font-medium text-foreground">{identifier}</span>, a
-            reset code is on its way. Enter it on the reset page to choose a new password.
+            {t('auth.forgotSentPre')}<span className="font-medium text-foreground">{identifier}</span>{t('auth.forgotSentPost')}
           </p>
           <Link href="/reset-password" className="w-full">
             <Button size="lg" className="w-full">
-              Enter reset code
+              {t('auth.enterResetCode')}
             </Button>
           </Link>
         </div>
       ) : (
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
           <IconInput
-            label="Mobile number"
+            label={t('auth.mobile')}
             leadingIcon="phone"
             inputMode="numeric"
-            placeholder="9876543210"
+            placeholder={t('auth.mobilePlaceholder')}
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
             error={error}
           />
           <Button type="submit" size="lg" loading={loading} className="mt-1 w-full">
-            {loading ? 'Sending…' : 'Send reset code'}
+            {loading ? t('auth.sending') : t('auth.sendResetCode')}
           </Button>
         </form>
       )}

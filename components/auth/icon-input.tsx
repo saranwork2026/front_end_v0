@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { Icon, type IconName } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
@@ -26,6 +27,7 @@ export const IconInput = React.forwardRef<HTMLInputElement, IconInputProps>(
     { className, label, error, hint, leadingIcon, password, blockPaste, id, type, ...props },
     ref,
   ) => {
+    const { t } = useTranslation()
     const generatedId = React.useId()
     const inputId = id ?? generatedId
     const [visible, setVisible] = React.useState(false)
@@ -69,7 +71,7 @@ export const IconInput = React.forwardRef<HTMLInputElement, IconInputProps>(
             <button
               type="button"
               onClick={() => setVisible((v) => !v)}
-              aria-label={visible ? 'Hide password' : 'Show password'}
+              aria-label={visible ? t('common.hidePassword') : t('common.showPassword')}
               aria-pressed={visible}
               className="absolute right-1 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
             >

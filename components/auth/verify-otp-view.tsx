@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { ApiError } from '@matrimony/shared-core'
 
 import { AuthShell } from '@/components/auth/auth-shell'
@@ -15,13 +16,13 @@ const RESEND_COOLDOWN = 60
 const MAX_RESENDS = 3
 const OTP_RE = /^\d{6}$/
 
-const errorMessages: Record<string, string> = {
-  INVALID_OTP: 'The code you entered is incorrect. Please check and try again.',
-  OTP_EXPIRED: 'This code has expired. Please request a new one.',
-  OTP_INVALID_REQUEST_NEW: 'This code is no longer valid. Please request a new one.',
-  OTP_ATTEMPTS_EXCEEDED: 'Too many incorrect attempts. Please request a new code.',
-  OTP_NOT_FOUND: 'This code is no longer valid. Please request a new one.',
-  RATE_LIMITED: 'Too many requests. Please wait a moment and try again.',
+const errorKeys: Record<string, string> = {
+  INVALID_OTP: 'auth.errInvalidOtp',
+  OTP_EXPIRED: 'auth.errOtpExpired',
+  OTP_INVALID_REQUEST_NEW: 'auth.errOtpInvalidNew',
+  OTP_ATTEMPTS_EXCEEDED: 'auth.errOtpAttempts',
+  OTP_NOT_FOUND: 'auth.errOtpNotFound',
+  RATE_LIMITED: 'auth.errRateLimited',
 }
 
 type Channel = 'SMS' | 'EMAIL'
@@ -41,6 +42,7 @@ interface ResendState {
 }
 
 export function VerifyOtpView() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const state = (location.state as LocationState | null) ?? {}
@@ -118,7 +120,7 @@ export function VerifyOtpView() {
 
       if (data.userActivated) {
         navigate('/login', {
-          state: { message: 'Your account is verified. Please sign in to continue.' },
+          state: { message: t('auth.accountVerified') },
         })
         return
       }
@@ -131,20 +133,17 @@ export function VerifyOtpView() {
       if (data.smsVerified && emailChannel && !data.emailVerified) {
         // SMS done, email still needs a valid code — clear it for retry.
         setEmailOtp(testBypass)
-        setPartial(
-          data.emailError ||
-            'Your mobile number is verified. Please enter the code sent to your email.',
-        )
+        setPartial(data.emailError || t('auth.smsVerifiedEnterEmail'))
       } else {
-        setError(`__RAW__${data.message || 'Please check the codes and try again.'}`)
+        setError(`__RAW__${data.message || t('auth.checkCodes')}`)
       }
     } catch (err: unknown) {
       const apiError = (err as { response?: { data?: ApiError } })?.response?.data
       const code = apiError?.errorCode
       setError(
-        code && errorMessages[code]
+        code && errorKeys[code]
           ? code
-          : `__RAW__${apiError?.message ?? 'Verification failed. Please try again.'}`,
+          : `__RAW__${apiError?.message ?? t('auth.verifyFailed')}`,
       )
       // Clear the still-pending codes so the user retypes fresh.
       if (!smsVerified) setSmsOtp('')
@@ -153,7 +152,7 @@ export function VerifyOtpView() {
       setLoading(false)
       submittedRef.current = false
     }
-  }, [profileId, smsOtp, emailOtp, emailChannel, emailVerified, smsVerified, navigate, testBypass])
+  }, [profileId, smsOtp, emailOtp, emailChannel, emailVerified, smsVerified, navigate, testBypass, t])
 
   // Auto-submit once the still-pending codes are complete.
   useEffect(() => {
@@ -178,7 +177,7 @@ export function VerifyOtpView() {
       setLookupNeeded(false)
     } catch (err: unknown) {
       const apiError = (err as { response?: { data?: ApiError } })?.response?.data
-      setError(`__RAW__${apiError?.message ?? 'We could not find a pending verification for that account.'}`)
+      setError(`__RAW__${apiError?.message ?? t('auth.noPendingVerification')}`)
     } finally {
       setLookupLoading(false)
     }
@@ -201,30 +200,32 @@ export function VerifyOtpView() {
         await authApi.resendOtp({ profileId, channel })
       } catch (err: unknown) {
         const apiError = (err as { response?: { data?: ApiError } })?.response?.data
-        setError(`__RAW__${apiError?.message ?? `We could not resend the ${channel} code. Please try again.`}`)
+        const channelName = channel === 'SMS' ? t('auth.channelSms') : t('auth.channelEmail')
+        setError(`__RAW__${apiError?.message ?? t('auth.couldNotResend', { channel: channelName })}`)
       }
     },
-    [profileId, smsResend, emailResend, testBypass],
+    [profileId, smsResend, emailResend, testBypass, t],
   )
 
   function bannerText(b: string): string {
     if (b.startsWith('__RAW__')) return b.slice('__RAW__'.length)
-    return errorMessages[b] ?? 'Verification failed. Please try again.'
+    return errorKeys[b] ? t(errorKeys[b] as never) : t('auth.verifyFailed')
   }
 
   /** Per-channel resend control: countdown → "Resend" → "no resends left". */
   function renderResend(channel: Channel, resend: ResendState) {
+    const channelName = channel === 'SMS' ? t('auth.channelSms') : t('auth.channelEmail')
     if (resend.count >= MAX_RESENDS) {
       return (
         <p className="text-center text-xs text-muted-foreground">
-          You have used all resend attempts for {channel === 'SMS' ? 'SMS' : 'email'}.
+          {t('auth.resendAllUsed', { channel: channelName })}
         </p>
       )
     }
     if (resend.cooldown > 0) {
       return (
         <p className="text-center text-xs text-muted-foreground">
-          Resend {channel === 'SMS' ? 'SMS' : 'email'} code in {resend.cooldown}s
+          {t('auth.resendCountdown', { channel: channelName, sec: resend.cooldown })}
         </p>
       )
     }
@@ -235,7 +236,7 @@ export function VerifyOtpView() {
           onClick={() => void handleResend(channel)}
           className="text-xs font-medium text-primary hover:underline"
         >
-          Resend {channel === 'SMS' ? 'SMS' : 'email'} code ({MAX_RESENDS - resend.count} left)
+          {t('auth.resendCta', { channel: channelName, left: MAX_RESENDS - resend.count })}
         </button>
       </div>
     )
@@ -248,17 +249,22 @@ export function VerifyOtpView() {
 
   return (
     <AuthShell
-      title="Verify your account"
+      title={t('auth.verifyTitle')}
       subtitle={
         emailChannel
-          ? `We've sent a verification code by SMS${maskedMobile ? ` to ${maskedMobile}` : ''} and by email${maskedEmail ? ` to ${maskedEmail}` : ''}. Enter both to confirm it's really you.`
-          : `We've sent a verification code by SMS${maskedMobile ? ` to ${maskedMobile}` : ''}. Enter it to confirm it's really you.`
+          ? t('auth.verifySubtitleBoth', {
+              sms: maskedMobile ? t('auth.toDest', { dest: maskedMobile }) : '',
+              email: maskedEmail ? t('auth.toDest', { dest: maskedEmail }) : '',
+            })
+          : t('auth.verifySubtitleSms', {
+              sms: maskedMobile ? t('auth.toDest', { dest: maskedMobile }) : '',
+            })
       }
       footer={
         <>
-          Entered the wrong details?{' '}
+          {t('auth.wrongDetails')}{' '}
           <Link href="/register" className="font-medium text-primary hover:underline">
-            Go back
+            {t('auth.goBack')}
           </Link>
         </>
       }
@@ -287,18 +293,18 @@ export function VerifyOtpView() {
         {lookupNeeded ? (
           <form onSubmit={handleLookup} className="flex flex-col gap-3">
             <p className="text-sm text-muted-foreground">
-              Enter your mobile number or email to receive your verification code.
+              {t('auth.lookupPrompt')}
             </p>
             <input
               inputMode="text"
               autoComplete="username"
-              placeholder="Mobile number or email"
+              placeholder={t('auth.identifierPlaceholder')}
               value={lookupIdentifier}
               onChange={(e) => setLookupIdentifier(e.target.value)}
               className="min-h-11 w-full rounded-lg border border-input bg-card px-3.5 text-foreground shadow-sm outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/40"
             />
             <Button type="submit" size="lg" loading={lookupLoading} className="w-full">
-              Continue
+              {t('auth.continue')}
             </Button>
           </form>
         ) : (
@@ -307,17 +313,17 @@ export function VerifyOtpView() {
               <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                 <Icon name="phone" size={16} className="text-primary" />
                 <span>
-                  SMS code
+                  {t('auth.smsCode')}
                   {maskedMobile && (
                     <span className="ml-1 font-normal text-muted-foreground">
-                      sent to {maskedMobile}
+                      {t('auth.sentTo', { dest: maskedMobile })}
                     </span>
                   )}
                 </span>
                 {smsVerified && (
                   <span className="ml-auto inline-flex items-center gap-1 text-xs font-medium text-success">
                     <Icon name="circle-check" size={14} />
-                    Verified
+                    {t('auth.verified')}
                   </span>
                 )}
               </div>
@@ -327,7 +333,7 @@ export function VerifyOtpView() {
                 disabled={loading || smsVerified}
                 verified={smsVerified || OTP_RE.test(smsOtp)}
                 autoFocus
-                ariaLabel="SMS verification code"
+                ariaLabel={t('auth.smsCodeAria')}
               />
               {!smsVerified && renderResend('SMS', smsResend)}
             </div>
@@ -337,17 +343,17 @@ export function VerifyOtpView() {
                 <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                   <Icon name="mail" size={16} className="text-primary" />
                   <span>
-                    Email code
+                    {t('auth.emailCode')}
                     {maskedEmail && (
                       <span className="ml-1 font-normal text-muted-foreground">
-                        sent to {maskedEmail}
+                        {t('auth.sentTo', { dest: maskedEmail })}
                       </span>
                     )}
                   </span>
                   {emailVerified && (
                     <span className="ml-auto inline-flex items-center gap-1 text-xs font-medium text-success">
                       <Icon name="circle-check" size={14} />
-                      Verified
+                      {t('auth.verified')}
                     </span>
                   )}
                 </div>
@@ -356,7 +362,7 @@ export function VerifyOtpView() {
                   onChange={setEmailOtp}
                   disabled={loading || emailVerified}
                   verified={emailVerified || OTP_RE.test(emailOtp)}
-                  ariaLabel="Email verification code"
+                  ariaLabel={t('auth.emailCodeAria')}
                 />
                 {!emailVerified && renderResend('EMAIL', emailResend)}
               </div>
@@ -370,7 +376,7 @@ export function VerifyOtpView() {
               onClick={() => void submit()}
               className="w-full"
             >
-              {loading ? 'Verifying…' : 'Verify'}
+              {loading ? t('auth.verifying') : t('auth.verify')}
             </Button>
           </>
         )}

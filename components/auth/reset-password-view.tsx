@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { AuthShell } from '@/components/auth/auth-shell'
 import { IconInput } from '@/components/auth/icon-input'
@@ -15,10 +16,10 @@ import type { ApiError } from '@matrimony/shared-core'
 import { resetPasswordSchema } from '@matrimony/shared-core'
 import { authApi } from '@/src/lib/api'
 
-const errorMessages: Record<string, string> = {
-  INVALID_OTP: 'The code you entered is incorrect. Please check and try again.',
-  OTP_EXPIRED: 'This code has expired. Please request a new one.',
-  OTP_ATTEMPTS_EXCEEDED: 'Too many incorrect attempts. Please request a new code.',
+const errorKeys: Record<string, string> = {
+  INVALID_OTP: 'auth.errInvalidOtp',
+  OTP_EXPIRED: 'auth.errOtpExpired',
+  OTP_ATTEMPTS_EXCEEDED: 'auth.errOtpAttempts',
 }
 
 interface ResetPasswordViewProps {
@@ -26,6 +27,7 @@ interface ResetPasswordViewProps {
 }
 
 export function ResetPasswordView({ profileId = '' }: ResetPasswordViewProps) {
+  const { t } = useTranslation()
   const router = useRouter()
   const [pid, setPid] = useState(profileId)
   const [otp, setOtp] = useState('')
@@ -68,7 +70,7 @@ export function ResetPasswordView({ profileId = '' }: ResetPasswordViewProps) {
     } catch (err: unknown) {
       const apiError = (err as { response?: { data?: ApiError } })?.response?.data
       const code = apiError?.errorCode
-      setBanner(code && errorMessages[code] ? code : `__RAW__${apiError?.message ?? 'Reset failed. Please try again.'}`)
+      setBanner(code && errorKeys[code] ? code : `__RAW__${apiError?.message ?? t('auth.resetFailed')}`)
     } finally {
       setLoading(false)
     }
@@ -76,16 +78,16 @@ export function ResetPasswordView({ profileId = '' }: ResetPasswordViewProps) {
 
   function bannerText(b: string): string {
     if (b.startsWith('__RAW__')) return b.slice('__RAW__'.length)
-    return errorMessages[b] ?? 'Reset failed. Please try again.'
+    return errorKeys[b] ? t(errorKeys[b] as never) : t('auth.resetFailed')
   }
 
   return (
     <AuthShell
-      title="Reset password"
-      subtitle="Enter the code we sent and choose a new password."
+      title={t('auth.resetTitle')}
+      subtitle={t('auth.resetSubtitle')}
       footer={
         <Link href="/login" className="font-medium text-primary hover:underline">
-          Back to sign in
+          {t('auth.backToSignIn')}
         </Link>
       }
     >
@@ -98,17 +100,17 @@ export function ResetPasswordView({ profileId = '' }: ResetPasswordViewProps) {
         )}
 
         <IconInput
-          label="Profile ID"
+          label={t('auth.profileId')}
           leadingIcon="user"
-          placeholder="MGZ-100238"
+          placeholder={t('auth.profileIdPlaceholder')}
           value={pid}
           onChange={(e) => setPid(e.target.value)}
           error={errors.pid}
         />
 
         <div className="flex flex-col gap-2">
-          <span className="text-sm font-medium text-foreground">Verification code</span>
-          <OtpInput value={otp} onChange={setOtp} verified={OTP_RE.test(otp)} ariaLabel="Reset verification code" />
+          <span className="text-sm font-medium text-foreground">{t('auth.verificationCode')}</span>
+          <OtpInput value={otp} onChange={setOtp} verified={OTP_RE.test(otp)} ariaLabel={t('auth.resetCodeAria')} />
           {errors.otp && (
             <p role="alert" className="flex items-center gap-1 text-sm text-destructive">
               <Icon name="alert-circle" size={14} />
@@ -119,7 +121,7 @@ export function ResetPasswordView({ profileId = '' }: ResetPasswordViewProps) {
 
         <div className="flex flex-col gap-2">
           <IconInput
-            label="New password"
+            label={t('auth.newPassword')}
             password
             leadingIcon="lock"
             autoComplete="new-password"
@@ -146,7 +148,7 @@ export function ResetPasswordView({ profileId = '' }: ResetPasswordViewProps) {
         </div>
 
         <IconInput
-          label="Confirm new password"
+          label={t('auth.confirmNewPassword')}
           password
           leadingIcon="lock"
           autoComplete="new-password"
@@ -156,7 +158,7 @@ export function ResetPasswordView({ profileId = '' }: ResetPasswordViewProps) {
         />
 
         <Button type="submit" size="lg" loading={loading} className="mt-1 w-full">
-          {loading ? 'Resetting…' : 'Reset password'}
+          {loading ? t('auth.resetting') : t('auth.resetPassword')}
         </Button>
       </form>
     </AuthShell>

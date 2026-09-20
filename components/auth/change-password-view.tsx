@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { AuthShell } from '@/components/auth/auth-shell'
 import { IconInput } from '@/components/auth/icon-input'
@@ -20,6 +21,7 @@ interface ChangePasswordViewProps {
 }
 
 export function ChangePasswordView({ forced = false }: ChangePasswordViewProps) {
+  const { t } = useTranslation()
   const router = useRouter()
   const [current, setCurrent] = useState('')
   const [password, setPassword] = useState('')
@@ -59,7 +61,7 @@ export function ChangePasswordView({ forced = false }: ChangePasswordViewProps) 
     setLoading(true)
     try {
       await authApi.changePassword({ currentPassword: current, newPassword: password })
-      pushToast('Password updated successfully.', 'success')
+      pushToast(t('auth.passwordUpdated'), 'success')
       setCurrent('')
       setPassword('')
       setConfirm('')
@@ -69,9 +71,9 @@ export function ChangePasswordView({ forced = false }: ChangePasswordViewProps) 
     } catch (err: unknown) {
       const apiError = (err as { response?: { data?: ApiError } })?.response?.data
       if (apiError?.errorCode === 'INVALID_CREDENTIALS') {
-        setErrors({ current: 'The current password is incorrect.' })
+        setErrors({ current: t('auth.currentPasswordWrong') })
       } else {
-        pushToast(apiError?.message ?? 'Something went wrong.', 'error')
+        pushToast(apiError?.message ?? t('auth.somethingWrong'), 'error')
       }
     } finally {
       setLoading(false)
@@ -80,20 +82,20 @@ export function ChangePasswordView({ forced = false }: ChangePasswordViewProps) 
 
   return (
     <AuthShell
-      title="Change password"
-      subtitle="Choose a strong password you do not use elsewhere."
+      title={t('auth.changeTitle')}
+      subtitle={t('auth.changeSubtitle')}
       banner={
         forced ? (
           <div className="mb-5 flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm text-foreground">
             <Icon name="alert-circle" size={16} className="mt-0.5 shrink-0 text-warning" />
-            <span>For your security, please set a new password before continuing.</span>
+            <span>{t('auth.forcedNotice')}</span>
           </div>
         ) : undefined
       }
     >
       <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
         <IconInput
-          label="Current password"
+          label={t('auth.currentPassword')}
           password
           leadingIcon="lock"
           autoComplete="current-password"
@@ -104,7 +106,7 @@ export function ChangePasswordView({ forced = false }: ChangePasswordViewProps) 
 
         <div className="flex flex-col gap-2">
           <IconInput
-            label="New password"
+            label={t('auth.newPassword')}
             password
             leadingIcon="lock"
             autoComplete="new-password"
@@ -131,7 +133,7 @@ export function ChangePasswordView({ forced = false }: ChangePasswordViewProps) 
         </div>
 
         <IconInput
-          label="Confirm new password"
+          label={t('auth.confirmNewPassword')}
           password
           leadingIcon="lock"
           autoComplete="new-password"
@@ -141,7 +143,7 @@ export function ChangePasswordView({ forced = false }: ChangePasswordViewProps) 
         />
 
         <Button type="submit" size="lg" loading={loading} className="mt-1 w-full">
-          {loading ? 'Updating…' : 'Update password'}
+          {loading ? t('auth.updating') : t('auth.updatePassword')}
         </Button>
       </form>
       <Toaster toasts={toasts} onDismiss={(id) => setToasts((t) => t.filter((x) => x.id !== id))} />
