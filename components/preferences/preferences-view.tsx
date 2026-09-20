@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/navigation'
 
 import { landingStore } from '@/src/stores/landing'
@@ -71,6 +72,7 @@ function OpenToAll({
   checked: boolean
   onChange: (v: boolean) => void
 }) {
+  const { t } = useTranslation()
   return (
     <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
       <input
@@ -79,7 +81,7 @@ function OpenToAll({
         onChange={(e) => onChange(e.target.checked)}
         className="size-4 rounded border-input text-primary focus-visible:ring-2 focus-visible:ring-ring/40"
       />
-      Open to all
+      {t('page.preferences.openToAll')}
     </label>
   )
 }
@@ -92,6 +94,7 @@ export function PreferencesView({
   initial?: 'saved' | 'empty'
 }) {
   const router = useRouter()
+  const { t } = useTranslation()
   const [form, setForm] = React.useState<PartnerPreference>(emptyPreference)
   const [errors, setErrors] = React.useState<Record<string, string>>({})
   const [saving, setSaving] = React.useState(false)
@@ -127,7 +130,7 @@ export function PreferencesView({
     const nextErrors = validatePreference(form)
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) {
-      pushToast('Please fix the highlighted fields.', 'error')
+      pushToast(t('page.preferences.fixFields'), 'error')
       return
     }
     setSaving(true)
@@ -136,19 +139,13 @@ export function PreferencesView({
       // Reflect that preferences now exist so the landing funnel advances to
       // the plans step instead of bouncing the user back to preferences.
       landingStore.getState().setLandingSignals({ hasPartnerPreferences: true })
-      pushToast(
-        'Preferences saved. We will use these to refine your matches.',
-        'success',
-      )
+      pushToast(t('page.preferences.savedToast'), 'success')
       // Onboarding step after profile submission: surface membership packages
       // next (skippable). The ?onboarding=1 flag tells the plans page to show a
       // "remind me later" path to matches.
       router.push('/plans?onboarding=1')
     } catch {
-      pushToast(
-        'Could not save preferences. Please try again in a moment.',
-        'error',
-      )
+      pushToast(t('page.preferences.saveError'), 'error')
     } finally {
       setSaving(false)
     }
@@ -157,26 +154,26 @@ export function PreferencesView({
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <Section
-        title="Age & height"
-        description="Set the range you're open to. Leave blank for no limit."
+        title={t('page.preferences.secAgeHeightTitle')}
+        description={t('page.preferences.secAgeHeightDesc')}
       >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="grid grid-cols-2 gap-3">
             <Input
-              label="Min age"
+              label={t('page.preferences.minAge')}
               type="number"
               inputMode="numeric"
               min={18}
-              placeholder="Any"
+              placeholder={t('page.preferences.any')}
               value={form.minAge ?? ''}
               onChange={(e) => set({ minAge: toNum(e.target.value) })}
             />
             <Input
-              label="Max age"
+              label={t('page.preferences.maxAge')}
               type="number"
               inputMode="numeric"
               min={18}
-              placeholder="Any"
+              placeholder={t('page.preferences.any')}
               value={form.maxAge ?? ''}
               error={errors.maxAge}
               onChange={(e) => set({ maxAge: toNum(e.target.value) })}
@@ -184,11 +181,11 @@ export function PreferencesView({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <Select
-              label="Min height"
+              label={t('page.preferences.minHeight')}
               value={form.minHeightCm ?? ''}
               onChange={(e) => set({ minHeightCm: toNum(e.target.value) })}
             >
-              <option value="">Any</option>
+              <option value="">{t('page.preferences.any')}</option>
               {heightOptions.map((h) => (
                 <option key={h.cm} value={h.cm}>
                   {h.label}
@@ -196,12 +193,12 @@ export function PreferencesView({
               ))}
             </Select>
             <Select
-              label="Max height"
+              label={t('page.preferences.maxHeight')}
               value={form.maxHeightCm ?? ''}
               error={errors.maxHeightCm}
               onChange={(e) => set({ maxHeightCm: toNum(e.target.value) })}
             >
-              <option value="">Any</option>
+              <option value="">{t('page.preferences.any')}</option>
               {heightOptions.map((h) => (
                 <option key={h.cm} value={h.cm}>
                   {h.label}
@@ -213,17 +210,17 @@ export function PreferencesView({
       </Section>
 
       <Section
-        title="Income & horoscope"
-        description="Financial expectations and Manglik / Dhosam preference."
+        title={t('page.preferences.secIncomeHoroTitle')}
+        description={t('page.preferences.secIncomeHoroDesc')}
       >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="grid grid-cols-2 gap-3">
             <Select
-              label="Min income"
+              label={t('page.preferences.minIncome')}
               value={form.minAnnualIncome ?? ''}
               onChange={(e) => set({ minAnnualIncome: toNum(e.target.value) })}
             >
-              <option value="">Any</option>
+              <option value="">{t('page.preferences.any')}</option>
               {incomeOptions.map((i) => (
                 <option key={i.value} value={i.value}>
                   {i.label}
@@ -231,12 +228,12 @@ export function PreferencesView({
               ))}
             </Select>
             <Select
-              label="Max income"
+              label={t('page.preferences.maxIncome')}
               value={form.maxAnnualIncome ?? ''}
               error={errors.maxAnnualIncome}
               onChange={(e) => set({ maxAnnualIncome: toNum(e.target.value) })}
             >
-              <option value="">Any</option>
+              <option value="">{t('page.preferences.any')}</option>
               {incomeOptions.map((i) => (
                 <option key={i.value} value={i.value}>
                   {i.label}
@@ -245,7 +242,7 @@ export function PreferencesView({
             </Select>
           </div>
           <Select
-            label="Manglik / Dhosam"
+            label={t('page.preferences.manglik')}
             value={form.manglik ?? ''}
             onChange={(e) => set({ manglik: e.target.value || undefined })}
           >
@@ -259,13 +256,13 @@ export function PreferencesView({
       </Section>
 
       <Section
-        title="Community"
-        description="Religion and caste. Turn on “Open to all” for each to match across communities."
+        title={t('page.preferences.secCommunityTitle')}
+        description={t('page.preferences.secCommunityDesc')}
       >
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-foreground">
-              Religion
+              {t('page.preferences.religion')}
             </span>
             <OpenToAll
               checked={form.anyReligion}
@@ -281,14 +278,14 @@ export function PreferencesView({
             options={religions}
             value={form.religions}
             disabled={form.anyReligion}
-            emptyHint="Open to all religions"
+            emptyHint={t('page.preferences.openAllReligions')}
             searchable
             onChange={(religions) => set({ religions })}
           />
 
           <div className="flex items-center justify-between pt-1">
             <span className="text-sm font-medium text-foreground">
-              Caste / Community
+              {t('page.preferences.caste')}
             </span>
             {/* Caste no-bar is independent of religion no-bar (backend has both). */}
             <OpenToAll
@@ -305,23 +302,23 @@ export function PreferencesView({
             options={allCastes}
             value={form.castes}
             disabled={form.anyCaste}
-            emptyHint="Open to all castes"
+            emptyHint={t('page.preferences.openAllCastes')}
             searchable
-            searchPlaceholder="Search caste / community"
+            searchPlaceholder={t('page.preferences.searchCaste')}
             onChange={(castes) => set({ castes })}
           />
         </div>
       </Section>
 
       <Section
-        title="Marital status & mother tongue"
-        description="Choose any that apply, or stay open to all."
+        title={t('page.preferences.secMaritalTongueTitle')}
+        description={t('page.preferences.secMaritalTongueDesc')}
       >
         <div className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-foreground">
-                Marital status
+                {t('page.preferences.maritalStatus')}
               </span>
               <OpenToAll
                 checked={form.anyMaritalStatus}
@@ -344,7 +341,7 @@ export function PreferencesView({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-foreground">
-                Mother tongue
+                {t('page.preferences.motherTongue')}
               </span>
               <OpenToAll
                 checked={form.anyMotherTongue}
@@ -361,7 +358,7 @@ export function PreferencesView({
               value={form.motherTongues}
               disabled={form.anyMotherTongue}
               searchable
-              searchPlaceholder="Search language"
+              searchPlaceholder={t('page.preferences.searchLanguage')}
               onChange={(motherTongues) => set({ motherTongues })}
             />
           </div>
@@ -369,13 +366,13 @@ export function PreferencesView({
       </Section>
 
       <Section
-        title="Education"
-        description="Preferred qualification levels."
+        title={t('page.preferences.secEducationTitle')}
+        description={t('page.preferences.secEducationDesc')}
       >
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-foreground">
-              Education
+              {t('page.preferences.education')}
             </span>
             <OpenToAll
               checked={form.anyEducation}
@@ -398,13 +395,13 @@ export function PreferencesView({
       </Section>
 
       <Section
-        title="Location"
-        description="Preferred cities. Leave “Open to all” on to match anywhere."
+        title={t('page.preferences.secLocationTitle')}
+        description={t('page.preferences.secLocationDesc')}
       >
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-foreground">
-              Preferred cities
+              {t('page.preferences.preferredCities')}
             </span>
             <OpenToAll
               checked={form.anyLocation}
@@ -420,9 +417,9 @@ export function PreferencesView({
             options={cities}
             value={form.cities}
             disabled={form.anyLocation}
-            emptyHint="Open to all locations"
+            emptyHint={t('page.preferences.openAllLocations')}
             searchable
-            searchPlaceholder="Search city"
+            searchPlaceholder={t('page.preferences.searchCity')}
             onChange={(cities) => set({ cities })}
           />
         </div>
@@ -432,7 +429,7 @@ export function PreferencesView({
       <div className="sticky bottom-0 -mx-4 border-t border-border bg-background/95 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:pt-1">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
           <p className="hidden text-sm text-muted-foreground sm:mr-auto sm:block">
-            You can change these any time from your account.
+            {t('page.preferences.changeAnyTime')}
           </p>
           <Button
             type="submit"
@@ -441,7 +438,7 @@ export function PreferencesView({
             className="w-full sm:w-auto"
           >
             {!saving && <Icon name="check" size={18} />}
-            Save preferences
+            {t('page.preferences.save')}
           </Button>
         </div>
       </div>
