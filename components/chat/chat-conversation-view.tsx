@@ -296,11 +296,16 @@ export function ChatConversationView({ profileId, state = 'ready' }: Props) {
       const code = apiError?.errorCode
       if (code === 'CHAT_NOT_ALLOWED') {
         setIsBlocked(true)
-      } else if (code === 'MESSAGE_PAYMENT_REQUIRED' || code === 'MESSAGE_QUOTA_EXHAUSTED') {
-        // No messaging quota (no plan or exhausted) — surface the upgrade CTA
+      } else if (
+        code === 'MESSAGE_PAYMENT_REQUIRED' ||
+        code === 'MESSAGE_QUOTA_EXHAUSTED' ||
+        code === 'CHAT_NOT_ALLOWED_PLAN'
+      ) {
+        // Sender's plan doesn't include chat (CHAT_NOT_ALLOWED_PLAN), or no
+        // messaging quota (no plan / exhausted) — surface the upgrade CTA
         // ("View plans" link below) so the member can buy a plan to continue.
         setErrorKind('quota')
-        setError('Upgrade your plan to send messages.')
+        setError('Upgrade to a chat-enabled plan to start chatting.')
       } else {
         setError(apiError?.message || 'Something went wrong while sending. Please try again.')
       }

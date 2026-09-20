@@ -234,6 +234,9 @@ export { formatCurrency, formatDate, formatWalletBalance, truncateText } from '.
 // Utility functions - API error handling
 export { getApiError, getApiErrorMessage } from './utils/apiError';
 
+// Utility functions - Subscription quota display
+export { describeQuota, type QuotaDisplay } from './utils/quota';
+
 // Validation Schemas - Auth
 export {
   registerSchema,

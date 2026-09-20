@@ -24,7 +24,7 @@ export const navItems: NavItem[] = [
   { to: '/', label: 'Dashboard', labelKey: 'nav.dashboard', icon: 'home', bottomNav: true },
   { to: '/search', label: 'Search', labelKey: 'nav.search', icon: 'search', bottomNav: true },
   { to: '/matches', label: 'Matches', labelKey: 'nav.matches', icon: 'heart', bottomNav: true },
-  { to: '/chat', label: 'Messages', labelKey: 'nav.chat', icon: 'chat', bottomNav: true },
+  { to: '/chat', label: 'Chats', labelKey: 'nav.chat', icon: 'chat', bottomNav: true },
   { to: '/interests', label: 'Interests', labelKey: 'nav.interests', icon: 'mail', bottomNav: true },
   // Notifications lives in the top-right bell + the slide-over menu (not the
   // bottom tab bar) to keep the tab bar to 5 core destinations.
@@ -32,6 +32,7 @@ export const navItems: NavItem[] = [
   { to: '/shortlist', label: 'Shortlist', labelKey: 'nav.shortlist', icon: 'star' },
   { to: '/profile-views', label: 'Profile Views', labelKey: 'nav.profileViews', icon: 'eye' },
   { to: '/plans', label: 'Plans', labelKey: 'nav.plans', icon: 'sparkles' },
+  { to: '/subscriptions', label: 'My Plan & Quota', labelKey: 'nav.subscriptions', icon: 'wallet' },
   { to: '/referrals', label: 'Refer & Earn', labelKey: 'nav.referrals', icon: 'handshake' },
   { to: '/profile', label: 'Profile', labelKey: 'nav.profile', icon: 'user' },
   { to: '/photos', label: 'Photos', labelKey: 'nav.photos', icon: 'photo' },

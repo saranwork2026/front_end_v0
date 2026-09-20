@@ -16,7 +16,7 @@ export const ta: Resources = {
       dashboard: 'முகப்பு',
       search: 'தேடு',
       matches: 'பொருத்தங்கள்',
-      chat: 'செய்திகள்',
+      chat: 'அரட்டைகள்',
       notifications: 'அறிவிப்புகள்',
       shortlist: 'தேர்வுப் பட்டியல்',
       interests: 'விருப்பங்கள்',
@@ -25,6 +25,7 @@ export const ta: Resources = {
       profile: 'சுயவிவரம்',
       photos: 'புகைப்படங்கள்',
       plans: 'திட்டங்கள்',
+      subscriptions: 'என் திட்டம் & ஒதுக்கீடு',
       settings: 'அமைப்புகள்',
     },
     header: {
@@ -477,7 +478,7 @@ export const ta: Resources = {
       },
       chat: {
         eyebrow: 'உரையாடல்கள்',
-        title: 'செய்திகள்',
+        title: 'அரட்டைகள்',
         subtitle: 'நீங்கள் இணைந்த உறுப்பினர்களுடன் தனிப்பட்ட முறையில் அரட்டையடிக்கவும்.',
         errorLoad: 'உங்கள் உரையாடல்களை எங்களால் ஏற்ற முடியவில்லை.',
         tryAgain: 'மீண்டும் முயற்சி',
@@ -644,8 +645,9 @@ export const ta: Resources = {
         usageThisCycle: 'இந்த சுழற்சியில் பயன்பாடு',
         contactViews: 'தொடர்பு பார்வைகள்',
         photoViews: 'புகைப்படப் பார்வைகள்',
-        messages: 'செய்திகள்',
+        messages: 'அரட்டைகள்',
         interests: 'விருப்பங்கள்',
+        unlimited: 'வரம்பற்றது',
         emptyTitle: 'செயலில் உள்ள சந்தா இல்லை',
         emptyDesc:
           'தொடர்புகள், புகைப்படக் கோரிக்கைகள், அரட்டை மற்றும் பலவற்றைத் திறக்க ஒரு பிரீமியம் திட்டத்திற்கு மேம்படுத்தவும்.',

@@ -4,7 +4,7 @@ import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import Link from 'next/link'
 import { useNavigate } from 'react-router-dom'
-import type { PaymentMethod, SubscriptionPlan } from '@matrimony/shared-core'
+import { describeQuota, type PaymentMethod, type SubscriptionPlan } from '@matrimony/shared-core'
 
 import { Button, buttonVariants } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -439,25 +439,40 @@ function UsageRow({
   remaining: number
   total: number
 }) {
-  const pct = total > 0 ? Math.min(100, Math.max(0, Math.round((remaining / total) * 100))) : 0
-  const barColor = pct > 50 ? 'bg-success' : pct > 20 ? 'bg-warning' : 'bg-destructive'
+  const { t } = useTranslation()
+  // -1 means unlimited for that quota (e.g. PLATINUM chats/photo views). Show
+  // an "Unlimited" pill and a full bar rather than a nonsensical "-1 / -1".
+  const { unlimited: isUnlimited, percent: pct } = describeQuota(remaining, total)
+  const barColor = isUnlimited
+    ? 'bg-success'
+    : pct > 50
+      ? 'bg-success'
+      : pct > 20
+        ? 'bg-warning'
+        : 'bg-destructive'
 
   return (
     <li className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between gap-3">
         <span className="text-sm font-medium text-foreground">{label}</span>
         <span className="font-mono text-xs text-muted-foreground tabular-nums">
-          <span className="text-foreground">{remaining}</span>
-          {' / '}
-          {total}
+          {isUnlimited ? (
+            <span className="text-foreground">{t('page.subscriptions.unlimited')}</span>
+          ) : (
+            <>
+              <span className="text-foreground">{remaining}</span>
+              {' / '}
+              {total}
+            </>
+          )}
         </span>
       </div>
       <div
         className="h-2 overflow-hidden rounded-full bg-muted"
         role="progressbar"
         aria-valuemin={0}
-        aria-valuemax={total}
-        aria-valuenow={remaining}
+        aria-valuemax={isUnlimited ? undefined : total}
+        aria-valuenow={isUnlimited ? undefined : remaining}
         aria-label={label}
       >
         <div

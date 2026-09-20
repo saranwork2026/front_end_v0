@@ -21,7 +21,7 @@ export const en = {
       dashboard: 'Dashboard',
       search: 'Search',
       matches: 'Matches',
-      chat: 'Messages',
+      chat: 'Chats',
       notifications: 'Notifications',
       shortlist: 'Shortlist',
       interests: 'Interests',
@@ -30,6 +30,7 @@ export const en = {
       profile: 'Profile',
       photos: 'Photos',
       plans: 'Plans',
+      subscriptions: 'My Plan & Quota',
       settings: 'Settings',
     },
     header: {
@@ -487,7 +488,7 @@ export const en = {
       },
       chat: {
         eyebrow: 'Conversations',
-        title: 'Messages',
+        title: 'Chats',
         subtitle: 'Chat privately with members you have connected with.',
         errorLoad: 'We could not load your conversations.',
         tryAgain: 'Try again',
@@ -654,8 +655,9 @@ export const en = {
         usageThisCycle: 'Usage this cycle',
         contactViews: 'Contact views',
         photoViews: 'Photo views',
-        messages: 'Messages',
+        messages: 'Chats',
         interests: 'Interests',
+        unlimited: 'Unlimited',
         emptyTitle: 'No active subscription',
         emptyDesc:
           'Upgrade to a premium plan to unlock contacts, photo requests, chat, and more.',
