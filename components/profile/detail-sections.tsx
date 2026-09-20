@@ -28,7 +28,7 @@ export function DetailSections({
   horoscopeRequested,
 }: DetailSectionsProps) {
   const { t } = useTranslation()
-  const sections = buildDetailSections(profile)
+  const sections = buildDetailSections(profile, t)
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
@@ -41,7 +41,7 @@ export function DetailSections({
             <span className="text-primary">
               <Icon name={section.icon} size={18} />
             </span>
-            {section.title}
+            {t(section.title as never)}
           </h2>
           <dl className="mt-4 grid gap-x-4 gap-y-3">
             {section.rows.map((row) => (
@@ -50,7 +50,7 @@ export function DetailSections({
                 className="flex items-baseline justify-between gap-4 border-b border-border/60 pb-3 last:border-0 last:pb-0"
               >
                 <dt className="shrink-0 text-sm text-muted-foreground">
-                  {row.label}
+                  {t(row.label as never)}
                 </dt>
                 <dd className="min-w-0 text-right text-sm font-medium text-foreground text-pretty">
                   {row.value}

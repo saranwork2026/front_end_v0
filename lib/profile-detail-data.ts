@@ -1,5 +1,9 @@
+import type { useTranslation } from 'react-i18next'
+
 import type { IconName } from '@/components/ui/icon'
 import type { UserProfile, PhotoResponse } from '@matrimony/shared-core'
+
+type TFunc = ReturnType<typeof useTranslation>['t']
 
 /**
  * Profile-detail view model for /profile/[profileId].
@@ -161,11 +165,13 @@ export function visiblePhotoUrls(photos: PhotoResponse[]): string[] {
 /* ------------------------- detail section model ------------------------ */
 
 export interface DetailRow {
+  /** i18n KEY (e.g. 'page.profile.dsAge'); the caller resolves via t(). */
   label: string
   value?: string | number
 }
 export interface DetailSection {
   key: string
+  /** i18n KEY (e.g. 'page.profile.dsSecBasic'); the caller resolves via t(). */
   title: string
   icon: IconName
   rows: DetailRow[]
@@ -177,82 +183,88 @@ function cmToFeet(cm?: number): string | undefined {
   return `${Math.floor(total / 12)}'${Math.round(total % 12)}" (${cm} cm)`
 }
 
-export function buildDetailSections(p: ProfileDetail): DetailSection[] {
+/**
+ * Build the profile detail sections. `title` and each row `label` hold i18n
+ * KEYS resolved by the caller (detail-sections.tsx) via t(). `t` is passed in
+ * only to format the age value ('{{count}} yrs'); this module has no React
+ * context of its own.
+ */
+export function buildDetailSections(p: ProfileDetail, t: TFunc): DetailSection[] {
   const sections: DetailSection[] = [
     {
       key: 'basic',
-      title: 'Basic Details',
+      title: 'page.profile.dsSecBasic',
       icon: 'user',
       rows: [
-        { label: 'Age', value: p.age ? `${p.age} yrs` : undefined },
-        { label: 'Gender', value: p.gender },
-        { label: 'Marital status', value: p.maritalStatus },
-        { label: 'Mother tongue', value: p.motherTongue },
+        { label: 'page.profile.dsAge', value: p.age ? t('page.profile.dsYrs', { count: p.age }) : undefined },
+        { label: 'page.profile.dsGender', value: p.gender },
+        { label: 'page.profile.dsMaritalStatus', value: p.maritalStatus },
+        { label: 'page.profile.dsMotherTongue', value: p.motherTongue },
       ],
     },
     {
       key: 'physical',
-      title: 'Physical Attributes',
+      title: 'page.profile.dsSecPhysical',
       icon: 'heart',
       rows: [
-        { label: 'Height', value: cmToFeet(p.heightCm) },
-        { label: 'Body type', value: p.bodyType },
-        { label: 'Complexion', value: p.complexion },
+        { label: 'page.profile.dsHeight', value: cmToFeet(p.heightCm) },
+        { label: 'page.profile.dsBodyType', value: p.bodyType },
+        { label: 'page.profile.dsComplexion', value: p.complexion },
       ],
     },
     {
       key: 'religious',
-      title: 'Religious Background',
+      title: 'page.profile.dsSecReligious',
       icon: 'sparkles',
       rows: [
-        { label: 'Religion', value: p.religion },
-        { label: 'Caste / community', value: p.caste },
-        { label: 'Manglik / Dhosam', value: p.manglik },
+        { label: 'page.profile.dsReligion', value: p.religion },
+        { label: 'page.profile.dsCaste', value: p.caste },
+        { label: 'page.profile.dsManglik', value: p.manglik },
       ],
     },
     {
       key: 'professional',
-      title: 'Education & Career',
+      title: 'page.profile.dsSecProfessional',
       icon: 'settings',
       rows: [
-        { label: 'Education', value: p.highestEducation },
-        { label: 'Profession', value: p.profession },
-        { label: 'Employed in', value: p.employedIn },
-        { label: 'Company', value: p.companyName },
-        { label: 'Annual income', value: p.annualIncome ? `₹${p.annualIncome.toLocaleString('en-IN')}` : undefined },
+        { label: 'page.profile.dsEducation', value: p.highestEducation },
+        { label: 'page.profile.dsProfession', value: p.profession },
+        { label: 'page.profile.dsEmployedIn', value: p.employedIn },
+        { label: 'page.profile.dsCompany', value: p.companyName },
+        { label: 'page.profile.dsAnnualIncome', value: p.annualIncome ? `₹${p.annualIncome.toLocaleString('en-IN')}` : undefined },
       ],
     },
     {
       key: 'location',
-      title: 'Location',
+      title: 'page.profile.dsSecLocation',
       icon: 'globe',
       rows: [
-        { label: 'City', value: p.currentCity },
-        { label: 'State', value: p.state },
-        { label: 'Country', value: p.country },
-        { label: 'Native place', value: p.nativePlace },
+        { label: 'page.profile.dsCity', value: p.currentCity },
+        { label: 'page.profile.dsState', value: p.state },
+        { label: 'page.profile.dsCountry', value: p.country },
+        { label: 'page.profile.dsNativePlace', value: p.nativePlace },
       ],
     },
     {
       key: 'family',
-      title: 'Family',
+      title: 'page.profile.dsSecFamily',
       icon: 'users',
       rows: [
-        { label: 'Family type', value: p.familyType },
-        { label: 'Family status', value: p.familyStatus },
-        { label: "Father's occupation", value: p.fatherOccupation },
-        { label: "Mother's occupation", value: p.motherOccupation },
-        { label: 'Siblings', value: p.siblings },
+        { label: 'page.profile.dsFamilyType', value: p.familyType },
+        { label: 'page.profile.dsFamilyStatus', value: p.familyStatus },
+        { label: 'page.profile.dsFatherOccupation', value: p.fatherOccupation },
+        { label: 'page.profile.dsMotherOccupation', value: p.motherOccupation },
+        { label: 'page.profile.dsSiblings', value: p.siblings },
       ],
     },
     {
       key: 'horoscope',
-      title: 'Horoscope',
+      title: 'page.profile.dsSecHoroscope',
       icon: 'star',
       rows: [
-        { label: 'Nakshatra', value: p.nakshatra },
-        { label: 'Raasi', value: p.raasi },
-        { label: 'Dhosam', value: p.dhosam },
+        { label: 'page.profile.dsNakshatra', value: p.nakshatra },
+        { label: 'page.profile.dsRaasi', value: p.raasi },
+        { label: 'page.profile.dsDhosam', value: p.dhosam },
       ],
     },
   ]
