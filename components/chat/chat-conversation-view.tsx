@@ -70,7 +70,7 @@ export function ChatConversationView({ profileId, state = 'ready' }: Props) {
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [errorKind, setErrorKind] = useState<'quota' | null>(null)
+  const [errorKind, setErrorKind] = useState<'quota' | 'not_connected' | null>(null)
   const [conversation, setConversation] = useState<Conversation | null>(null)
   const [isBlocked, setIsBlocked] = useState(state === 'blocked')
   const [connected, setConnected] = useState(false)
@@ -142,8 +142,17 @@ export function ChatConversationView({ profileId, state = 'ready' }: Props) {
         setMessages([...res.data.content].reverse())
         setTotalPages(res.data.totalPages)
         setCurrentPage(0)
-      } catch {
-        if (!cancelled) setError('We could not load this conversation. Please try again.')
+      } catch (err: unknown) {
+        if (cancelled) return
+        const code = (err as { response?: { data?: { errorCode?: string } } })?.response?.data?.errorCode
+        if (code === 'CHAT_NOT_ALLOWED') {
+          // No conversation/accepted interest yet — not an error. Prompt the
+          // member to connect first rather than showing a failure.
+          setErrorKind('not_connected')
+          setError('You are not connected with this member yet. Send an interest and, once it is accepted, you can start chatting.')
+        } else {
+          setError('We could not load this conversation. Please try again.')
+        }
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -422,14 +431,23 @@ export function ChatConversationView({ profileId, state = 'ready' }: Props) {
       </div>
 
       {error ? (
-        <div role="alert" className="border-t border-destructive/30 bg-destructive/5 px-4 py-2.5 text-center text-sm text-destructive">
-          {error}
-          {errorKind === 'quota' ? (
-            <Link href="/plans" className="ml-1 font-medium underline underline-offset-4">
-              View plans
+        errorKind === 'not_connected' ? (
+          <div className="border-t border-border bg-secondary/40 px-4 py-3 text-center text-sm text-muted-foreground">
+            {error}
+            <Link href={`/profile/${profileId}`} className="ml-1 font-medium text-primary underline underline-offset-4">
+              View profile
             </Link>
-          ) : null}
-        </div>
+          </div>
+        ) : (
+          <div role="alert" className="border-t border-destructive/30 bg-destructive/5 px-4 py-2.5 text-center text-sm text-destructive">
+            {error}
+            {errorKind === 'quota' ? (
+              <Link href="/plans" className="ml-1 font-medium underline underline-offset-4">
+                View plans
+              </Link>
+            ) : null}
+          </div>
+        )
       ) : null}
 
       {isBlocked ? (
