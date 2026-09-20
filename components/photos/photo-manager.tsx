@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { PhotoResponse, PhotoVisibility } from '@matrimony/shared-core'
 
 import { Button } from '@/components/ui/button'
@@ -23,33 +24,35 @@ const MAX_SELECT_BYTES = 25 * 1024 * 1024
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 const ACCEPT_ATTR = 'image/jpeg,image/png,image/webp'
 
-const VISIBILITY_OPTIONS: { value: PhotoVisibility; label: string }[] = [
-  { value: 'PUBLIC', label: 'Public — visible to all members' },
-  { value: 'PREMIUM_ONLY', label: 'Premium only — visible to paid members' },
-  { value: 'REQUEST_REQUIRED', label: 'On request — members must ask to view' },
+type TFunc = ReturnType<typeof useTranslation>['t']
+
+const VISIBILITY_OPTIONS: { value: PhotoVisibility; labelKey: string }[] = [
+  { value: 'PUBLIC', labelKey: 'page.photos.visPublic' },
+  { value: 'PREMIUM_ONLY', labelKey: 'page.photos.visPremium' },
+  { value: 'REQUEST_REQUIRED', labelKey: 'page.photos.visRequest' },
 ]
 
-function validateFile(file: File): string | null {
+function validateFile(file: File, t: TFunc): string | null {
   if (!ACCEPTED_TYPES.includes(file.type)) {
-    return 'Invalid file format. Only JPEG, PNG, and WEBP are accepted.'
+    return t('page.photos.invalidFormat')
   }
   if (file.size > MAX_SELECT_BYTES) {
-    return 'File is too large. Please choose an image under 25 MB.'
+    return t('page.photos.tooLargeSelect')
   }
   return null
 }
 
 /** Extracts a human message from a backend error response, with a fallback. */
-function apiErrorMessage(err: unknown, fallback: string): string {
+function apiErrorMessage(err: unknown, fallback: string, t: TFunc): string {
   const data = (err as { response?: { data?: { errorCode?: string; message?: string } } })?.response?.data
   if (data?.errorCode === 'INVALID_PHOTO_TYPE' || data?.errorCode === 'INVALID_FILE_TYPE') {
-    return 'Invalid file format. Only JPEG, PNG, and WEBP are accepted.'
+    return t('page.photos.invalidFormat')
   }
   if (data?.errorCode === 'PHOTO_TOO_LARGE') {
-    return 'File is too large.'
+    return t('page.photos.tooLarge')
   }
   if (data?.errorCode === 'PHOTO_LIMIT_REACHED') {
-    return 'You have reached the maximum number of photos.'
+    return t('page.photos.photoLimitReached')
   }
   return data?.message || fallback
 }
@@ -61,6 +64,7 @@ function apiErrorMessage(err: unknown, fallback: string): string {
  * immediately on file selection — they are NOT part of the wizard form state.
  */
 export function PhotoManager() {
+  const { t } = useTranslation()
   const [photos, setPhotos] = useState<PhotoResponse[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -103,13 +107,13 @@ export function PhotoManager() {
   const handleProfileFile = useCallback(
     async (file: File | undefined) => {
       if (!file) return
-      const validationError = validateFile(file)
+      const validationError = validateFile(file, t)
       if (validationError) {
         pushToast(validationError, 'error')
         return
       }
       if (!canUploadProfile) {
-        pushToast(`You can upload up to ${MAX_PROFILE_PHOTOS} profile photos.`, 'error')
+        pushToast(t('page.photos.maxProfileToast', { max: MAX_PROFILE_PHOTOS }), 'error')
         return
       }
       setUploadingProfile(true)
@@ -119,15 +123,15 @@ export function PhotoManager() {
         const toUpload = await compressImageIfNeeded(file, COMPRESS_TARGET_BYTES)
         const res = await photoApi.uploadPhoto(toUpload, visibility)
         setPhotos((prev) => [...prev, res.data])
-        pushToast('Photo uploaded. It will be visible after admin approval.', 'success')
+        pushToast(t('page.photos.photoUploaded'), 'success')
       } catch (err) {
-        pushToast(apiErrorMessage(err, 'Upload failed. Please try again.'), 'error')
+        pushToast(apiErrorMessage(err, t('page.photos.uploadFailed'), t), 'error')
       } finally {
         setUploadingProfile(false)
         if (profileInputRef.current) profileInputRef.current.value = ''
       }
     },
-    [canUploadProfile, pushToast, visibility],
+    [canUploadProfile, pushToast, visibility, t],
   )
 
   const handleSetPrimary = useCallback(
@@ -136,14 +140,14 @@ export function PhotoManager() {
       try {
         await photoApi.setPrimary(photoId)
         setPhotos((prev) => prev.map((p) => ({ ...p, isPrimary: p.photoId === photoId })))
-        pushToast('Primary photo updated.', 'success')
+        pushToast(t('page.photos.primaryUpdated'), 'success')
       } catch (err) {
-        pushToast(apiErrorMessage(err, 'Could not set primary photo.'), 'error')
+        pushToast(apiErrorMessage(err, t('page.photos.couldNotSetPrimary'), t), 'error')
       } finally {
         setBusyPhotoId(null)
       }
     },
-    [pushToast],
+    [pushToast, t],
   )
 
   const handleDelete = useCallback(
@@ -152,14 +156,14 @@ export function PhotoManager() {
       try {
         await photoApi.deletePhoto(photoId)
         setPhotos((prev) => prev.filter((p) => p.photoId !== photoId))
-        pushToast('Photo deleted.', 'success')
+        pushToast(t('page.photos.photoDeleted'), 'success')
       } catch (err) {
-        pushToast(apiErrorMessage(err, 'Could not delete photo.'), 'error')
+        pushToast(apiErrorMessage(err, t('page.photos.couldNotDelete'), t), 'error')
       } finally {
         setBusyPhotoId(null)
       }
     },
-    [pushToast],
+    [pushToast, t],
   )
 
   if (loading) {
@@ -179,9 +183,9 @@ export function PhotoManager() {
         className="flex flex-col items-center gap-3 rounded-2xl border border-destructive/40 bg-destructive/10 px-6 py-10 text-center"
       >
         <Icon name="alert-circle" size={28} className="text-destructive" />
-        <p className="text-sm text-foreground">We couldn&apos;t load your photos. Please try again.</p>
+        <p className="text-sm text-foreground">{t('page.photos.errorLoad')}</p>
         <Button variant="secondary" size="sm" onClick={() => void load()}>
-          Retry
+          {t('page.photos.retry')}
         </Button>
       </div>
     )
@@ -196,7 +200,7 @@ export function PhotoManager() {
             <span className="text-primary">
               <Icon name="photo" size={18} />
             </span>
-            Profile photos
+            {t('page.photos.profilePhotos')}
           </h2>
           <span className="text-sm text-muted-foreground tabular-nums">
             {profileCount} / {MAX_PROFILE_PHOTOS}
@@ -205,7 +209,7 @@ export function PhotoManager() {
 
         {photos.length === 0 ? (
           <p className="mt-4 text-sm text-muted-foreground">
-            You haven&apos;t added any profile photos yet.
+            {t('page.photos.noProfilePhotos')}
           </p>
         ) : (
           <ul className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
@@ -244,12 +248,12 @@ export function PhotoManager() {
                   onClick={() => profileInputRef.current?.click()}
                 >
                   <Icon name="upload" size={18} />
-                  Upload photo
+                  {t('page.photos.uploadPhoto')}
                 </Button>
               </div>
               <fieldset className="flex flex-col gap-2" disabled={uploadingProfile}>
                 <legend className="mb-1 text-sm font-medium text-foreground">
-                  Who can see this photo?
+                  {t('page.photos.whoCanSee')}
                 </legend>
                 {VISIBILITY_OPTIONS.map((opt) => (
                   <label
@@ -264,7 +268,7 @@ export function PhotoManager() {
                       onChange={() => setVisibility(opt.value)}
                       className="mt-0.5 size-4 shrink-0 cursor-pointer accent-primary"
                     />
-                    <span>{opt.label}</span>
+                    <span>{t(opt.labelKey as never)}</span>
                   </label>
                 ))}
               </fieldset>
@@ -272,11 +276,11 @@ export function PhotoManager() {
           ) : (
             <p className="flex items-center gap-2 text-sm text-muted-foreground">
               <Icon name="alert-circle" size={16} />
-              You&apos;ve reached the {MAX_PROFILE_PHOTOS}-photo limit. Delete a photo to add a new one.
+              {t('page.photos.limitReachedHint', { max: MAX_PROFILE_PHOTOS })}
             </p>
           )}
           <p className="mt-2 text-xs text-muted-foreground">
-            JPEG, PNG, or WEBP. Up to 5 MB.
+            {t('page.photos.formatHint')}
           </p>
         </div>
       </section>
@@ -295,25 +299,26 @@ interface PhotoTileProps {
 }
 
 function PhotoTile({ photo, busy, onSetPrimary, onDelete, hidePrimary }: PhotoTileProps) {
+  const { t } = useTranslation()
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
       <div className="relative aspect-square bg-muted">
         {photo.photoUrl ? (
           <img
             src={photo.thumbnailUrl ?? photo.photoUrl}
-            alt="Uploaded photo"
+            alt={t('page.photos.uploadedAlt')}
             className="h-full w-full object-cover"
             loading="lazy"
           />
         ) : (
           <span className="flex h-full w-full items-center justify-center px-2 text-center text-xs text-muted-foreground">
-            Processing…
+            {t('page.photos.processing')}
           </span>
         )}
         {!hidePrimary && photo.isPrimary && (
           <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-card/90 px-2 py-0.5 text-xs font-medium text-gold shadow-sm">
             <Icon name="star-filled" size={12} />
-            Primary
+            {t('page.photos.primary')}
           </span>
         )}
       </div>
@@ -323,7 +328,7 @@ function PhotoTile({ photo, busy, onSetPrimary, onDelete, hidePrimary }: PhotoTi
           {onSetPrimary && (
             <Button variant="secondary" size="sm" loading={busy} onClick={onSetPrimary}>
               <Icon name="star" size={16} />
-              Set primary
+              {t('page.photos.setPrimary')}
             </Button>
           )}
           <Button
@@ -331,10 +336,10 @@ function PhotoTile({ photo, busy, onSetPrimary, onDelete, hidePrimary }: PhotoTi
             size="sm"
             loading={busy}
             onClick={onDelete}
-            aria-label="Delete photo"
+            aria-label={t('page.photos.deletePhoto')}
           >
             <Icon name="trash" size={16} />
-            Delete
+            {t('page.photos.delete')}
           </Button>
         </div>
       </div>

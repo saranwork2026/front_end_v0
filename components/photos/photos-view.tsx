@@ -1,5 +1,7 @@
 'use client'
 
+import { useTranslation } from 'react-i18next'
+
 import { PhotoManager } from '@/components/photos/photo-manager'
 import { ProfileDpManager } from '@/components/photos/profile-dp-manager'
 
@@ -11,12 +13,13 @@ import { ProfileDpManager } from '@/components/photos/profile-dp-manager'
  *      gallery), kept identical to the wizard's Photos step.
  */
 export function PhotosView() {
+  const { t } = useTranslation()
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:py-10">
       <div className="mb-6">
-        <h1 className="font-serif text-2xl text-foreground sm:text-3xl">Photos</h1>
+        <h1 className="font-serif text-2xl text-foreground sm:text-3xl">{t('page.photos.title')}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Add up to 3 profile photos. New photos are visible to others after admin approval.
+          {t('page.photos.subtitle')}
         </p>
       </div>
 
@@ -28,7 +31,7 @@ export function PhotosView() {
             id="additional-photos-heading"
             className="mb-3 font-serif text-lg font-bold text-foreground"
           >
-            Additional photos
+            {t('page.photos.additional')}
           </h2>
           <PhotoManager />
         </section>

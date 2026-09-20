@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { PhotoResponse } from '@matrimony/shared-core'
 
 import { Button } from '@/components/ui/button'
@@ -18,24 +19,26 @@ const MAX_SELECT_BYTES = 25 * 1024 * 1024
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 const ACCEPT_ATTR = 'image/jpeg,image/png,image/webp'
 
-function validateFile(file: File): string | null {
+type TFunc = ReturnType<typeof useTranslation>['t']
+
+function validateFile(file: File, t: TFunc): string | null {
   if (!ACCEPTED_TYPES.includes(file.type)) {
-    return 'Invalid file format. Only JPEG, PNG, and WEBP are accepted.'
+    return t('page.photos.invalidFormat')
   }
   if (file.size > MAX_SELECT_BYTES) {
-    return 'File is too large. Please choose an image under 25 MB.'
+    return t('page.photos.tooLargeSelect')
   }
   return null
 }
 
-function apiErrorMessage(err: unknown, fallback: string): string {
+function apiErrorMessage(err: unknown, fallback: string, t: TFunc): string {
   const data = (err as { response?: { data?: { errorCode?: string; message?: string } } })?.response
     ?.data
   if (data?.errorCode === 'INVALID_PHOTO_TYPE' || data?.errorCode === 'INVALID_FILE_TYPE') {
-    return 'Invalid file format. Only JPEG, PNG, and WEBP are accepted.'
+    return t('page.photos.invalidFormat')
   }
-  if (data?.errorCode === 'PHOTO_TOO_LARGE') return 'File is too large.'
-  if (data?.errorCode === 'PHOTO_LIMIT_REACHED') return 'You have reached the horoscope-photo limit.'
+  if (data?.errorCode === 'PHOTO_TOO_LARGE') return t('page.photos.tooLarge')
+  if (data?.errorCode === 'PHOTO_LIMIT_REACHED') return t('page.photos.horoscopeLimitReached')
   return data?.message || fallback
 }
 
@@ -48,6 +51,7 @@ function apiErrorMessage(err: unknown, fallback: string): string {
  * Backend forces visibility to REQUEST_REQUIRED and requires admin approval.
  */
 export function HoroscopePhotoManager() {
+  const { t } = useTranslation()
   const [photos, setPhotos] = useState<PhotoResponse[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
@@ -80,13 +84,13 @@ export function HoroscopePhotoManager() {
   const handleFile = useCallback(
     async (file: File | undefined) => {
       if (!file) return
-      const validationError = validateFile(file)
+      const validationError = validateFile(file, t)
       if (validationError) {
         pushToast(validationError, 'error')
         return
       }
       if (!canUpload) {
-        pushToast(`You can upload up to ${MAX_HOROSCOPE_PHOTOS} horoscope photos.`, 'error')
+        pushToast(t('page.photos.maxHoroscopeToast', { max: MAX_HOROSCOPE_PHOTOS }), 'error')
         return
       }
       setUploading(true)
@@ -94,15 +98,15 @@ export function HoroscopePhotoManager() {
         const toUpload = await compressImageIfNeeded(file, COMPRESS_TARGET_BYTES)
         const res = await photoApi.uploadHoroscopePhoto(toUpload)
         setPhotos((prev) => [...prev, res.data])
-        pushToast('Horoscope chart uploaded. It will be visible after admin approval.', 'success')
+        pushToast(t('page.photos.horoscopeUploaded'), 'success')
       } catch (err) {
-        pushToast(apiErrorMessage(err, 'Upload failed. Please try again.'), 'error')
+        pushToast(apiErrorMessage(err, t('page.photos.uploadFailed'), t), 'error')
       } finally {
         setUploading(false)
         if (inputRef.current) inputRef.current.value = ''
       }
     },
-    [canUpload, pushToast],
+    [canUpload, pushToast, t],
   )
 
   const handleDelete = useCallback(
@@ -111,25 +115,24 @@ export function HoroscopePhotoManager() {
       try {
         await photoApi.deletePhoto(photoId)
         setPhotos((prev) => prev.filter((p) => p.photoId !== photoId))
-        pushToast('Horoscope chart deleted.', 'success')
+        pushToast(t('page.photos.horoscopeDeleted'), 'success')
       } catch (err) {
-        pushToast(apiErrorMessage(err, 'Could not delete the chart.'), 'error')
+        pushToast(apiErrorMessage(err, t('page.photos.couldNotDeleteChart'), t), 'error')
       } finally {
         setBusyId(null)
       }
     },
-    [pushToast],
+    [pushToast, t],
   )
 
   return (
     <div className="flex flex-col gap-2">
       <span className="text-sm font-medium text-foreground">
-        Horoscope chart
-        <span className="ml-1 font-normal text-muted-foreground">(optional)</span>
+        {t('page.photos.horoscopeChart')}
+        <span className="ml-1 font-normal text-muted-foreground">{t('page.photos.optional')}</span>
       </span>
       <p className="text-xs text-muted-foreground">
-        Shared only with members you connect with, and requires admin approval. JPEG, PNG, or WEBP up
-        to 5&nbsp;MB.
+        {t('page.photos.horoscopeHint')}
       </p>
 
       {photos.length > 0 && (
@@ -143,13 +146,13 @@ export function HoroscopePhotoManager() {
                 {photo.photoUrl ? (
                   <img
                     src={photo.thumbnailUrl ?? photo.photoUrl}
-                    alt="Horoscope chart"
+                    alt={t('page.photos.horoscopeAlt')}
                     className="h-full w-full object-cover"
                     loading="lazy"
                   />
                 ) : (
                   <span className="flex h-full w-full items-center justify-center px-2 text-center text-xs text-muted-foreground">
-                    Processing…
+                    {t('page.photos.processing')}
                   </span>
                 )}
               </div>
@@ -160,10 +163,10 @@ export function HoroscopePhotoManager() {
                   size="sm"
                   loading={busyId === photo.photoId}
                   onClick={() => void handleDelete(photo.photoId)}
-                  aria-label="Delete horoscope chart"
+                  aria-label={t('page.photos.deleteHoroscope')}
                 >
                   <Icon name="trash" size={16} />
-                  Delete
+                  {t('page.photos.delete')}
                 </Button>
               </div>
             </li>
@@ -189,17 +192,17 @@ export function HoroscopePhotoManager() {
             >
               <Icon name={uploading ? 'refresh' : 'upload'} size={22} />
               <span className="text-sm font-medium">
-                {uploading ? 'Uploading…' : 'Upload chart'}
+                {uploading ? t('page.photos.uploading') : t('page.photos.uploadChart')}
               </span>
               <span className="text-xs text-muted-foreground">
-                JPG, PNG, or WEBP of your horoscope / jathagam
+                {t('page.photos.uploadChartHint')}
               </span>
             </button>
           </div>
         ) : (
           <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
             <Icon name="alert-circle" size={16} />
-            You&apos;ve reached the {MAX_HOROSCOPE_PHOTOS}-chart limit. Delete one to add another.
+            {t('page.photos.horoscopeLimitHint', { max: MAX_HOROSCOPE_PHOTOS })}
           </p>
         ))}
 

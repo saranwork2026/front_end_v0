@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
@@ -26,6 +27,7 @@ import type { PhotoResponse } from '@matrimony/shared-core'
  * layout composes without touching the existing gallery manager.
  */
 export function ProfileDpManager() {
+  const { t } = useTranslation()
   const [photos, setPhotos] = useState<PhotoResponse[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -117,9 +119,9 @@ export function ProfileDpManager() {
         prev.map((p) => (p.photoId === selected.photoId ? { ...p, focalX: focal.x, focalY: focal.y } : p)),
       )
       setDirty(false)
-      pushToast('Profile picture position saved.', 'success')
+      pushToast(t('page.photos.dpSavedToast'), 'success')
     } catch {
-      pushToast('Could not save the position. Please try again.', 'error')
+      pushToast(t('page.photos.dpSaveError'), 'error')
     } finally {
       setSaving(false)
     }
@@ -132,9 +134,9 @@ export function ProfileDpManager() {
       await photoApi.setPrimary(p.photoId)
       setPhotos((prev) => prev.map((x) => ({ ...x, isPrimary: x.photoId === p.photoId })))
       selectPhoto(p)
-      pushToast('Profile picture updated.', 'success')
+      pushToast(t('page.photos.dpUpdatedToast'), 'success')
     } catch {
-      pushToast('Could not set this as your profile picture.', 'error')
+      pushToast(t('page.photos.dpSetError'), 'error')
     } finally {
       setBusy(false)
     }
@@ -146,11 +148,10 @@ export function ProfileDpManager() {
     <section aria-labelledby="dp-heading" className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
       <div className="mb-4">
         <h2 id="dp-heading" className="font-serif text-lg font-bold text-foreground">
-          Profile picture
+          {t('page.photos.dpTitle')}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          This is your display picture (DP) shown across the app. Drag the photo to position your face
-          inside the circle, then save.
+          {t('page.photos.dpSubtitle')}
         </p>
       </div>
 
@@ -164,10 +165,9 @@ export function ProfileDpManager() {
           <span className="flex size-14 items-center justify-center rounded-full bg-card text-primary shadow-sm">
             <Icon name="user" size={26} />
           </span>
-          <p className="text-sm font-medium text-foreground">No approved photo yet</p>
+          <p className="text-sm font-medium text-foreground">{t('page.photos.dpNoPhoto')}</p>
           <p className="max-w-sm text-sm text-muted-foreground">
-            Upload a photo in the “Additional photos” section below. Once it’s approved you can set it as
-            your profile picture and position your face here.
+            {t('page.photos.dpNoPhotoHint')}
           </p>
         </div>
       ) : (
@@ -182,7 +182,7 @@ export function ProfileDpManager() {
               onPointerCancel={onPointerUp}
               className="relative size-40 cursor-grab touch-none overflow-hidden rounded-full border-2 border-gold/70 bg-secondary active:cursor-grabbing"
               role="img"
-              aria-label="Profile picture preview — drag to reposition"
+              aria-label={t('page.photos.dpPreviewAria')}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -195,7 +195,7 @@ export function ProfileDpManager() {
               <span className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-inset ring-foreground/10" />
             </div>
             <span className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Icon name="camera" size={13} /> Drag to fit your face
+              <Icon name="camera" size={13} /> {t('page.photos.dpDragHint')}
             </span>
           </div>
 
@@ -203,7 +203,7 @@ export function ProfileDpManager() {
           <div className="flex w-full flex-1 flex-col gap-4">
             {approved.length > 1 && (
               <div>
-                <p className="mb-2 text-sm font-medium text-foreground">Choose your profile picture</p>
+                <p className="mb-2 text-sm font-medium text-foreground">{t('page.photos.dpChoose')}</p>
                 <div className="flex flex-wrap gap-2">
                   {approved.map((p) => {
                     const thumb = p.thumbnailUrl ?? p.photoUrl ?? ''
@@ -215,7 +215,7 @@ export function ProfileDpManager() {
                         onClick={() => selectPhoto(p)}
                         onDoubleClick={() => void makeDp(p)}
                         aria-pressed={isSel}
-                        aria-label={p.isPrimary ? 'Current profile picture' : 'Use as profile picture'}
+                        aria-label={p.isPrimary ? t('page.photos.dpCurrentAria') : t('page.photos.dpUseAria')}
                         className={cn(
                           'relative size-14 shrink-0 overflow-hidden rounded-lg border-2 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/60',
                           isSel ? 'border-primary' : 'border-transparent opacity-80 hover:opacity-100',
@@ -243,11 +243,11 @@ export function ProfileDpManager() {
             <div className="flex flex-wrap items-center gap-2">
               {selected && !selected.isPrimary && (
                 <Button variant="secondary" size="sm" onClick={() => void makeDp(selected)} loading={busy}>
-                  <Icon name="user" size={16} /> Set as profile picture
+                  <Icon name="user" size={16} /> {t('page.photos.dpSetAs')}
                 </Button>
               )}
               <Button size="sm" onClick={() => void saveFocus()} loading={saving} disabled={!dirty}>
-                <Icon name="check" size={16} /> {dirty ? 'Save position' : 'Position saved'}
+                <Icon name="check" size={16} /> {dirty ? t('page.photos.dpSavePosition') : t('page.photos.dpPositionSaved')}
               </Button>
             </div>
           </div>
