@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { SuccessStory } from '@matrimony/shared-core'
 
 import { buttonVariants } from '@/components/ui/button'
@@ -17,6 +18,7 @@ import { successStoryApi } from '@/src/lib/api'
  * Mirrors the existing app's SuccessStoriesPage.
  */
 export function SuccessStoriesView() {
+  const { t } = useTranslation()
   const [stories, setStories] = useState<SuccessStory[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -43,12 +45,12 @@ export function SuccessStoriesView() {
       <div className="mx-auto max-w-6xl px-4 py-10 sm:py-12">
         <div className="mb-8 flex flex-col gap-3 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
           <div>
-            <h1 className="font-serif text-3xl font-semibold text-primary">Success Stories</h1>
-            <p className="mt-1 text-muted-foreground">Real couples who found each other here.</p>
+            <h1 className="font-serif text-3xl font-semibold text-primary">{t('page.successStories.title')}</h1>
+            <p className="mt-1 text-muted-foreground">{t('page.successStories.subtitle')}</p>
           </div>
           <Link href="/success-stories/submit" className={cn(buttonVariants({ variant: 'primary' }))}>
             <Icon name="heart" size={16} />
-            Share your story
+            {t('page.successStories.shareStory')}
           </Link>
         </div>
 
@@ -61,11 +63,11 @@ export function SuccessStoriesView() {
         ) : stories.length === 0 ? (
           <EmptyState
             icon="heart"
-            title="No stories yet"
-            description="Be the first to share your success story with our community."
+            title={t('page.successStories.emptyTitle')}
+            description={t('page.successStories.emptyDesc')}
             action={
               <Link href="/success-stories/submit" className={cn(buttonVariants({ variant: 'primary' }))}>
-                Share your story
+                {t('page.successStories.shareStory')}
               </Link>
             }
           />
@@ -79,7 +81,7 @@ export function SuccessStoriesView() {
                 {s.photoUrl ? (
                   <img
                     src={s.photoUrl}
-                    alt={`${s.brideName} & ${s.groomName}`}
+                    alt={t('page.successStories.coupleAlt', { bride: s.brideName, groom: s.groomName })}
                     className="h-52 w-full bg-muted object-cover"
                     loading="lazy"
                   />
@@ -94,10 +96,11 @@ export function SuccessStoriesView() {
                   </h2>
                   {s.marriageDate && (
                     <p className="mt-0.5 text-xs text-muted-foreground">
-                      Married{' '}
-                      {new Date(s.marriageDate).toLocaleDateString('en-IN', {
-                        year: 'numeric',
-                        month: 'long',
+                      {t('page.successStories.marriedOn', {
+                        date: new Date(s.marriageDate).toLocaleDateString('en-IN', {
+                          year: 'numeric',
+                          month: 'long',
+                        }),
                       })}
                     </p>
                   )}

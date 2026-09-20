@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
@@ -19,6 +20,7 @@ const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
  * Mirrors the existing app's SubmitSuccessStoryPage.
  */
 export function SubmitSuccessStoryView() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   const [brideName, setBrideName] = useState('')
@@ -40,11 +42,11 @@ export function SubmitSuccessStoryView() {
     setFileError(null)
     if (!file) return
     if (!ACCEPTED_TYPES.includes(file.type)) {
-      setFileError('Use a JPG, PNG, or WEBP image.')
+      setFileError(t('page.successStories.fileTypeError'))
       return
     }
     if (file.size > MAX_FILE_SIZE) {
-      setFileError('Photo must be 5MB or smaller.')
+      setFileError(t('page.successStories.fileSizeError'))
       return
     }
     setPhoto(file)
@@ -54,7 +56,7 @@ export function SubmitSuccessStoryView() {
     e.preventDefault()
     setError(null)
     if (!brideName.trim() || !groomName.trim() || !story.trim()) {
-      setError('Bride name, groom name, and your story are required.')
+      setError(t('page.successStories.requiredError'))
       return
     }
     if (fileError) return
@@ -68,12 +70,12 @@ export function SubmitSuccessStoryView() {
         partnerProfileId: partnerProfileId.trim() || undefined,
         photo: photo ?? undefined,
       })
-      pushToast('Thank you! Your story has been submitted for review.', 'success')
+      pushToast(t('page.successStories.submittedToast'), 'success')
       setTimeout(() => navigate('/'), 700)
     } catch (err) {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        'Failed to submit your story. Please try again.'
+        t('page.successStories.submitError')
       setError(message)
       setSubmitting(false)
     }
@@ -82,31 +84,31 @@ export function SubmitSuccessStoryView() {
   return (
     <main className="mx-auto w-full max-w-2xl px-4 py-8 sm:py-10">
       <div className="mb-6">
-        <h1 className="font-serif text-2xl text-foreground sm:text-3xl">Share your success story</h1>
+        <h1 className="font-serif text-2xl text-foreground sm:text-3xl">{t('page.successStories.submitTitle')}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Found your partner here? Tell us your story. Once approved, it may be featured on our success stories page.
+          {t('page.successStories.submitSubtitle')}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Input label="Bride's name" value={brideName} onChange={(e) => setBrideName(e.target.value)} />
-          <Input label="Groom's name" value={groomName} onChange={(e) => setGroomName(e.target.value)} />
+          <Input label={t('page.successStories.brideName')} value={brideName} onChange={(e) => setBrideName(e.target.value)} />
+          <Input label={t('page.successStories.groomName')} value={groomName} onChange={(e) => setGroomName(e.target.value)} />
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Input label="Marriage date" type="date" value={marriageDate} onChange={(e) => setMarriageDate(e.target.value)} />
+          <Input label={t('page.successStories.marriageDate')} type="date" value={marriageDate} onChange={(e) => setMarriageDate(e.target.value)} />
           <Input
-            label="Partner's profile ID (optional)"
+            label={t('page.successStories.partnerProfileId')}
             value={partnerProfileId}
             onChange={(e) => setPartnerProfileId(e.target.value)}
-            placeholder="e.g. SM123"
+            placeholder={t('page.successStories.partnerIdPlaceholder')}
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="story" className="text-sm font-medium text-foreground">
-            Your story
+            {t('page.successStories.yourStory')}
           </label>
           <textarea
             id="story"
@@ -114,7 +116,7 @@ export function SubmitSuccessStoryView() {
             onChange={(e) => setStory(e.target.value.slice(0, STORY_MAX))}
             rows={6}
             required
-            placeholder="How did you meet? What made it special?"
+            placeholder={t('page.successStories.storyPlaceholder')}
             className="w-full resize-y rounded-lg border border-input bg-card px-3.5 py-2.5 text-foreground shadow-sm outline-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/40"
           />
           <p className="self-end text-xs text-muted-foreground">
@@ -124,7 +126,7 @@ export function SubmitSuccessStoryView() {
 
         <div className="flex flex-col gap-2">
           <span className="text-sm font-medium text-foreground">
-            Couple photo <span className="font-normal text-muted-foreground">(optional)</span>
+            {t('page.successStories.couplePhoto')} <span className="font-normal text-muted-foreground">{t('page.successStories.optional')}</span>
           </span>
           <input
             ref={fileInputRef}
@@ -147,7 +149,7 @@ export function SubmitSuccessStoryView() {
                 }}
                 className="shrink-0 text-sm font-medium text-muted-foreground transition-colors hover:text-destructive"
               >
-                Remove
+                {t('page.successStories.remove')}
               </button>
             </div>
           ) : (
@@ -157,8 +159,8 @@ export function SubmitSuccessStoryView() {
               className="flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-border bg-card px-4 py-6 text-muted-foreground transition-colors hover:border-primary/50 hover:bg-secondary hover:text-primary"
             >
               <Icon name="upload" size={20} />
-              <span className="text-sm font-medium">Upload photo</span>
-              <span className="text-xs">JPG, PNG or WEBP up to 5MB</span>
+              <span className="text-sm font-medium">{t('page.successStories.uploadPhoto')}</span>
+              <span className="text-xs">{t('page.successStories.uploadHint')}</span>
             </button>
           )}
           {fileError && (
@@ -176,10 +178,10 @@ export function SubmitSuccessStoryView() {
 
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button type="button" variant="ghost" onClick={() => navigate(-1)} disabled={submitting}>
-            Cancel
+            {t('page.successStories.cancel')}
           </Button>
           <Button type="submit" loading={submitting}>
-            Submit story
+            {t('page.successStories.submitStory')}
           </Button>
         </div>
       </form>
