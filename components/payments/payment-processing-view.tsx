@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getApiError, type PaymentMethod, type PaymentType } from '@matrimony/shared-core'
 
@@ -18,10 +19,10 @@ const INR = new Intl.NumberFormat('en-IN', {
   maximumFractionDigits: 0,
 })
 
-const PAYMENT_TYPE_LABELS: Record<PaymentType, string> = {
-  SUBSCRIPTION: 'Subscription',
-  WALLET_RECHARGE: 'Wallet recharge',
-  CONTACT_UNLOCK: 'Contact unlock',
+const PAYMENT_TYPE_KEYS: Record<PaymentType, string> = {
+  SUBSCRIPTION: 'page.payments.typeSubscription',
+  WALLET_RECHARGE: 'page.payments.typeWallet',
+  CONTACT_UNLOCK: 'page.payments.typeContactUnlock',
 }
 
 type Phase = 'payment' | 'success' | 'claim-submitted'
@@ -47,6 +48,7 @@ interface PaymentLocationState {
 export function PaymentProcessingView({ paymentId }: PaymentProcessingViewProps) {
   const location = useLocation()
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const state = (location.state as PaymentLocationState | null) ?? {}
   const amount = state.amount
   const paymentType = state.paymentType
@@ -93,7 +95,7 @@ export function PaymentProcessingView({ paymentId }: PaymentProcessingViewProps)
         setTerminated(true)
         return
       }
-      setError(messageOf(err, 'The payment could not be processed. Please try again.'))
+      setError(messageOf(err, t('page.payments.payProcessError')))
     } finally {
       setPaying(false)
     }
@@ -114,7 +116,7 @@ export function PaymentProcessingView({ paymentId }: PaymentProcessingViewProps)
     setError(null)
     try {
       await paymentsApi.paymentFailed({ paymentId, transactionId: `txn_mock_${Date.now()}` })
-      pushToast('Payment cancelled.', 'info')
+      pushToast(t('page.payments.paymentCancelled'), 'info')
       if (paymentType === 'WALLET_RECHARGE') navigate('/wallet')
       else if (paymentType === 'CONTACT_UNLOCK') navigate('/')
       // Onboarding subscription: back to packages (still skippable) rather than
@@ -132,7 +134,7 @@ export function PaymentProcessingView({ paymentId }: PaymentProcessingViewProps)
         setTerminated(true)
         return
       }
-      setError(messageOf(err, 'The payment could not be cancelled. Please try again.'))
+      setError(messageOf(err, t('page.payments.payCancelError')))
     } finally {
       setCancelling(false)
     }
@@ -153,7 +155,7 @@ export function PaymentProcessingView({ paymentId }: PaymentProcessingViewProps)
       })
       setPhase('claim-submitted')
     } catch (err) {
-      pushToast(messageOf(err, 'We could not record your payment claim. Please try again.'), 'error')
+      pushToast(messageOf(err, t('page.payments.manualClaimError')), 'error')
     } finally {
       setClaiming(false)
     }
@@ -169,26 +171,25 @@ export function PaymentProcessingView({ paymentId }: PaymentProcessingViewProps)
         </span>
         <div className="flex flex-col gap-1.5">
           <h1 className="text-balance font-serif text-2xl text-foreground">
-            This payment is closed
+            {t('page.payments.paymentClosedTitle')}
           </h1>
           <p className="text-pretty text-sm text-muted-foreground">
-            This payment attempt was already cancelled or did not go through, so
-            it can&apos;t be completed. Please start a new payment to continue.
+            {t('page.payments.paymentClosedDesc')}
           </p>
-          <p className="mt-1 font-mono text-xs text-muted-foreground">Payment ID: {paymentId}</p>
+          <p className="mt-1 font-mono text-xs text-muted-foreground">{t('page.payments.paymentIdLabel')} {paymentId}</p>
         </div>
         <div className="flex w-full max-w-xs flex-col gap-2 sm:flex-row">
           <Link
             href={onboarding ? '/plans?onboarding=1' : '/plans'}
             className={buttonVariants({ className: 'flex-1' })}
           >
-            Back to plans
+            {t('page.payments.backToPlans')}
           </Link>
           <Link
             href={onboarding ? '/profile/status' : '/'}
             className={buttonVariants({ variant: 'secondary', className: 'flex-1' })}
           >
-            {onboarding ? 'Continue' : 'Go to dashboard'}
+            {onboarding ? t('page.payments.continue') : t('page.payments.goToDashboard')}
           </Link>
         </div>
         <Toaster toasts={toasts} onDismiss={(id) => setToasts((t) => t.filter((x) => x.id !== id))} />
@@ -211,33 +212,33 @@ export function PaymentProcessingView({ paymentId }: PaymentProcessingViewProps)
         </span>
         <div className="flex flex-col gap-1.5">
           <h1 className="text-balance font-serif text-2xl text-foreground">
-            {submitted ? 'Payment claim received' : 'Payment successful'}
+            {submitted ? t('page.payments.claimReceived') : t('page.payments.paymentSuccessful')}
           </h1>
           <p className="text-pretty text-sm text-muted-foreground">
             {submitted
-              ? 'Our team will verify your payment shortly. You will be notified once it is confirmed.'
-              : 'Your payment was processed successfully.'}
+              ? t('page.payments.claimVerifyDesc')
+              : t('page.payments.successProcessedDesc')}
           </p>
-          <p className="mt-1 font-mono text-xs text-muted-foreground">Payment ID: {paymentId}</p>
+          <p className="mt-1 font-mono text-xs text-muted-foreground">{t('page.payments.paymentIdLabel')} {paymentId}</p>
           {amount != null && (
-            <p className="text-sm text-muted-foreground">Amount: {INR.format(amount)}</p>
+            <p className="text-sm text-muted-foreground">{t('page.payments.amountLabel', { amount: INR.format(amount) })}</p>
           )}
         </div>
         {onboarding ? (
           <div className="flex w-full max-w-xs flex-col gap-2 sm:flex-row">
             <Link href="/profile/status" className={buttonVariants({ className: 'flex-1' })}>
-              Continue
+              {t('page.payments.continue')}
             </Link>
             <Link
               href="/subscriptions"
               className={buttonVariants({ variant: 'secondary', className: 'flex-1' })}
             >
-              View subscription
+              {t('page.payments.viewSubscription')}
             </Link>
           </div>
         ) : (
           <Link href="/" className={buttonVariants()}>
-            Go to dashboard
+            {t('page.payments.goToDashboard')}
           </Link>
         )}
         <Toaster toasts={toasts} onDismiss={(id) => setToasts((t) => t.filter((x) => x.id !== id))} />
@@ -248,28 +249,28 @@ export function PaymentProcessingView({ paymentId }: PaymentProcessingViewProps)
   return (
     <div className="mx-auto flex max-w-md flex-col gap-6 px-4 py-12">
       <section className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
-        <h1 className="mb-6 text-center font-serif text-2xl text-foreground">Complete your payment</h1>
+        <h1 className="mb-6 text-center font-serif text-2xl text-foreground">{t('page.payments.completeTitle')}</h1>
 
         <dl className="mb-6 flex flex-col gap-3 text-sm">
           <div className="flex items-center justify-between">
-            <dt className="text-muted-foreground">Payment ID</dt>
+            <dt className="text-muted-foreground">{t('page.payments.paymentId')}</dt>
             <dd className="font-mono text-xs text-foreground">{paymentId}</dd>
           </div>
           {amount != null && (
             <div className="flex items-center justify-between">
-              <dt className="text-muted-foreground">Amount</dt>
+              <dt className="text-muted-foreground">{t('page.payments.amountRow')}</dt>
               <dd className="font-serif text-lg font-semibold text-foreground">{INR.format(amount)}</dd>
             </div>
           )}
           {paymentType && (
             <div className="flex items-center justify-between">
-              <dt className="text-muted-foreground">Type</dt>
-              <dd className="font-medium text-foreground">{PAYMENT_TYPE_LABELS[paymentType]}</dd>
+              <dt className="text-muted-foreground">{t('page.payments.typeRow')}</dt>
+              <dd className="font-medium text-foreground">{t(PAYMENT_TYPE_KEYS[paymentType] as never)}</dd>
             </div>
           )}
           {amount == null && !paymentType && (
             <p className="text-center text-muted-foreground">
-              Confirm below to complete your payment.
+              {t('page.payments.confirmBelow')}
             </p>
           )}
         </dl>
@@ -278,7 +279,7 @@ export function PaymentProcessingView({ paymentId }: PaymentProcessingViewProps)
           <div role="alert" className="mb-6 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-center">
             <p className="text-sm text-destructive">{error}</p>
             <Link href="/" className="mt-2 inline-block text-sm font-medium text-primary hover:underline">
-              Go to dashboard
+              {t('page.payments.goToDashboard')}
             </Link>
           </div>
         )}
@@ -286,24 +287,24 @@ export function PaymentProcessingView({ paymentId }: PaymentProcessingViewProps)
         <div className="flex flex-col gap-3">
           <Button variant="primary" size="lg" loading={paying} disabled={cancelling} onClick={() => void handlePay()}>
             <Icon name="lock" size={16} />
-            Pay now
+            {t('page.payments.payNow')}
           </Button>
           <Button variant="secondary" size="lg" loading={cancelling} disabled={paying} onClick={() => void handleCancel()}>
-            Cancel payment
+            {t('page.payments.cancelPayment')}
           </Button>
         </div>
         <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
           <Icon name="shield" size={13} />
-          This is a demo gateway — no real charge is made.
+          {t('page.payments.demoGateway')}
         </p>
       </section>
 
       {/* Manual (cash/UPI) claim — only for a single contact unlock. */}
       {paymentType === 'CONTACT_UNLOCK' && (
         <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-          <h2 className="font-serif text-lg text-foreground">Or pay by cash / UPI</h2>
+          <h2 className="font-serif text-lg text-foreground">{t('page.payments.orPayCashUpi')}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Prefer UPI or cash? Submit your payment details and we&apos;ll verify and unlock the contact.
+            {t('page.payments.orPayCashUpiDesc')}
           </p>
           <div className="mt-4">
             <ManualPaymentForm onSubmit={handleManualSubmit} submitting={claiming} />

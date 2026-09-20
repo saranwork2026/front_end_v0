@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Payment } from '@matrimony/shared-core'
 
 import { buttonVariants } from '@/components/ui/button'
@@ -30,10 +31,10 @@ const paymentDate = new Intl.DateTimeFormat('en-IN', {
   minute: '2-digit',
 })
 
-const referenceTypeLabel: Record<Payment['paymentReferenceType'], string> = {
-  SUBSCRIPTION: 'Subscription',
-  WALLET_RECHARGE: 'Wallet recharge',
-  CONTACT_UNLOCK: 'Contact unlock',
+const referenceTypeKey: Record<Payment['paymentReferenceType'], string> = {
+  SUBSCRIPTION: 'page.payments.typeSubscription',
+  WALLET_RECHARGE: 'page.payments.typeWallet',
+  CONTACT_UNLOCK: 'page.payments.typeContactUnlock',
 }
 
 function shortId(id: string): string {
@@ -46,6 +47,7 @@ interface PaymentHistoryViewProps {
 }
 
 export function PaymentHistoryView(_props: PaymentHistoryViewProps) {
+  const { t } = useTranslation()
   const [page, setPage] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -78,10 +80,10 @@ export function PaymentHistoryView(_props: PaymentHistoryViewProps) {
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
       <header className="mb-6">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">Billing</p>
-        <h1 className="mt-1 font-serif text-3xl text-foreground text-balance">Payment history</h1>
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">{t('page.payments.billing')}</p>
+        <h1 className="mt-1 font-serif text-3xl text-foreground text-balance">{t('page.payments.historyTitle')}</h1>
         <p className="mt-2 max-w-prose text-sm leading-relaxed text-muted-foreground">
-          A record of every subscription and contact-unlock payment on your account.
+          {t('page.payments.historySubtitle')}
         </p>
       </header>
 
@@ -92,21 +94,21 @@ export function PaymentHistoryView(_props: PaymentHistoryViewProps) {
           role="alert"
           className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-6 text-center"
         >
-          <p className="text-sm text-destructive">We could not load your payments. Please try again.</p>
+          <p className="text-sm text-destructive">{t('page.payments.historyErrorDesc')}</p>
           <div className="mt-4 flex justify-center">
             <Button variant="secondary" onClick={() => void load()}>
-              Retry
+              {t('page.payments.retry')}
             </Button>
           </div>
         </div>
       ) : all.length === 0 ? (
         <EmptyState
           icon="wallet"
-          title="No payments yet"
-          description="When you subscribe to a plan or unlock a contact, your receipts will appear here."
+          title={t('page.payments.emptyTitle')}
+          description={t('page.payments.emptyDesc')}
           action={
             <Link href="/plans" className={cn(buttonVariants({ variant: 'primary' }))}>
-              View plans
+              {t('page.payments.viewPlans')}
             </Link>
           }
         />
@@ -117,12 +119,12 @@ export function PaymentHistoryView(_props: PaymentHistoryViewProps) {
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-border bg-secondary/50 text-xs uppercase tracking-wide text-muted-foreground">
-                  <th scope="col" className="px-4 py-3 font-medium">Receipt</th>
-                  <th scope="col" className="px-4 py-3 font-medium">Date</th>
-                  <th scope="col" className="px-4 py-3 font-medium">Type</th>
-                  <th scope="col" className="px-4 py-3 font-medium">Gateway</th>
-                  <th scope="col" className="px-4 py-3 text-right font-medium">Amount</th>
-                  <th scope="col" className="px-4 py-3 font-medium">Status</th>
+                  <th scope="col" className="px-4 py-3 font-medium">{t('page.payments.colReceipt')}</th>
+                  <th scope="col" className="px-4 py-3 font-medium">{t('page.payments.colDate')}</th>
+                  <th scope="col" className="px-4 py-3 font-medium">{t('page.payments.colType')}</th>
+                  <th scope="col" className="px-4 py-3 font-medium">{t('page.payments.colGateway')}</th>
+                  <th scope="col" className="px-4 py-3 text-right font-medium">{t('page.payments.colAmount')}</th>
+                  <th scope="col" className="px-4 py-3 font-medium">{t('page.payments.colStatus')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -135,7 +137,7 @@ export function PaymentHistoryView(_props: PaymentHistoryViewProps) {
                       {paymentDate.format(new Date(txn.paymentDate))}
                     </td>
                     <td className="px-4 py-3 text-foreground">
-                      {referenceTypeLabel[txn.paymentReferenceType]}
+                      {t(referenceTypeKey[txn.paymentReferenceType] as never)}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">{txn.paymentGateway}</td>
                     <td className="whitespace-nowrap px-4 py-3 text-right font-medium text-foreground">
@@ -174,12 +176,13 @@ export function PaymentHistoryView(_props: PaymentHistoryViewProps) {
 }
 
 function PaymentCard({ txn }: { txn: Payment }) {
+  const { t } = useTranslation()
   return (
     <article className="rounded-xl border border-border bg-card p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate font-medium text-foreground">
-            {referenceTypeLabel[txn.paymentReferenceType]}
+            {t(referenceTypeKey[txn.paymentReferenceType] as never)}
           </p>
           <p className="mt-0.5 font-mono text-xs text-muted-foreground">{shortId(txn.paymentId)}</p>
         </div>
@@ -187,24 +190,24 @@ function PaymentCard({ txn }: { txn: Payment }) {
       </div>
       <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
         <div>
-          <dt className="text-xs uppercase tracking-wide text-muted-foreground">Amount</dt>
+          <dt className="text-xs uppercase tracking-wide text-muted-foreground">{t('page.payments.colAmount')}</dt>
           <dd className="mt-0.5 font-medium text-foreground">{INR.format(txn.amount)}</dd>
         </div>
         <div>
-          <dt className="text-xs uppercase tracking-wide text-muted-foreground">Gateway</dt>
+          <dt className="text-xs uppercase tracking-wide text-muted-foreground">{t('page.payments.colGateway')}</dt>
           <dd className="mt-0.5 flex items-center gap-1.5 text-foreground">
             <Icon name="wallet" size={15} className="text-muted-foreground" />
             {txn.paymentGateway}
           </dd>
         </div>
         <div>
-          <dt className="text-xs uppercase tracking-wide text-muted-foreground">Transaction</dt>
+          <dt className="text-xs uppercase tracking-wide text-muted-foreground">{t('page.payments.colTransaction')}</dt>
           <dd className="mt-0.5 truncate font-mono text-xs text-foreground">
             {txn.transactionId ?? '—'}
           </dd>
         </div>
         <div>
-          <dt className="text-xs uppercase tracking-wide text-muted-foreground">Date</dt>
+          <dt className="text-xs uppercase tracking-wide text-muted-foreground">{t('page.payments.colDate')}</dt>
           <dd className="mt-0.5 text-foreground">{paymentDate.format(new Date(txn.paymentDate))}</dd>
         </div>
       </dl>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useNavigate } from 'react-router-dom'
@@ -30,36 +31,32 @@ interface PlanFeature {
   label: string
 }
 
-function validityLabel(days: number): string {
-  if (days <= 0) return 'Forever'
-  if (days % 365 === 0) {
-    const y = days / 365
-    return `${y} ${y === 1 ? 'year' : 'years'}`
-  }
-  if (days % 30 === 0) {
-    const m = days / 30
-    return `${m} ${m === 1 ? 'month' : 'months'}`
-  }
-  return `${days} days`
+type TFunc = ReturnType<typeof useTranslation>['t']
+
+function validityLabel(days: number, t: TFunc): string {
+  if (days <= 0) return t('page.payments.forever')
+  if (days % 365 === 0) return t('page.payments.year', { count: days / 365 })
+  if (days % 30 === 0) return t('page.payments.month', { count: days / 30 })
+  return t('page.payments.days', { count: days })
 }
 
 /** Included features only, derived from the real plan fields. */
-function includedFeatures(plan: SubscriptionPlan): PlanFeature[] {
+function includedFeatures(plan: SubscriptionPlan, t: TFunc): PlanFeature[] {
   const features: PlanFeature[] = []
   if (plan.contactViewLimit > 0) {
-    features.push({ icon: 'eye', label: `${plan.contactViewLimit} contact views` })
+    features.push({ icon: 'eye', label: t('page.payments.featContactViews', { count: plan.contactViewLimit }) })
   }
   if (plan.messageLimit > 0) {
-    features.push({ icon: 'mail', label: `${plan.messageLimit} messages` })
+    features.push({ icon: 'mail', label: t('page.payments.featMessages', { count: plan.messageLimit }) })
   }
   if (plan.interestLimit > 0) {
-    features.push({ icon: 'heart', label: `${plan.interestLimit} interests` })
+    features.push({ icon: 'heart', label: t('page.payments.featInterests', { count: plan.interestLimit }) })
   }
   if (plan.chatEnabled) {
-    features.push({ icon: 'chat', label: 'Chat enabled' })
+    features.push({ icon: 'chat', label: t('page.payments.featChat') })
   }
   if (plan.profileBoostEnabled) {
-    features.push({ icon: 'star', label: 'Profile boost' })
+    features.push({ icon: 'star', label: t('page.payments.featBoost') })
   }
   return features
 }
@@ -71,6 +68,7 @@ function includedFeatures(plan: SubscriptionPlan): PlanFeature[] {
  */
 export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps) {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const searchParams = useSearchParams()
   // Carried through the post-submission onboarding flow so the success screens
   // send the user back to their profile status instead of the dashboard.
@@ -116,7 +114,7 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
     } catch (err) {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        'The payment could not be started. Please try again.'
+        t('page.payments.payStartError')
       pushToast(message, 'error')
     } finally {
       setPaying(false)
@@ -141,7 +139,7 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
     } catch (err) {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        'We could not record your payment claim. Please try again.'
+        t('page.payments.manualClaimError')
       pushToast(message, 'error')
     } finally {
       setClaiming(false)
@@ -164,13 +162,13 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
         <span className="flex size-14 items-center justify-center rounded-full bg-destructive/10 text-destructive">
           <Icon name="alert-circle" size={26} />
         </span>
-        <h1 className="font-serif text-2xl text-foreground">Could not load plan</h1>
+        <h1 className="font-serif text-2xl text-foreground">{t('page.payments.loadPlanErrorTitle')}</h1>
         <p className="text-pretty text-sm text-muted-foreground">
-          Something went wrong while loading this plan. Please try again.
+          {t('page.payments.loadPlanErrorDesc')}
         </p>
         <Button variant="secondary" onClick={() => void load()}>
           <Icon name="refresh" size={16} />
-          Retry
+          {t('page.payments.retry')}
         </Button>
       </div>
     )
@@ -183,19 +181,19 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
         <span className="flex size-14 items-center justify-center rounded-full bg-muted text-muted-foreground">
           <Icon name="alert-circle" size={26} />
         </span>
-        <h1 className="font-serif text-2xl text-foreground">Plan not found</h1>
+        <h1 className="font-serif text-2xl text-foreground">{t('page.payments.planNotFoundTitle')}</h1>
         <p className="text-pretty text-sm text-muted-foreground">
-          We couldn&apos;t find the plan you were trying to pay for. Choose a plan to continue.
+          {t('page.payments.planNotFoundDesc')}
         </p>
         <Link href="/plans" className={buttonVariants()}>
-          View plans
+          {t('page.payments.viewPlans')}
         </Link>
       </div>
     )
   }
 
   const total = plan.price
-  const features = includedFeatures(plan)
+  const features = includedFeatures(plan, t)
 
   if (phase === 'success' || phase === 'claim-submitted') {
     const submitted = phase === 'claim-submitted'
@@ -213,27 +211,27 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
           </span>
           <div className="flex flex-col gap-1.5">
             <h1 className="text-balance font-serif text-2xl text-foreground">
-              {submitted ? 'Payment claim received' : 'Payment successful'}
+              {submitted ? t('page.payments.claimReceived') : t('page.payments.paymentSuccessful')}
             </h1>
             <p className="text-pretty text-sm text-muted-foreground">
               {submitted
-                ? 'Our team will verify your payment and activate your plan shortly. You will be notified once it is confirmed.'
-                : `Your ${plan.name} plan is now active. Welcome to a richer matchmaking experience.`}
+                ? t('page.payments.claimReceivedDesc')
+                : t('page.payments.successDesc', { plan: plan.name })}
             </p>
           </div>
 
           <div className="w-full rounded-xl border border-border bg-muted/40 p-4 text-left">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Plan</span>
+              <span className="text-muted-foreground">{t('page.payments.plan')}</span>
               <span className="font-medium text-foreground">{plan.name}</span>
             </div>
             <div className="mt-2 flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Amount</span>
+              <span className="text-muted-foreground">{t('page.payments.amount')}</span>
               <span className="font-medium text-foreground">{INR.format(total)}</span>
             </div>
             <div className="mt-2 flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Validity</span>
-              <span className="font-medium text-foreground">{validityLabel(plan.validityDays)}</span>
+              <span className="text-muted-foreground">{t('page.payments.validity')}</span>
+              <span className="font-medium text-foreground">{validityLabel(plan.validityDays, t)}</span>
             </div>
           </div>
 
@@ -241,25 +239,25 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
             {onboarding ? (
               <>
                 <Link href="/profile/status" className={buttonVariants({ className: 'flex-1' })}>
-                  Continue
+                  {t('page.payments.continue')}
                 </Link>
                 <Link
                   href="/subscriptions"
                   className={buttonVariants({ variant: 'secondary', className: 'flex-1' })}
                 >
-                  View subscription
+                  {t('page.payments.viewSubscription')}
                 </Link>
               </>
             ) : (
               <>
                 <Link href="/subscriptions" className={buttonVariants({ className: 'flex-1' })}>
-                  View subscription
+                  {t('page.payments.viewSubscription')}
                 </Link>
                 <Link
                   href="/"
                   className={buttonVariants({ variant: 'secondary', className: 'flex-1' })}
                 >
-                  Go to dashboard
+                  {t('page.payments.goToDashboard')}
                 </Link>
               </>
             )}
@@ -279,11 +277,11 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
             className="inline-flex w-fit items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <Icon name="arrow-left" size={15} />
-            Back to plans
+            {t('page.payments.backToPlans')}
           </Link>
-          <h1 className="text-balance font-serif text-3xl text-foreground">Complete your payment</h1>
+          <h1 className="text-balance font-serif text-3xl text-foreground">{t('page.payments.completeTitle')}</h1>
           <p className="text-pretty text-sm text-muted-foreground">
-            Review your plan, then pay instantly or submit a manual payment for our team to verify.
+            {t('page.payments.completeSubtitle')}
           </p>
         </div>
 
@@ -292,11 +290,11 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-0.5">
               <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Selected plan
+                {t('page.payments.selectedPlan')}
               </span>
               <span className="font-serif text-xl text-foreground">{plan.name}</span>
               <span className="text-sm text-muted-foreground">
-                {validityLabel(plan.validityDays)} membership
+                {t('page.payments.membership', { validity: validityLabel(plan.validityDays, t) })}
               </span>
             </div>
             <span className="text-right">
@@ -316,7 +314,7 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
           )}
 
           <div className="flex items-center justify-between border-t border-border pt-3 text-sm font-medium text-foreground">
-            <span>Total payable</span>
+            <span>{t('page.payments.totalPayable')}</span>
             <span>{INR.format(total)}</span>
           </div>
         </section>
@@ -324,27 +322,27 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
         {/* Instant pay (mock gateway) */}
         <section className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5">
           <div className="flex flex-col gap-0.5">
-            <h2 className="font-serif text-lg text-foreground">Pay instantly</h2>
+            <h2 className="font-serif text-lg text-foreground">{t('page.payments.payInstantly')}</h2>
             <p className="text-sm text-muted-foreground">
-              Use our secure payment gateway to activate your plan right away.
+              {t('page.payments.payInstantlyDesc')}
             </p>
           </div>
           <Button onClick={handlePayNow} loading={paying} size="lg">
             <Icon name="lock" size={16} />
-            Pay {INR.format(total)} now
+            {t('page.payments.payNowAmount', { amount: INR.format(total) })}
           </Button>
           <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
             <Icon name="shield" size={13} />
-            This is a demo gateway — no real charge is made.
+            {t('page.payments.demoGateway')}
           </p>
         </section>
 
         {/* Manual payment */}
         <section className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5">
           <div className="flex flex-col gap-0.5">
-            <h2 className="font-serif text-lg text-foreground">Or pay manually</h2>
+            <h2 className="font-serif text-lg text-foreground">{t('page.payments.orPayManually')}</h2>
             <p className="text-sm text-muted-foreground">
-              Prefer UPI or cash? Submit your payment details and we&apos;ll verify and activate your plan.
+              {t('page.payments.orPayManuallyDesc')}
             </p>
           </div>
           <ManualPaymentForm

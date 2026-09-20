@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { PaymentMethod } from '@matrimony/shared-core'
 
 import { Button } from '@/components/ui/button'
@@ -16,13 +17,13 @@ const PAYEE = { upiId: 'magizhmatrimony@upi', whatsapp: '+91 90000 00000' }
 
 interface PaymentMethodOption {
   value: PaymentMethod
-  label: string
-  hint: string
+  labelKey: string
+  hintKey: string
 }
 
 const paymentMethodOptions: PaymentMethodOption[] = [
-  { value: 'UPI', label: 'UPI transfer', hint: 'Pay to our UPI ID and share the reference.' },
-  { value: 'CASH', label: 'Cash / branch', hint: 'Pay at a branch and note the receipt number.' },
+  { value: 'UPI', labelKey: 'page.payments.methodUpi', hintKey: 'page.payments.methodUpiHint' },
+  { value: 'CASH', labelKey: 'page.payments.methodCash', hintKey: 'page.payments.methodCashHint' },
 ]
 
 interface ManualPaymentFormProps {
@@ -43,6 +44,7 @@ interface ManualPaymentFormProps {
  * the actual File to the parent, which calls `paymentsApi.submitManualPayment`.
  */
 export function ManualPaymentForm({ onSubmit, submitting, onCancel }: ManualPaymentFormProps) {
+  const { t } = useTranslation()
   const [method, setMethod] = useState<PaymentMethod>('UPI')
   const [note, setNote] = useState('')
   const [screenshot, setScreenshot] = useState<File | null>(null)
@@ -54,11 +56,11 @@ export function ManualPaymentForm({ onSubmit, submitting, onCancel }: ManualPaym
     setFileError(null)
     if (!file) return
     if (!ACCEPTED_SCREENSHOT_TYPES.includes(file.type)) {
-      setFileError('Use a JPG, PNG, or WEBP image.')
+      setFileError(t('page.payments.fileTypeError'))
       return
     }
     if (file.size > MAX_SCREENSHOT_BYTES) {
-      setFileError('Screenshot must be 5MB or smaller.')
+      setFileError(t('page.payments.fileSizeError'))
       return
     }
     setScreenshot(file)
@@ -88,7 +90,7 @@ export function ManualPaymentForm({ onSubmit, submitting, onCancel }: ManualPaym
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       {/* Method radios */}
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-1 text-sm font-medium text-foreground">Payment method</legend>
+        <legend className="mb-1 text-sm font-medium text-foreground">{t('page.payments.methodLabel')}</legend>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {paymentMethodOptions.map((opt) => {
             const active = method === opt.value
@@ -111,8 +113,8 @@ export function ManualPaymentForm({ onSubmit, submitting, onCancel }: ManualPaym
                   className="mt-0.5 size-4 accent-primary"
                 />
                 <span className="flex flex-col gap-0.5">
-                  <span className="text-sm font-medium text-foreground">{opt.label}</span>
-                  <span className="text-xs text-muted-foreground">{opt.hint}</span>
+                  <span className="text-sm font-medium text-foreground">{t(opt.labelKey as never)}</span>
+                  <span className="text-xs text-muted-foreground">{t(opt.hintKey as never)}</span>
                 </span>
               </label>
             )
@@ -126,7 +128,7 @@ export function ManualPaymentForm({ onSubmit, submitting, onCancel }: ManualPaym
           <QrPlaceholder />
           <div className="flex flex-col gap-2 text-center sm:text-left">
             <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Pay to UPI ID
+              {t('page.payments.payToUpi')}
             </span>
             <div className="flex items-center justify-center gap-2 sm:justify-start">
               <code className="rounded-md bg-card px-2 py-1 font-mono text-sm text-foreground">
@@ -135,15 +137,14 @@ export function ManualPaymentForm({ onSubmit, submitting, onCancel }: ManualPaym
               <button
                 type="button"
                 onClick={copyUpi}
-                aria-label="Copy UPI ID"
+                aria-label={t('page.payments.copyUpi')}
                 className="flex size-8 items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
               >
                 <Icon name={copied ? 'check' : 'copy'} size={15} />
               </button>
             </div>
             <p className="text-xs text-muted-foreground text-pretty">
-              After paying, upload the screenshot below or share it on WhatsApp{' '}
-              <span className="font-medium text-foreground">{PAYEE.whatsapp}</span>.
+              {t('page.payments.afterPaying', { whatsapp: PAYEE.whatsapp })}
             </p>
           </div>
         </div>
@@ -152,7 +153,7 @@ export function ManualPaymentForm({ onSubmit, submitting, onCancel }: ManualPaym
       {/* Screenshot upload (optional) */}
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium text-foreground">
-          Payment screenshot <span className="font-normal text-muted-foreground">(optional)</span>
+          {t('page.payments.screenshot')} <span className="font-normal text-muted-foreground">{t('page.payments.optional')}</span>
         </span>
         <input
           ref={fileInputRef}
@@ -175,7 +176,7 @@ export function ManualPaymentForm({ onSubmit, submitting, onCancel }: ManualPaym
               }}
               className="shrink-0 text-sm font-medium text-muted-foreground transition-colors hover:text-destructive"
             >
-              Remove
+              {t('page.payments.remove')}
             </button>
           </div>
         ) : (
@@ -185,8 +186,8 @@ export function ManualPaymentForm({ onSubmit, submitting, onCancel }: ManualPaym
             className="flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-border bg-card px-4 py-6 text-muted-foreground transition-colors hover:border-primary/50 hover:bg-secondary hover:text-primary"
           >
             <Icon name="upload" size={20} />
-            <span className="text-sm font-medium">Upload screenshot</span>
-            <span className="text-xs">JPG, PNG or WEBP up to 5MB</span>
+            <span className="text-sm font-medium">{t('page.payments.uploadScreenshot')}</span>
+            <span className="text-xs">{t('page.payments.screenshotHint')}</span>
           </button>
         )}
         {fileError && (
@@ -199,14 +200,14 @@ export function ManualPaymentForm({ onSubmit, submitting, onCancel }: ManualPaym
       {/* Reference note */}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="payment-note" className="text-sm font-medium text-foreground">
-          Reference note <span className="font-normal text-muted-foreground">(optional)</span>
+          {t('page.payments.referenceNote')} <span className="font-normal text-muted-foreground">{t('page.payments.optional')}</span>
         </label>
         <textarea
           id="payment-note"
           value={note}
           onChange={(e) => setNote(e.target.value.slice(0, MAX_NOTE_LENGTH))}
           rows={3}
-          placeholder="Transaction ID, sender name, or any detail that helps us match your payment."
+          placeholder={t('page.payments.notePlaceholder')}
           className="w-full resize-y rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
         />
         <span className="self-end text-xs text-muted-foreground">
@@ -217,11 +218,11 @@ export function ManualPaymentForm({ onSubmit, submitting, onCancel }: ManualPaym
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         {onCancel && (
           <Button type="button" variant="ghost" onClick={onCancel} disabled={submitting}>
-            Cancel
+            {t('page.payments.cancel')}
           </Button>
         )}
         <Button type="submit" loading={submitting}>
-          Submit payment claim
+          {t('page.payments.submitClaim')}
         </Button>
       </div>
     </form>
