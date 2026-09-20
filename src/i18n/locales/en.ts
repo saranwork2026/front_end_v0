@@ -1200,6 +1200,35 @@ export const en = {
         reviewerNote: 'Reviewer note',
         previewStates: 'Preview states:',
       },
+      errorsPage: {
+        accessDeniedTitle: 'Access denied',
+        accessDeniedMsg: "You don't have permission to view this page. If you believe this is a mistake, contact support.",
+        notFoundTitle: 'Page not found',
+        notFoundMsg: "The page you're looking for doesn't exist or may have moved.",
+        backToDashboard: 'Back to dashboard',
+        contactSupport: 'Contact support',
+        browseMatches: 'Browse matches',
+      },
+      publicProfile: {
+        notAvailableTitle: 'Profile not available',
+        notAvailableDesc:
+          'This profile is private or no longer available. Join Magizh to discover members who match your preferences.',
+        createAccount: 'Create a free account',
+        member: 'Member',
+        profileIdPrefix: 'Profile ID:',
+        likeWhatYouSee: 'Like what you see?',
+        ctaDesc:
+          'Create a free account to view full profiles, express interest, and start a conversation.',
+      },
+      legal: {
+        termsTitle: 'Terms of Service',
+        privacyTitle: 'Privacy Policy',
+        effectiveDate: 'Effective date: {{date}}',
+        draftTitle: 'Draft — pending legal review',
+        draftDesc:
+          'This page is a structured template. Sections marked [PLACEHOLDER: …] must be completed with real, business-approved content and reviewed by counsel before this is treated as binding.',
+        backToLogin: '← Back to login',
+      },
       successStories: {
         title: 'Success Stories',
         subtitle: 'Real couples who found each other here.',

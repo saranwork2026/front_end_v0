@@ -1,33 +1,37 @@
+import { useTranslation } from 'react-i18next'
+
 import { useDocumentTitle } from '@/src/hooks/use-document-title'
 import { ErrorStateView } from '@/components/errors/error-state-view'
 
 export function AccessDeniedPage() {
+  const { t } = useTranslation()
   useDocumentTitle('Access denied | Matrimony')
   return (
     <ErrorStateView
       icon="lock"
       code="403"
-      title="Access denied"
-      message="You don't have permission to view this page. If you believe this is a mistake, contact support."
+      title={t('page.errorsPage.accessDeniedTitle')}
+      message={t('page.errorsPage.accessDeniedMsg')}
       actions={[
-        { label: 'Back to dashboard', href: '/', variant: 'primary' },
-        { label: 'Contact support', href: '/support', variant: 'secondary' },
+        { label: t('page.errorsPage.backToDashboard'), href: '/', variant: 'primary' },
+        { label: t('page.errorsPage.contactSupport'), href: '/support', variant: 'secondary' },
       ]}
     />
   )
 }
 
 export function NotFoundPage() {
+  const { t } = useTranslation()
   useDocumentTitle('Page not found | Matrimony')
   return (
     <ErrorStateView
       icon="search"
       code="404"
-      title="Page not found"
-      message="The page you're looking for doesn't exist or may have moved."
+      title={t('page.errorsPage.notFoundTitle')}
+      message={t('page.errorsPage.notFoundMsg')}
       actions={[
-        { label: 'Back to dashboard', href: '/', variant: 'primary' },
-        { label: 'Browse matches', href: '/matches', variant: 'secondary' },
+        { label: t('page.errorsPage.backToDashboard'), href: '/', variant: 'primary' },
+        { label: t('page.errorsPage.browseMatches'), href: '/matches', variant: 'secondary' },
       ]}
     />
   )

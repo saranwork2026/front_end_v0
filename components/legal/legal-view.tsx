@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { Icon } from '@/components/ui/icon'
 import { LEGAL_INFO } from '@/src/data/legalContent'
@@ -16,14 +17,14 @@ import { LEGAL_INFO } from '@/src/data/legalContent'
  */
 
 function DraftNotice() {
+  const { t } = useTranslation()
   return (
     <div role="note" className="flex items-start gap-3 rounded-xl border border-gold/40 bg-gold-soft p-4 text-sm text-foreground">
       <Icon name="shield" size={20} className="mt-0.5 shrink-0 text-gold-foreground" />
       <div className="space-y-1">
-        <p className="font-semibold">Draft — pending legal review</p>
+        <p className="font-semibold">{t('page.legal.draftTitle')}</p>
         <p className="text-muted-foreground">
-          This page is a structured template. Sections marked [PLACEHOLDER: …] must be completed with
-          real, business-approved content and reviewed by counsel before this is treated as binding.
+          {t('page.legal.draftDesc')}
         </p>
       </div>
     </div>
@@ -40,12 +41,13 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 function Shell({ title, children }: { title: string; children: ReactNode }) {
+  const { t } = useTranslation()
   return (
     <main className="min-h-dvh bg-brand-warm px-4 py-12">
       <div className="mx-auto max-w-3xl space-y-8">
         <div>
           <h1 className="font-serif text-2xl font-bold text-foreground">{title}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Effective date: {LEGAL_INFO.effectiveDate}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t('page.legal.effectiveDate', { date: LEGAL_INFO.effectiveDate })}</p>
         </div>
         <DraftNotice />
         <div className="space-y-6 rounded-2xl border border-border bg-card p-6 text-sm leading-relaxed text-foreground/90">
@@ -53,7 +55,7 @@ function Shell({ title, children }: { title: string; children: ReactNode }) {
         </div>
         <p>
           <Link href="/login" className="text-sm font-medium text-primary hover:underline">
-            ← Back to login
+            {t('page.legal.backToLogin')}
           </Link>
         </p>
       </div>
@@ -277,15 +279,16 @@ function PrivacyContent() {
 }
 
 export function LegalView({ doc }: { doc: 'terms' | 'privacy' }) {
+  const { t } = useTranslation()
   if (doc === 'privacy') {
     return (
-      <Shell title="Privacy Policy">
+      <Shell title={t('page.legal.privacyTitle')}>
         <PrivacyContent />
       </Shell>
     )
   }
   return (
-    <Shell title="Terms of Service">
+    <Shell title={t('page.legal.termsTitle')}>
       <TermsContent />
     </Shell>
   )

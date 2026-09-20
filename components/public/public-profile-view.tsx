@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { PublicProfilePreview } from '@matrimony/shared-core'
 
 import { buttonVariants } from '@/components/ui/button'
@@ -18,6 +19,7 @@ import { publicProfileApi } from '@/src/lib/api'
  * the existing app's PublicProfilePage.
  */
 export function PublicProfileView({ profileId }: { profileId: string }) {
+  const { t } = useTranslation()
   const [preview, setPreview] = useState<PublicProfilePreview | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -55,12 +57,12 @@ export function PublicProfileView({ profileId }: { profileId: string }) {
       <main className="min-h-dvh bg-brand-warm px-4 py-16">
         <div className="mx-auto max-w-md text-center">
           <Icon name="user" size={48} className="mx-auto text-primary/40" />
-          <h1 className="mt-4 font-serif text-xl font-semibold text-foreground">Profile not available</h1>
+          <h1 className="mt-4 font-serif text-xl font-semibold text-foreground">{t('page.publicProfile.notAvailableTitle')}</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            This profile is private or no longer available. Join Magizh to discover members who match your preferences.
+            {t('page.publicProfile.notAvailableDesc')}
           </p>
           <Link href="/register" className={cn(buttonVariants({ variant: 'primary' }), 'mt-6')}>
-            Create a free account
+            {t('page.publicProfile.createAccount')}
           </Link>
         </div>
       </main>
@@ -75,7 +77,7 @@ export function PublicProfileView({ profileId }: { profileId: string }) {
             {preview.primaryPhotoUrl ? (
               <img
                 src={preview.primaryPhotoUrl}
-                alt={preview.firstName || 'Member'}
+                alt={preview.firstName || t('page.publicProfile.member')}
                 className="h-full w-full object-cover"
                 style={{ objectPosition: focalPosition(preview.photoFocalX, preview.photoFocalY) }}
                 loading="lazy"
@@ -94,19 +96,19 @@ export function PublicProfileView({ profileId }: { profileId: string }) {
               {preview.currentCity && <span>{preview.currentCity}</span>}
             </div>
             {preview.profileId && (
-              <p className="pt-1 text-xs text-muted-foreground/70">Profile ID: {preview.profileId}</p>
+              <p className="pt-1 text-xs text-muted-foreground/70">{t('page.publicProfile.profileIdPrefix')} {preview.profileId}</p>
             )}
           </div>
         </div>
 
         {/* Sign-up CTA — the growth loop */}
         <div className="mt-6 rounded-2xl border border-primary/20 bg-card p-5 text-center">
-          <p className="font-medium text-foreground">Like what you see?</p>
+          <p className="font-medium text-foreground">{t('page.publicProfile.likeWhatYouSee')}</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Create a free account to view full profiles, express interest, and start a conversation.
+            {t('page.publicProfile.ctaDesc')}
           </p>
           <Link href="/register" className={cn(buttonVariants({ variant: 'primary', size: 'lg' }), 'mt-4 w-full')}>
-            Create a free account
+            {t('page.publicProfile.createAccount')}
           </Link>
         </div>
       </div>
