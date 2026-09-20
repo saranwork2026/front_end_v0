@@ -73,7 +73,7 @@ export function SupportView() {
         <div className="grid gap-4 sm:grid-cols-3">
           {channels.map((c) => (
             <a
-              key={c.label}
+              key={c.labelKey}
               href={c.href}
               target={c.icon === "chat" ? "_blank" : undefined}
               rel={c.icon === "chat" ? "noopener noreferrer" : undefined}

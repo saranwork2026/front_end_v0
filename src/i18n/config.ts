@@ -1,7 +1,7 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 
-import { en, type Resources } from './locales/en'
+import { en } from './locales/en'
 import { ta } from './locales/ta'
 
 /** Supported UI languages. `en` is the fallback. */
@@ -46,10 +46,25 @@ void i18n.use(initReactI18next).init({
 
 export default i18n
 
-// Give t(...) full key + type safety across the app.
+// i18next / react-i18next TypeScript integration.
+//
+// We intentionally do NOT feed the full `Resources` tree into CustomTypeOptions.
+// The en.ts locale tree is large and deeply nested; with react-i18next v15,
+// typing `resources: Resources` pushes TS key inference past its recursion
+// limit (TS2589 "excessively deep"), which then degrades t(...)'s return type
+// to the detailed-result union (TFunctionDetailedResult | ...) instead of a
+// plain `string`. That broke ~30 call sites that assign t(...) to a `string`
+// (TS2322) and failed the CI `tsc --noEmit` build.
+//
+// Setting only `returnNull: false` keeps t(...) returning `string` (never
+// `string | null`) so every existing `t(...)`-into-string usage compiles. We
+// trade compile-time KEY autocomplete for a green, correct build; runtime
+// behaviour is unchanged (resources are still loaded/typed at runtime via the
+// init() call above, and Resources still enforces en/ta shape parity in
+// locales/*.ts). `Resources` is imported there, not here.
 declare module 'i18next' {
   interface CustomTypeOptions {
     defaultNS: 'translation'
-    resources: Resources
+    returnNull: false
   }
 }

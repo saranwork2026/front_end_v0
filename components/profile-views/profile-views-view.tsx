@@ -172,7 +172,7 @@ function ViewerCard({ viewer, premium }: { viewer: ProfileView; premium: boolean
   const { t } = useTranslation()
   const initial = viewer.viewerFirstName.charAt(0).toUpperCase()
   const meta = premium
-    ? [viewer.viewerAge ? t('page.profileViews.yrs', { count: viewer.viewerAge }) : null, viewer.viewerCity].filter(Boolean).join(' · ') ||
+    ? [viewer.viewerAge ? t('page.profileViews.yrs', { count: Number(viewer.viewerAge) }) : null, viewer.viewerCity].filter(Boolean).join(' · ') ||
       t('page.profileViews.detailsOnProfile')
     : '28 yrs · Chennai'
 
