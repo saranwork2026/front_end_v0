@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import Link from 'next/link'
 import { useNavigate } from 'react-router-dom'
 import type { ApiError } from '@matrimony/shared-core'
@@ -36,17 +37,18 @@ interface ProfileDetailViewProps {
   previewState?: 'error' | 'notfound' | undefined
 }
 
-const interestErrorMessages: Record<string, string> = {
-  INTEREST_ALREADY_SENT: 'You have already sent an interest to this member.',
-  INTEREST_BLOCKED: 'You cannot send an interest to this member.',
-  INTEREST_LIMIT_REACHED: 'You have reached your interest limit. Upgrade your plan to send more.',
+const interestErrorKeys: Record<string, string> = {
+  INTEREST_ALREADY_SENT: 'page.profile.errInterestAlreadySent',
+  INTEREST_BLOCKED: 'page.profile.errInterestBlocked',
+  INTEREST_LIMIT_REACHED: 'page.profile.errInterestLimit',
 }
-const accessErrorMessages: Record<string, string> = {
-  REQUEST_ALREADY_EXISTS: 'You have already requested access.',
+const accessErrorKeys: Record<string, string> = {
+  REQUEST_ALREADY_EXISTS: 'page.profile.errRequestExists',
 }
 
 export function ProfileDetailView({ profileId, previewState }: ProfileDetailViewProps) {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const ownProfileId = useAuthStore((s) => s.profileId)
 
   const [status, setStatus] = useState<Status>('loading')
@@ -183,9 +185,9 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
     if (unlockedContact) {
       setRevealedContact({ phone: unlockedContact.mobileNo ?? '', email: unlockedContact.email ?? '' })
       setContactState('unlocked')
-      pushToast('Contact unlocked.', 'success')
+      pushToast(t('page.profile.contactUnlocked'), 'success')
     }
-  }, [unlockedContact, pushToast])
+  }, [unlockedContact, pushToast, t])
 
   useEffect(() => {
     if (unlockError) pushToast(unlockError, 'error')
@@ -217,12 +219,13 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
     try {
       await interestsApi.sendInterest(profileId)
       setInterestState('sent')
-      pushToast('Interest sent. We will notify you when it is accepted.', 'success')
+      pushToast(t('page.profile.interestSentToast'), 'success')
     } catch (err: unknown) {
       const code = (err as { response?: { data?: ApiError } })?.response?.data?.errorCode
       if (code === 'INTEREST_ALREADY_SENT') setInterestState('sent')
       else setInterestState('idle')
-      pushToast(code ? interestErrorMessages[code] ?? 'Could not send interest.' : 'Could not send interest.', 'error')
+      const key = code ? interestErrorKeys[code] : undefined
+      pushToast(key ? t(key as never) : t('page.profile.couldNotSendInterest'), 'error')
     }
   }
 
@@ -240,10 +243,11 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
       await accessApi.sendAccessRequest(profileId, type)
       if (type === 'PHOTO') setPhotoAccess('requested')
       else setContactState('requested')
-      pushToast(`${type === 'PHOTO' ? 'Photo' : 'Contact'} access request sent.`, 'success')
+      pushToast(type === 'PHOTO' ? t('page.profile.photoAccessSent') : t('page.profile.contactAccessSent'), 'success')
     } catch (err: unknown) {
       const code = (err as { response?: { data?: ApiError } })?.response?.data?.errorCode
-      pushToast(code ? accessErrorMessages[code] ?? 'Could not send request.' : 'Could not send request.', 'error')
+      const key = code ? accessErrorKeys[code] : undefined
+      pushToast(key ? t(key as never) : t('page.profile.couldNotSendRequest'), 'error')
     }
   }
 
@@ -256,7 +260,7 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
 
   const handleUnlockContact = () => {
     if (contactState === 'unlocked') {
-      pushToast('Contact is already unlocked.', 'info')
+      pushToast(t('page.profile.contactAlreadyUnlocked'), 'info')
       return
     }
     setContactState('unlocking')
@@ -273,13 +277,13 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
         reason: reason as never,
         ...(description ? { description } : {}),
       })
-      pushToast('Report submitted. Thank you for keeping the community safe.', 'success')
+      pushToast(t('page.profile.reportSubmitted'), 'success')
     } catch (err: unknown) {
       const httpStatus = (err as { response?: { status?: number } })?.response?.status
       if (httpStatus === 409) {
-        pushToast('You have already reported this member.', 'info')
+        pushToast(t('page.profile.alreadyReported'), 'info')
       } else {
-        pushToast('Could not submit the report. Please try again.', 'error')
+        pushToast(t('page.profile.couldNotReport'), 'error')
       }
     }
   }
@@ -288,9 +292,9 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
     try {
       await blockApi.blockUser(profileId)
       setBlocked(true)
-      pushToast('Profile blocked.', 'success')
+      pushToast(t('page.profile.profileBlocked'), 'success')
     } catch {
-      pushToast('Could not block this member. Please try again.', 'error')
+      pushToast(t('page.profile.couldNotBlock'), 'error')
     }
   }
 
@@ -298,9 +302,9 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
     try {
       await blockApi.unblockUser(profileId)
       setBlocked(false)
-      pushToast('Profile unblocked.', 'success')
+      pushToast(t('page.profile.profileUnblocked'), 'success')
     } catch {
-      pushToast('Could not unblock this member. Please try again.', 'error')
+      pushToast(t('page.profile.couldNotUnblock'), 'error')
     }
   }
 
@@ -313,7 +317,7 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
         className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
       >
         <Icon name="chevron-left" size={18} />
-        Back to results
+        {t('page.profile.backToResults')}
       </button>
 
       {status === 'loading' && <LoadingState />}
@@ -385,36 +389,38 @@ function LoadingState() {
 }
 
 function ErrorState({ onRetry }: { onRetry: () => void }) {
+  const { t } = useTranslation()
   return (
     <div role="alert" className="mx-auto max-w-md rounded-2xl border border-destructive/30 bg-destructive/5 p-8 text-center">
       <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-destructive/10 text-destructive">
         <Icon name="alert-circle" size={28} />
       </span>
-      <h1 className="mt-4 font-serif text-xl font-bold text-foreground">Something went wrong</h1>
+      <h1 className="mt-4 font-serif text-xl font-bold text-foreground">{t('page.profile.errorTitle')}</h1>
       <p className="mt-2 text-sm text-muted-foreground text-pretty">
-        We couldn&apos;t load this profile. Please check your connection and try again.
+        {t('page.profile.errorDesc')}
       </p>
       <Button variant="primary" className="mt-5" onClick={onRetry}>
         <Icon name="refresh" size={16} />
-        Try again
+        {t('page.profile.tryAgain')}
       </Button>
     </div>
   )
 }
 
 function NotFoundState() {
+  const { t } = useTranslation()
   return (
     <div className="mx-auto max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
       <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-secondary text-primary">
         <Icon name="eye" size={28} />
       </span>
-      <h1 className="mt-4 font-serif text-xl font-bold text-foreground">Profile unavailable</h1>
+      <h1 className="mt-4 font-serif text-xl font-bold text-foreground">{t('page.profile.notFoundTitle')}</h1>
       <p className="mt-2 text-sm text-muted-foreground text-pretty">
-        This profile may have been removed, set to private, or is no longer active.
+        {t('page.profile.notFoundDesc')}
       </p>
       <Link href="/search" className={buttonVariants({ variant: 'secondary', className: 'mt-5' })}>
         <Icon name="search" size={16} />
-        Browse other profiles
+        {t('page.profile.browseOthers')}
       </Link>
     </div>
   )
@@ -471,6 +477,7 @@ function ReadyContent({
   onBlock,
   onUnblock,
 }: ReadyContentProps) {
+  const { t } = useTranslation()
   const name = [profile.firstName, profile.lastName].filter(Boolean).join(' ')
   const photosVisible = !profile.photosLocked || photoAccess === 'granted'
   // Safety actions (report/block/unblock) are available on anyone else's
@@ -487,12 +494,11 @@ function ReadyContent({
         <div className="flex flex-wrap items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm">
           <Icon name="alert-circle" size={18} className="shrink-0 text-destructive" />
           <span className="min-w-0 flex-1 text-foreground">
-            Your photo wasn&apos;t approved as it didn&apos;t meet our photo guidelines. Please
-            re-upload a clear photo that follows the guidelines.
+            {t('page.profile.photoRejectedAlert')}
           </span>
           <Button variant="secondary" size="sm" onClick={onManagePhotos}>
             <Icon name="camera" size={16} />
-            Re-upload photo
+            {t('page.profile.reUploadPhoto')}
           </Button>
         </div>
       )}
@@ -501,11 +507,11 @@ function ReadyContent({
         <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-secondary/60 px-4 py-3 text-sm text-muted-foreground">
           <Icon name="lock" size={18} className="shrink-0 text-muted-foreground" />
           <span className="min-w-0 flex-1">
-            You have blocked this member. Connect actions are hidden.
+            {t('page.profile.blockedBanner')}
           </span>
           <Button variant="secondary" size="sm" onClick={onUnblock}>
             <Icon name="check" size={16} />
-            Unblock
+            {t('page.profile.unblock')}
           </Button>
         </div>
       )}
@@ -528,7 +534,7 @@ function ReadyContent({
                 <span className="text-primary">
                   <Icon name="chat" size={18} />
                 </span>
-                About {profile.firstName}
+                {t('page.profile.about', { name: profile.firstName })}
               </h2>
               <p className="mt-3 leading-relaxed text-foreground/90 text-pretty">{profile.aboutMe}</p>
             </section>
@@ -592,7 +598,7 @@ function ReadyContent({
               size="md"
               onClick={onShortlistToggle}
               aria-pressed={shortlisted}
-              aria-label={shortlisted ? 'Remove from shortlist' : 'Add to shortlist'}
+              aria-label={shortlisted ? t('page.profile.removeFromShortlist') : t('page.profile.addToShortlist')}
               className="shrink-0"
             >
               <Icon name={shortlisted ? 'star-filled' : 'star'} size={18} />
@@ -606,9 +612,9 @@ function ReadyContent({
               disabled={interestState === 'sent'}
             >
               <Icon name={interestState === 'sent' ? 'check' : 'heart-filled'} size={18} />
-              {interestState === 'sent' ? 'Interest sent' : 'Send interest'}
+              {interestState === 'sent' ? t('page.profile.interestSent') : t('page.profile.sendInterest')}
             </Button>
-            <Button variant="secondary" size="md" onClick={onShare} aria-label="Share profile" className="shrink-0">
+            <Button variant="secondary" size="md" onClick={onShare} aria-label={t('page.profile.shareProfile')} className="shrink-0">
               <Icon name="share" size={18} />
             </Button>
           </div>

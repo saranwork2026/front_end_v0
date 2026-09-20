@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
@@ -32,14 +33,14 @@ export type EditSectionKey =
   | 'family'
   | 'horoscope'
 
-const SECTION_META: Record<EditSectionKey, { title: string; description: string }> = {
-  basic: { title: 'Basic details', description: 'Your name, date of birth, and the essentials.' },
-  religious: { title: 'Religious background', description: 'Community and religious details.' },
-  professional: { title: 'Education & career', description: 'Your qualifications and profession.' },
-  location: { title: 'Location', description: 'Your native and current location.' },
-  physical: { title: 'Physical attributes', description: 'Height, weight, and other details.' },
-  family: { title: 'Family details', description: 'About your family and values.' },
-  horoscope: { title: 'Horoscope', description: 'Birth-chart details.' },
+const SECTION_META: Record<EditSectionKey, { titleKey: string; descKey: string }> = {
+  basic: { titleKey: 'page.myProfile.editTitleBasic', descKey: 'page.myProfile.editDescBasic' },
+  religious: { titleKey: 'page.myProfile.editTitleReligious', descKey: 'page.myProfile.editDescReligious' },
+  professional: { titleKey: 'page.myProfile.editTitleProfessional', descKey: 'page.myProfile.editDescProfessional' },
+  location: { titleKey: 'page.myProfile.editTitleLocation', descKey: 'page.myProfile.editDescLocation' },
+  physical: { titleKey: 'page.myProfile.editTitlePhysical', descKey: 'page.myProfile.editDescPhysical' },
+  family: { titleKey: 'page.myProfile.editTitleFamily', descKey: 'page.myProfile.editDescFamily' },
+  horoscope: { titleKey: 'page.myProfile.editTitleHoroscope', descKey: 'page.myProfile.editDescHoroscope' },
 }
 
 const VALID_SECTIONS = Object.keys(SECTION_META) as EditSectionKey[]
@@ -62,6 +63,7 @@ interface ProfileEditViewProps {
  */
 export function ProfileEditView({ section }: ProfileEditViewProps) {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -113,12 +115,12 @@ export function ProfileEditView({ section }: ProfileEditViewProps) {
     setSaving(true)
     try {
       await saveStep(section, form)
-      pushToast('Your changes have been saved.', 'success')
+      pushToast(t('page.myProfile.savedToast'), 'success')
       navigate('/profile')
     } catch (err) {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        'We could not save your changes. Please try again.'
+        t('page.myProfile.saveError')
       pushToast(message, 'error')
     } finally {
       setSaving(false)
@@ -143,13 +145,13 @@ export function ProfileEditView({ section }: ProfileEditViewProps) {
         >
           <Icon name="alert-circle" size={28} className="text-destructive" />
           <div>
-            <p className="font-medium text-foreground">We couldn&apos;t load your profile</p>
+            <p className="font-medium text-foreground">{t('page.myProfile.editErrorTitle')}</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Please check your connection and try again.
+              {t('page.myProfile.editErrorDesc')}
             </p>
           </div>
           <Button variant="secondary" size="sm" onClick={() => void load()}>
-            Retry
+            {t('page.myProfile.retry')}
           </Button>
         </div>
       </main>
@@ -166,19 +168,19 @@ export function ProfileEditView({ section }: ProfileEditViewProps) {
             className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <Icon name="arrow-left" size={15} />
-            Back to profile
+            {t('page.myProfile.backToProfile')}
           </button>
           <h1 className="mt-2 font-serif text-2xl text-foreground text-balance sm:text-3xl">
-            Edit {meta.title.toLowerCase()}
+            {t(meta.titleKey as never)}
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">{meta.description}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t(meta.descKey as never)}</p>
         </header>
 
         {approved && (
           <div className="mb-6 flex items-start gap-2.5 rounded-xl border border-gold/40 bg-gold-soft/60 px-4 py-3 text-sm text-foreground">
             <Icon name="alert-circle" size={16} className="mt-0.5 shrink-0 text-gold" />
             <p>
-              Editing an approved profile sends it back for review before your changes go live.
+              {t('page.myProfile.approvedNotice')}
             </p>
           </div>
         )}
@@ -188,10 +190,10 @@ export function ProfileEditView({ section }: ProfileEditViewProps) {
 
           <div className="mt-6 flex items-center gap-3 border-t border-border pt-5">
             <Button onClick={handleSave} loading={saving}>
-              Save changes
+              {t('page.myProfile.saveChanges')}
             </Button>
             <Button variant="secondary" onClick={() => navigate('/profile')} disabled={saving}>
-              Cancel
+              {t('page.myProfile.cancel')}
             </Button>
           </div>
         </section>

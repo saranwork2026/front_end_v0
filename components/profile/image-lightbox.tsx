@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { createPortal } from 'react-dom'
 
 import { Icon } from '@/components/ui/icon'
@@ -30,6 +31,7 @@ export function ImageLightbox({
   onClose,
   onNavigate,
 }: ImageLightboxProps) {
+  const { t } = useTranslation()
   const touchStart = useRef<{ x: number; y: number } | null>(null)
 
   const onTouchStart = (e: React.TouchEvent) => {
@@ -81,7 +83,7 @@ export function ImageLightbox({
         <button
           type="button"
           onClick={() => onNavigate((index - 1 + images.length) % images.length)}
-          aria-label="Previous photo"
+          aria-label={t('page.profile.previousPhoto')}
           className="absolute left-3 z-10 flex size-11 items-center justify-center rounded-full bg-background/15 text-background backdrop-blur transition-colors hover:bg-background/25 sm:left-6"
         >
           <Icon name="chevron-left" size={24} />
@@ -97,7 +99,7 @@ export function ImageLightbox({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close photo viewer"
+          aria-label={t('page.profile.closeViewer')}
           className="absolute -right-3 -top-3 z-10 flex size-10 items-center justify-center rounded-full bg-background text-foreground shadow-lg ring-1 ring-black/10 transition-colors hover:bg-background/90"
         >
           <Icon name="x" size={20} />
@@ -119,7 +121,7 @@ export function ImageLightbox({
           <button
             type="button"
             onClick={() => onNavigate((index + 1) % images.length)}
-            aria-label="Next photo"
+            aria-label={t('page.profile.nextPhoto')}
             className="absolute right-3 z-10 flex size-11 items-center justify-center rounded-full bg-background/15 text-background backdrop-blur transition-colors hover:bg-background/25 sm:right-6"
           >
             <Icon name="chevron-right" size={24} />

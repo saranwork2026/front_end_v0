@@ -1,5 +1,7 @@
 'use client'
 
+import { useTranslation } from 'react-i18next'
+
 import { Icon } from '@/components/ui/icon'
 import {
   buildDetailSections,
@@ -25,6 +27,7 @@ export function DetailSections({
   onRequestHoroscope,
   horoscopeRequested,
 }: DetailSectionsProps) {
+  const { t } = useTranslation()
   const sections = buildDetailSections(profile)
 
   return (
@@ -58,7 +61,7 @@ export function DetailSections({
             {section.key === 'horoscope' && profile.horoscopePhotoCount > 0 && (
               <div className="pt-1">
                 <p className="mb-2 text-sm text-muted-foreground">
-                  Horoscope charts
+                  {t('page.profile.horoscopeCharts')}
                 </p>
                 {horoscopeVisible ? (
                   <div className="flex gap-2">
@@ -78,7 +81,7 @@ export function DetailSections({
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-foreground">
-                        {profile.horoscopePhotoCount} charts locked
+                        {t('page.profile.chartsLocked', { count: profile.horoscopePhotoCount })}
                       </p>
                       <button
                         type="button"
@@ -86,7 +89,7 @@ export function DetailSections({
                         disabled={horoscopeRequested}
                         className="text-sm font-medium text-primary underline-offset-4 hover:underline disabled:text-muted-foreground disabled:no-underline"
                       >
-                        {horoscopeRequested ? 'Request sent' : 'Request access'}
+                        {horoscopeRequested ? t('page.profile.requestSent') : t('page.profile.requestAccess')}
                       </button>
                     </div>
                   </div>

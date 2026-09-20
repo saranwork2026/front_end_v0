@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import type { PhotoResponse, UserProfile } from '@matrimony/shared-core'
 
@@ -17,16 +18,18 @@ import { HoroscopeChartsDisplay } from '@/components/horoscope/horoscope-charts-
 
 type FieldValue = string | number | boolean | null | undefined
 
+type TFunc = ReturnType<typeof useTranslation>['t']
+
 interface ProfileField {
-  label: string
+  labelKey: string
   value: FieldValue
 }
 
 interface ProfileSection {
   key: string
-  title: string
+  titleKey: string
   icon: IconName
-  emptyHint: string
+  emptyHintKey: string
   fields: ProfileField[]
 }
 
@@ -36,8 +39,8 @@ function hasValue(value: FieldValue): boolean {
 }
 
 /** Format enums (UNDER_SCORE → words), booleans (Yes/No), numbers, strings. */
-function formatValue(value: FieldValue): string {
-  if (typeof value === 'boolean') return value ? 'Yes' : 'No'
+function formatValue(value: FieldValue, t: TFunc): string {
+  if (typeof value === 'boolean') return value ? t('page.myProfile.yes') : t('page.myProfile.no')
   if (typeof value === 'number') return value.toString()
   return String(value).replace(/_/g, ' ')
 }
@@ -49,129 +52,129 @@ function birthOrderLabel(value: string | null | undefined): string | null {
 }
 
 /** "2 (1 married)" style sibling summary, or null when there are none listed. */
-function siblingSummary(count: number | null | undefined, married: number | null | undefined): string | null {
+function siblingSummary(count: number | null | undefined, married: number | null | undefined, t: TFunc): string | null {
   if (count == null) return null
-  return married ? `${count} (${married} married)` : `${count}`
+  return married ? t('page.myProfile.siblingSummary', { count, married }) : `${count}`
 }
 
-function buildSections(profile: UserProfile): ProfileSection[] {
+function buildSections(profile: UserProfile, t: TFunc): ProfileSection[] {
   return [
     {
       key: 'basic',
-      title: 'Basic details',
+      titleKey: 'page.myProfile.secBasic',
       icon: 'user',
-      emptyHint: 'Add your basic details',
+      emptyHintKey: 'page.myProfile.secBasicHint',
       fields: [
-        { label: 'Date of birth', value: profile.dateOfBirth },
-        { label: 'Age', value: profile.age },
-        { label: 'Gender', value: profile.gender },
-        { label: 'Marital status', value: profile.maritalStatus },
-        { label: 'Mother tongue', value: profile.motherTongue },
-        { label: 'About me', value: profile.aboutMe },
+        { labelKey: 'page.myProfile.f.dateOfBirth', value: profile.dateOfBirth },
+        { labelKey: 'page.myProfile.f.age', value: profile.age },
+        { labelKey: 'page.myProfile.f.gender', value: profile.gender },
+        { labelKey: 'page.myProfile.f.maritalStatus', value: profile.maritalStatus },
+        { labelKey: 'page.myProfile.f.motherTongue', value: profile.motherTongue },
+        { labelKey: 'page.myProfile.f.aboutMe', value: profile.aboutMe },
       ],
     },
     {
       key: 'religious',
-      title: 'Religious background',
+      titleKey: 'page.myProfile.secReligious',
       icon: 'sparkles',
-      emptyHint: 'Add your religious details',
+      emptyHintKey: 'page.myProfile.secReligiousHint',
       fields: [
-        { label: 'Religion', value: profile.religion },
-        { label: 'Sect', value: profile.sect },
-        { label: 'Caste', value: profile.caste },
-        { label: 'Sub-caste', value: profile.subCaste },
-        { label: 'Gothram', value: profile.gothram },
-        { label: 'Manglik', value: profile.manglik },
-        { label: 'Open to other religions', value: profile.canConsiderOtherReligion },
-        { label: 'Open to other castes', value: profile.canConsiderOtherCaste },
+        { labelKey: 'page.myProfile.f.religion', value: profile.religion },
+        { labelKey: 'page.myProfile.f.sect', value: profile.sect },
+        { labelKey: 'page.myProfile.f.caste', value: profile.caste },
+        { labelKey: 'page.myProfile.f.subCaste', value: profile.subCaste },
+        { labelKey: 'page.myProfile.f.gothram', value: profile.gothram },
+        { labelKey: 'page.myProfile.f.manglik', value: profile.manglik },
+        { labelKey: 'page.myProfile.f.openReligions', value: profile.canConsiderOtherReligion },
+        { labelKey: 'page.myProfile.f.openCastes', value: profile.canConsiderOtherCaste },
       ],
     },
     {
       key: 'professional',
-      title: 'Education & career',
+      titleKey: 'page.myProfile.secProfessional',
       icon: 'layers',
-      emptyHint: 'Add your education and career details',
+      emptyHintKey: 'page.myProfile.secProfessionalHint',
       fields: [
-        { label: 'Highest education', value: profile.highestEducation },
-        { label: 'Education detail', value: profile.educationDetail },
-        { label: 'Employment type', value: profile.employmentType },
-        { label: 'Profession', value: profile.profession },
-        { label: 'Company', value: profile.companyName },
+        { labelKey: 'page.myProfile.f.education', value: profile.highestEducation },
+        { labelKey: 'page.myProfile.f.educationDetail', value: profile.educationDetail },
+        { labelKey: 'page.myProfile.f.employmentType', value: profile.employmentType },
+        { labelKey: 'page.myProfile.f.profession', value: profile.profession },
+        { labelKey: 'page.myProfile.f.company', value: profile.companyName },
         {
-          label: 'Annual income',
+          labelKey: 'page.myProfile.f.annualIncome',
           value: profile.annualIncome ? `₹${profile.annualIncome.toLocaleString('en-IN')}` : null,
         },
-        { label: 'Work location', value: profile.workLocation },
+        { labelKey: 'page.myProfile.f.workLocation', value: profile.workLocation },
       ],
     },
     {
       key: 'location',
-      title: 'Location',
+      titleKey: 'page.myProfile.secLocation',
       icon: 'map-pin',
-      emptyHint: 'Add your location details',
+      emptyHintKey: 'page.myProfile.secLocationHint',
       fields: [
-        { label: 'Current city', value: profile.currentCity },
-        { label: 'Current state', value: profile.currentState },
-        { label: 'Current country', value: profile.currentCountry },
-        { label: 'Native city', value: profile.nativeCity },
-        { label: 'Native state', value: profile.nativeState },
-        { label: 'Native country', value: profile.nativeCountry },
-        { label: 'Citizenship', value: profile.citizenshipCountry },
-        { label: 'Residency status', value: profile.residencyStatus },
+        { labelKey: 'page.myProfile.f.currentCity', value: profile.currentCity },
+        { labelKey: 'page.myProfile.f.currentState', value: profile.currentState },
+        { labelKey: 'page.myProfile.f.currentCountry', value: profile.currentCountry },
+        { labelKey: 'page.myProfile.f.nativeCity', value: profile.nativeCity },
+        { labelKey: 'page.myProfile.f.nativeState', value: profile.nativeState },
+        { labelKey: 'page.myProfile.f.nativeCountry', value: profile.nativeCountry },
+        { labelKey: 'page.myProfile.f.citizenship', value: profile.citizenshipCountry },
+        { labelKey: 'page.myProfile.f.residencyStatus', value: profile.residencyStatus },
       ],
     },
     {
       key: 'physical',
-      title: 'Physical attributes',
+      titleKey: 'page.myProfile.secPhysical',
       icon: 'user',
-      emptyHint: 'Add your physical attributes',
+      emptyHintKey: 'page.myProfile.secPhysicalHint',
       fields: [
-        { label: 'Height', value: profile.heightCm ? `${profile.heightCm} cm` : null },
-        { label: 'Weight', value: profile.weightKg ? `${profile.weightKg} kg` : null },
-        { label: 'Blood group', value: profile.bloodGroup },
-        { label: 'Complexion', value: profile.complexion },
-        { label: 'Body type', value: profile.bodyType },
-        { label: 'Physical status', value: profile.physicalStatus },
+        { labelKey: 'page.myProfile.f.height', value: profile.heightCm ? `${profile.heightCm} cm` : null },
+        { labelKey: 'page.myProfile.f.weight', value: profile.weightKg ? `${profile.weightKg} kg` : null },
+        { labelKey: 'page.myProfile.f.bloodGroup', value: profile.bloodGroup },
+        { labelKey: 'page.myProfile.f.complexion', value: profile.complexion },
+        { labelKey: 'page.myProfile.f.bodyType', value: profile.bodyType },
+        { labelKey: 'page.myProfile.f.physicalStatus', value: profile.physicalStatus },
       ],
     },
     {
       key: 'family',
-      title: 'Family',
+      titleKey: 'page.myProfile.secFamily',
       icon: 'users',
-      emptyHint: 'Add your family details',
+      emptyHintKey: 'page.myProfile.secFamilyHint',
       fields: [
-        { label: 'Father', value: profile.fatherStatus },
-        { label: "Father's profession", value: profile.fatherProfession },
-        { label: 'Mother', value: profile.motherStatus },
-        { label: "Mother's profession", value: profile.motherProfession },
-        { label: 'Brothers', value: siblingSummary(profile.noOfBrothers, profile.brothersMarried) },
-        { label: 'Sisters', value: siblingSummary(profile.noOfSisters, profile.sistersMarried) },
-        { label: 'Birth order', value: birthOrderLabel(profile.birthOrder) },
-        { label: 'Family type', value: profile.familyType },
-        { label: 'Family status', value: profile.familyStatus },
-        { label: 'Assets', value: profile.assetDetails },
-        { label: 'Own house', value: profile.ownHouse ? 'Yes' : null },
-        { label: 'Native place', value: profile.nativePlace },
+        { labelKey: 'page.myProfile.f.father', value: profile.fatherStatus },
+        { labelKey: 'page.myProfile.f.fatherProfession', value: profile.fatherProfession },
+        { labelKey: 'page.myProfile.f.mother', value: profile.motherStatus },
+        { labelKey: 'page.myProfile.f.motherProfession', value: profile.motherProfession },
+        { labelKey: 'page.myProfile.f.brothers', value: siblingSummary(profile.noOfBrothers, profile.brothersMarried, t) },
+        { labelKey: 'page.myProfile.f.sisters', value: siblingSummary(profile.noOfSisters, profile.sistersMarried, t) },
+        { labelKey: 'page.myProfile.f.birthOrder', value: birthOrderLabel(profile.birthOrder) },
+        { labelKey: 'page.myProfile.f.familyType', value: profile.familyType },
+        { labelKey: 'page.myProfile.f.familyStatus', value: profile.familyStatus },
+        { labelKey: 'page.myProfile.f.assets', value: profile.assetDetails },
+        { labelKey: 'page.myProfile.f.ownHouse', value: profile.ownHouse ? t('page.myProfile.yes') : null },
+        { labelKey: 'page.myProfile.f.nativePlace', value: profile.nativePlace },
       ],
     },
     {
       key: 'horoscope',
-      title: 'Horoscope',
+      titleKey: 'page.myProfile.secHoroscope',
       icon: 'star',
-      emptyHint: 'Add your horoscope details',
+      emptyHintKey: 'page.myProfile.secHoroscopeHint',
       fields: [
-        { label: 'Raasi', value: profile.raasi },
-        { label: 'Nakshatra', value: profile.nakshatra },
-        { label: 'Dhosam', value: profile.dhosam },
-        { label: 'Lagnam', value: profile.lagnam },
-        { label: 'Birth time', value: profile.birthTime },
-        { label: 'Birth city', value: profile.birthCity },
-        { label: 'Tamil year', value: profile.tamilYear },
-        { label: 'Tamil month', value: profile.tamilMonth },
-        { label: 'Tamil date', value: profile.tamilDate },
-        { label: 'Kilamai', value: profile.kilamai },
-        { label: 'Horoscope available', value: profile.horoscopeAvailable },
-        { label: 'Willing to share horoscope', value: profile.willingToShareHoroscope },
+        { labelKey: 'page.myProfile.f.raasi', value: profile.raasi },
+        { labelKey: 'page.myProfile.f.nakshatra', value: profile.nakshatra },
+        { labelKey: 'page.myProfile.f.dhosam', value: profile.dhosam },
+        { labelKey: 'page.myProfile.f.lagnam', value: profile.lagnam },
+        { labelKey: 'page.myProfile.f.birthTime', value: profile.birthTime },
+        { labelKey: 'page.myProfile.f.birthCity', value: profile.birthCity },
+        { labelKey: 'page.myProfile.f.tamilYear', value: profile.tamilYear },
+        { labelKey: 'page.myProfile.f.tamilMonth', value: profile.tamilMonth },
+        { labelKey: 'page.myProfile.f.tamilDate', value: profile.tamilDate },
+        { labelKey: 'page.myProfile.f.kilamai', value: profile.kilamai },
+        { labelKey: 'page.myProfile.f.horoscopeAvailable', value: profile.horoscopeAvailable },
+        { labelKey: 'page.myProfile.f.willingToShare', value: profile.willingToShareHoroscope },
       ],
     },
   ]
@@ -184,6 +187,7 @@ function editPath(section?: string): string {
 
 export function MyProfileView() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [photos, setPhotos] = useState<PhotoResponse[]>([])
   const [horoscopePhotos, setHoroscopePhotos] = useState<PhotoResponse[]>([])
@@ -234,18 +238,18 @@ export function MyProfileView() {
         >
           <Icon name="alert-circle" size={28} className="text-destructive" />
           <div>
-            <p className="font-medium text-foreground">We couldn&apos;t load your profile</p>
-            <p className="mt-1 text-sm text-muted-foreground">Please check your connection and try again.</p>
+            <p className="font-medium text-foreground">{t('page.myProfile.errorTitle')}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{t('page.myProfile.errorDesc')}</p>
           </div>
           <Button variant="secondary" size="sm" onClick={() => void load()}>
-            Retry
+            {t('page.myProfile.retry')}
           </Button>
         </div>
       </main>
     )
   }
 
-  const sections = buildSections(profile)
+  const sections = buildSections(profile, t)
   const primaryPhoto = photos.find((p) => p.isPrimary && p.photoUrl) ?? photos.find((p) => p.photoUrl)
   const fullName = [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim() || profile.profileId
   const completion = profile.profileCompletionPct ?? 0
@@ -253,10 +257,10 @@ export function MyProfileView() {
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:py-10">
       <div className="mb-6 flex items-center justify-between gap-3">
-        <h1 className="font-serif text-2xl text-foreground sm:text-3xl">My profile</h1>
+        <h1 className="font-serif text-2xl text-foreground sm:text-3xl">{t('page.myProfile.title')}</h1>
         <Link href={editPath('basic')} className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }))}>
           <Icon name="edit" size={16} />
-          Edit profile
+          {t('page.myProfile.editProfile')}
         </Link>
       </div>
 
@@ -281,11 +285,11 @@ export function MyProfileView() {
               <h2 className="truncate font-serif text-xl text-foreground">{fullName}</h2>
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <StatusBadge status={profile.status} />
-                <span className="text-sm text-muted-foreground">ID {profile.profileId}</span>
+                <span className="text-sm text-muted-foreground">{t('page.myProfile.idPrefix')} {profile.profileId}</span>
                 {profile.verified ? (
                   <span className="inline-flex items-center gap-1 text-sm font-medium text-success">
                     <Icon name="circle-check" size={16} />
-                    Verified
+                    {t('page.myProfile.verified')}
                   </span>
                 ) : null}
               </div>
@@ -294,7 +298,7 @@ export function MyProfileView() {
 
           <div className="sm:w-56">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Profile completion</span>
+              <span className="text-sm text-muted-foreground">{t('page.myProfile.completion')}</span>
               <span className="text-sm font-semibold text-foreground">{completion}%</span>
             </div>
             <div
@@ -303,7 +307,7 @@ export function MyProfileView() {
               aria-valuenow={completion}
               aria-valuemin={0}
               aria-valuemax={100}
-              aria-label="Profile completion"
+              aria-label={t('page.myProfile.completion')}
             >
               <div
                 className="h-full rounded-full bg-primary transition-[width] duration-500"
@@ -321,16 +325,16 @@ export function MyProfileView() {
             <span className="text-primary">
               <Icon name="photo" size={18} />
             </span>
-            Photos
+            {t('page.myProfile.photos')}
           </h2>
           <Link href="/photos" className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}>
-            Manage photos
+            {t('page.myProfile.managePhotos')}
           </Link>
         </div>
 
         {photos.length === 0 ? (
           <p className="mt-4 text-sm text-muted-foreground">
-            You haven&apos;t added any photos yet. Add photos to help members recognise you.
+            {t('page.myProfile.noPhotos')}
           </p>
         ) : (
           <div className="mt-4 flex flex-wrap gap-3">
@@ -342,19 +346,19 @@ export function MyProfileView() {
                 {photo.photoUrl ? (
                   <img
                     src={photo.thumbnailUrl ?? photo.photoUrl}
-                    alt="Profile photo"
+                    alt={t('page.myProfile.photos')}
                     className="h-full w-full object-cover"
                     loading="lazy"
                   />
                 ) : (
                   <span className="flex h-full w-full items-center justify-center px-2 text-center text-xs text-muted-foreground">
-                    Processing…
+                    {t('page.myProfile.processing')}
                   </span>
                 )}
                 {photo.isPrimary && (
                   <span className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-card/90 px-2 py-0.5 text-xs font-medium text-gold shadow-sm">
                     <Icon name="star-filled" size={12} />
-                    Primary
+                    {t('page.myProfile.primary')}
                   </span>
                 )}
               </div>
@@ -364,7 +368,7 @@ export function MyProfileView() {
 
         {horoscopePhotos.length > 0 && (
           <div className="mt-6 border-t border-border/70 pt-5">
-            <h3 className="text-sm font-semibold text-foreground">Horoscope charts</h3>
+            <h3 className="text-sm font-semibold text-foreground">{t('page.myProfile.horoscopeCharts')}</h3>
             <div className="mt-3 flex flex-wrap gap-3">
               {horoscopePhotos.map((photo) => (
                 <div
@@ -374,13 +378,13 @@ export function MyProfileView() {
                   {photo.photoUrl ? (
                     <img
                       src={photo.thumbnailUrl ?? photo.photoUrl}
-                      alt="Horoscope chart"
+                      alt={t('page.myProfile.horoscopeCharts')}
                       className="h-full w-full object-cover"
                       loading="lazy"
                     />
                   ) : (
                     <span className="flex h-full w-full items-center justify-center px-2 text-center text-xs text-muted-foreground">
-                      Processing…
+                      {t('page.myProfile.processing')}
                     </span>
                   )}
                 </div>
@@ -401,16 +405,16 @@ export function MyProfileView() {
                   <span className="text-primary">
                     <Icon name={section.icon} size={18} />
                   </span>
-                  {section.title}
+                  {t(section.titleKey as never)}
                 </h2>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => navigate(editPath(section.key))}
-                  aria-label={`Edit ${section.title}`}
+                  aria-label={t('page.myProfile.editSectionAria', { section: t(section.titleKey as never) })}
                 >
                   <Icon name="edit" size={16} />
-                  Edit
+                  {t('page.myProfile.edit')}
                 </Button>
               </div>
 
@@ -418,18 +422,18 @@ export function MyProfileView() {
                 <dl className="mt-4 grid gap-x-4 gap-y-3">
                   {visibleFields.map((field) => (
                     <div
-                      key={field.label}
+                      key={field.labelKey}
                       className="flex items-baseline justify-between gap-4 border-b border-border/60 pb-3 last:border-0 last:pb-0"
                     >
-                      <dt className="shrink-0 text-sm text-muted-foreground">{field.label}</dt>
+                      <dt className="shrink-0 text-sm text-muted-foreground">{t(field.labelKey as never)}</dt>
                       <dd className="min-w-0 text-right text-sm font-medium text-foreground text-pretty">
-                        {formatValue(field.value)}
+                        {formatValue(field.value, t)}
                       </dd>
                     </div>
                   ))}
                 </dl>
               ) : (
-                <p className="mt-4 text-sm text-muted-foreground">{section.emptyHint}</p>
+                <p className="mt-4 text-sm text-muted-foreground">{t(section.emptyHintKey as never)}</p>
               )}
 
               {section.key === 'horoscope' && (

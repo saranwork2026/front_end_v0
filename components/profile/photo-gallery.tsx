@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
@@ -48,6 +49,7 @@ export function PhotoGallery({
   emptyState = 'viewer-none',
   onManagePhotos,
 }: PhotoGalleryProps) {
+  const { t } = useTranslation()
   const [active, setActive] = useState(0)
   const [lightbox, setLightbox] = useState(false)
   // Tracks the initial touch so we can tell a horizontal swipe (change photo)
@@ -87,33 +89,33 @@ export function PhotoGallery({
       'owner-pending': {
         icon: 'clock',
         tone: 'neutral',
-        title: 'Photo pending approval',
-        body: 'Your photo has been uploaded and is awaiting admin approval. It will be visible to other members once approved.',
+        title: t('page.profile.emptyPendingTitle'),
+        body: t('page.profile.emptyPendingBody'),
       },
       'owner-rejected': {
         icon: 'alert-circle',
         tone: 'danger',
-        title: 'Photo not approved',
-        body: "Your photo wasn't approved as it didn't meet our photo guidelines. Please upload a clear photo that follows the guidelines.",
+        title: t('page.profile.emptyRejectedTitle'),
+        body: t('page.profile.emptyRejectedBody'),
       },
       'owner-none': {
         icon: 'camera',
         tone: 'neutral',
-        title: 'Add a profile photo',
-        body: 'Profiles with photos get far more interest. Upload a photo to help members recognise you.',
+        title: t('page.profile.emptyNoneTitle'),
+        body: t('page.profile.emptyNoneBody'),
       },
       'viewer-none': {
         icon: 'user',
         tone: 'neutral',
-        title: 'No photo yet',
-        body: `${name.split(' ')[0]} hasn't added an approved photo yet.`,
+        title: t('page.profile.emptyViewerTitle'),
+        body: t('page.profile.emptyViewerBody', { name: name.split(' ')[0] }),
       },
     }
     const c = copy[emptyState]
     const isOwnerCta = emptyState === 'owner-none' || emptyState === 'owner-pending' || emptyState === 'owner-rejected'
     return (
       <section
-        aria-label="Photos"
+        aria-label={t('page.profile.photosAria')}
         className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
       >
         <div className="relative flex aspect-[4/3] w-full items-center justify-center bg-secondary sm:aspect-[16/10]">
@@ -136,7 +138,7 @@ export function PhotoGallery({
             {isOwnerCta && onManagePhotos && (
               <Button variant="secondary" size="sm" onClick={onManagePhotos}>
                 <Icon name="camera" size={16} />
-                {emptyState === 'owner-none' ? 'Upload photo' : emptyState === 'owner-rejected' ? 'Re-upload photo' : 'Manage photos'}
+                {emptyState === 'owner-none' ? t('page.profile.uploadPhoto') : emptyState === 'owner-rejected' ? t('page.profile.reUploadPhoto') : t('page.profile.managePhotos')}
               </Button>
             )}
           </div>
@@ -148,7 +150,7 @@ export function PhotoGallery({
   if (!visible) {
     return (
       <section
-        aria-label="Photos"
+        aria-label={t('page.profile.photosAria')}
         className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
       >
         <div className="relative flex aspect-[4/3] w-full items-center justify-center bg-secondary sm:aspect-[16/10]">
@@ -161,9 +163,9 @@ export function PhotoGallery({
               <Icon name="lock" size={26} />
             </span>
             <div>
-              <p className="font-medium text-foreground">Photos are protected</p>
+              <p className="font-medium text-foreground">{t('page.profile.photosProtected')}</p>
               <p className="mt-1 text-sm text-muted-foreground text-pretty">
-                {name.split(' ')[0]} keeps photos private. Request access to view them.
+                {t('page.profile.photosProtectedBody', { name: name.split(' ')[0] })}
               </p>
             </div>
             <Button
@@ -173,7 +175,7 @@ export function PhotoGallery({
               disabled={accessState === 'requested'}
             >
               <Icon name={accessState === 'requested' ? 'check' : 'eye'} size={16} />
-              {accessState === 'requested' ? 'Request sent' : 'Request photo access'}
+              {accessState === 'requested' ? t('page.profile.requestSent') : t('page.profile.requestPhotoAccess')}
             </Button>
           </div>
         </div>
@@ -183,7 +185,7 @@ export function PhotoGallery({
 
   return (
     <section
-      aria-label="Photos"
+      aria-label={t('page.profile.photosAria')}
       className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
     >
       <button
@@ -198,7 +200,7 @@ export function PhotoGallery({
         }}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
-        aria-label={`Open photo ${active + 1} of ${photos.length} full screen`}
+        aria-label={t('page.profile.openPhotoFull', { current: active + 1, total: photos.length })}
         className="group relative block aspect-[4/3] w-full touch-pan-y overflow-hidden bg-secondary outline-none focus-visible:ring-2 focus-visible:ring-ring/60 sm:aspect-[16/10]"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -210,7 +212,7 @@ export function PhotoGallery({
         />
         <span className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-foreground/55 px-2.5 py-1 text-xs font-medium text-background backdrop-blur">
           <Icon name="eye" size={14} />
-          View
+          {t('page.profile.view')}
         </span>
       </button>
 
@@ -221,7 +223,7 @@ export function PhotoGallery({
               key={src}
               type="button"
               onClick={() => setActive(i)}
-              aria-label={`Show photo ${i + 1}`}
+              aria-label={t('page.profile.showPhoto', { n: i + 1 })}
               aria-current={i === active}
               className={cn(
                 'relative size-16 shrink-0 overflow-hidden rounded-lg border-2 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/60',

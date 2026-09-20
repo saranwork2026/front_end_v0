@@ -1,5 +1,7 @@
 'use client'
 
+import { useTranslation } from 'react-i18next'
+
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
 
@@ -28,11 +30,12 @@ export function ConnectPanel({
   onShare,
   onRequestPhotoAccess,
 }: ConnectPanelProps) {
+  const { t } = useTranslation()
   return (
     <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-      <h2 className="font-serif text-lg font-bold text-foreground">Connect</h2>
+      <h2 className="font-serif text-lg font-bold text-foreground">{t('page.profile.connect')}</h2>
       <p className="mt-1 text-sm text-muted-foreground text-pretty">
-        Express interest to start a conversation once it&apos;s accepted.
+        {t('page.profile.connectDesc')}
       </p>
 
       <div className="mt-4 flex flex-col gap-2.5">
@@ -48,7 +51,7 @@ export function ConnectPanel({
             name={interestState === 'sent' ? 'check' : 'heart-filled'}
             size={18}
           />
-          {interestState === 'sent' ? 'Interest sent' : 'Send interest'}
+          {interestState === 'sent' ? t('page.profile.interestSent') : t('page.profile.sendInterest')}
         </Button>
 
         <div className="flex gap-2.5">
@@ -60,13 +63,13 @@ export function ConnectPanel({
             aria-pressed={shortlisted}
           >
             <Icon name={shortlisted ? 'star-filled' : 'star'} size={18} />
-            {shortlisted ? 'Shortlisted' : 'Shortlist'}
+            {shortlisted ? t('page.profile.shortlisted') : t('page.profile.shortlist')}
           </Button>
           <Button
             variant="secondary"
             size="icon"
             onClick={onShare}
-            aria-label="Share profile"
+            aria-label={t('page.profile.shareProfile')}
           >
             <Icon name="share" size={18} />
           </Button>
@@ -85,8 +88,8 @@ export function ConnectPanel({
               size={18}
             />
             {photoAccessState === 'requested'
-              ? 'Photo request sent'
-              : 'Request photo access'}
+              ? t('page.profile.photoRequestSent')
+              : t('page.profile.requestPhotoAccess')}
           </Button>
         )}
       </div>

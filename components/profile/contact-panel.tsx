@@ -1,5 +1,7 @@
 'use client'
 
+import { useTranslation } from 'react-i18next'
+
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
 
@@ -23,13 +25,14 @@ export function ContactPanel({
   onUnlock,
   onRequestAccess,
 }: ContactPanelProps) {
+  const { t } = useTranslation()
   return (
     <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
       <h2 className="flex items-center gap-2 font-serif text-lg font-bold text-foreground">
         <span className="text-primary">
           <Icon name="phone" size={18} />
         </span>
-        Contact details
+        {t('page.profile.contactDetails')}
       </h2>
 
       {state === 'unlocked' ? (
@@ -39,7 +42,7 @@ export function ContactPanel({
               <Icon name="phone" size={16} />
             </span>
             <div className="min-w-0">
-              <dt className="text-xs text-muted-foreground">Mobile</dt>
+              <dt className="text-xs text-muted-foreground">{t('page.profile.mobile')}</dt>
               <dd className="truncate font-medium text-foreground">
                 <a href={`tel:${contact.phone.replace(/\s+/g, '')}`} className="hover:underline">
                   {contact.phone}
@@ -52,7 +55,7 @@ export function ContactPanel({
               <Icon name="mail" size={16} />
             </span>
             <div className="min-w-0">
-              <dt className="text-xs text-muted-foreground">Email</dt>
+              <dt className="text-xs text-muted-foreground">{t('page.profile.email')}</dt>
               <dd className="truncate font-medium text-foreground">
                 <a href={`mailto:${contact.email}`} className="hover:underline">
                   {contact.email}
@@ -83,7 +86,7 @@ export function ContactPanel({
               loading={state === 'unlocking'}
             >
               <Icon name="lock" size={16} />
-              Unlock contact
+              {t('page.profile.unlockContact')}
             </Button>
             <Button
               variant="ghost"
@@ -93,12 +96,12 @@ export function ContactPanel({
               disabled={state === 'requested'}
             >
               <Icon name={state === 'requested' ? 'check' : 'handshake'} size={16} />
-              {state === 'requested' ? 'Access request sent' : 'Request contact access'}
+              {state === 'requested' ? t('page.profile.accessRequestSent') : t('page.profile.requestContactAccess')}
             </Button>
             <p className="text-center text-xs text-muted-foreground">
               {quotaRemaining > 0
-                ? `${quotaRemaining} free unlock${quotaRemaining === 1 ? '' : 's'} left this month`
-                : 'Unlock uses a paid contact credit'}
+                ? t('page.profile.freeUnlocks', { count: quotaRemaining })
+                : t('page.profile.paidUnlock')}
             </p>
           </div>
         </>
