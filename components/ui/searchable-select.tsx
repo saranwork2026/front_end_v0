@@ -78,14 +78,28 @@ export function SearchableSelect({
 
   function openDropdown() {
     if (disabled) return
-    // Decide whether to open the panel upward: if the space below the trigger
-    // is less than the panel's approx height (~300px) AND there's more room
-    // above, flip up so the options aren't clipped/hidden off-screen. This is
-    // what keeps fields near the bottom (e.g. Mother tongue) usable.
+    // Decide whether to open the panel upward. We measure available space
+    // relative to the nearest scrollable ancestor (not the full window height)
+    // because the wizard/modal containers are themselves scrollable — using
+    // window.innerHeight overestimates the real space below and can wrongly
+    // flip fields near the top of a scrolled container to open upward.
     const trigger = containerRef.current?.getBoundingClientRect()
     if (trigger) {
-      const spaceBelow = window.innerHeight - trigger.bottom
-      const spaceAbove = trigger.top
+      // Walk up the DOM to find the closest scrollable ancestor.
+      let scrollParent: Element | null = containerRef.current?.parentElement ?? null
+      while (scrollParent && scrollParent !== document.documentElement) {
+        const style = window.getComputedStyle(scrollParent)
+        if (/auto|scroll|overlay/.test(style.overflow + style.overflowY)) break
+        scrollParent = scrollParent.parentElement
+      }
+      const containerBottom = scrollParent
+        ? scrollParent.getBoundingClientRect().bottom
+        : window.innerHeight
+      const containerTop = scrollParent
+        ? scrollParent.getBoundingClientRect().top
+        : 0
+      const spaceBelow = containerBottom - trigger.bottom
+      const spaceAbove = trigger.top - containerTop
       const PANEL_APPROX = 300
       setDropUp(spaceBelow < PANEL_APPROX && spaceAbove > spaceBelow)
     }
