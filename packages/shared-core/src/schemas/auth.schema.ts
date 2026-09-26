@@ -15,6 +15,30 @@ import { z } from 'zod';
 const mobileNoPattern = /^[6-9]\d{9}$/;
 const otpPattern = /^\d{6}$/;
 
+// Gender values shown at registration (matches the backend Gender enum). Kept
+// as a local const so the register schema stays self-contained; profile.schema
+// declares its own identical copy for the profile wizard's basic section.
+const genderValues = ['MALE', 'FEMALE'] as const;
+
+// Minimum legal marriage age in India, by gender: men >= 21, women >= 18.
+// Mirrors profile.schema.ts and the backend MarriageAgeValidator so the age
+// rule is applied consistently at registration and in the profile basic section.
+const MIN_AGE_MALE = 21;
+const MIN_AGE_FEMALE = 18;
+
+/** Full years between a YYYY-MM-DD date string and today. Null if unparseable. */
+function ageFromDob(dob: string): number | null {
+  const birth = new Date(dob);
+  if (Number.isNaN(birth.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - birth.getFullYear();
+  const monthDiff = now.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age;
+}
+
 const passwordSchema = z
   .string()
   .min(8, 'validation.password.minLength')
@@ -28,15 +52,47 @@ export const registerSchema = z
     firstName: z.string().min(1, 'validation.firstName.required').max(50, 'validation.firstName.maxLength'),
     lastName: z.string().min(1, 'validation.lastName.required').max(50, 'validation.lastName.maxLength'),
     mobileNo: z.string().regex(mobileNoPattern, 'validation.mobile.invalid'),
+    dateOfBirth: z.string().min(1, 'validation.dateOfBirth.required'),
+    gender: z.enum(genderValues, {
+      // An empty/absent selection should surface the required-field key rather
+      // than Zod's default "Invalid enum value" message.
+      errorMap: () => ({ message: 'validation.gender.required' }),
+    }),
     email: z
       .union([z.string().email('validation.email.invalid'), z.literal('')])
       .optional(),
     password: passwordSchema,
     confirmPassword: z.string(),
   })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'validation.password.mismatch',
-    path: ['confirmPassword'],
+  .superRefine((data, ctx) => {
+    // Password confirmation must match.
+    if (data.password !== data.confirmPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['confirmPassword'],
+        message: 'validation.password.mismatch',
+      });
+    }
+
+    // Enforce the minimum marriage age by gender. Only runs once both DOB and
+    // gender are present and parseable (their own required-field errors cover
+    // the empty case). Same key||{json} convention as profile.schema.ts.
+    if (data.dateOfBirth && data.gender) {
+      const age = ageFromDob(data.dateOfBirth);
+      if (age !== null) {
+        const minAge = data.gender === 'MALE' ? MIN_AGE_MALE : MIN_AGE_FEMALE;
+        if (age < minAge) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['dateOfBirth'],
+            message:
+              data.gender === 'MALE'
+                ? `validation.age.minMale||{"min":${MIN_AGE_MALE}}`
+                : `validation.age.minFemale||{"min":${MIN_AGE_FEMALE}}`,
+          });
+        }
+      }
+    }
   });
 
 export const loginSchema = z.object({
@@ -101,6 +157,7 @@ export const VALIDATION_MESSAGES_EN: Record<string, string> = {
   'validation.password.special': 'Password must contain a special character',
   'validation.password.mismatch': 'Passwords do not match',
   'validation.password.sameAsCurrent': 'New password must be different from your current password',
+  'validation.gender.required': 'Gender is required',
   'validation.otp.invalid': 'OTP must be exactly 6 numeric digits',
   'validation.profileId.required': 'Profile ID is required',
   'validation.currentPassword.required': 'Current password is required',

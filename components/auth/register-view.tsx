@@ -13,6 +13,7 @@ import { CaptchaField } from '@/components/auth/captcha-field'
 import { IconInput } from '@/components/auth/icon-input'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
+import { Select } from '@/components/ui/select'
 import { checkPassword, passwordRules } from '@/lib/auth-data'
 import { authApi } from '@/src/lib/api'
 import { isCaptchaDisabled } from '@/src/lib/captcha'
@@ -49,6 +50,11 @@ export function RegisterView() {
       firstName: '',
       lastName: '',
       mobileNo: '',
+      // Empty string as the initial gender selection ("Select…"). Cast because
+      // the resolved schema type is 'MALE' | 'FEMALE'; the empty value fails
+      // validation and surfaces validation.gender.required.
+      dateOfBirth: '',
+      gender: '' as unknown as 'MALE' | 'FEMALE',
       email: '',
       password: '',
       confirmPassword: '',
@@ -79,6 +85,8 @@ export function RegisterView() {
         firstName: data.firstName,
         lastName: data.lastName,
         mobileNo: data.mobileNo,
+        dateOfBirth: data.dateOfBirth,
+        gender: data.gender,
         email: data.email || undefined,
         password: data.password,
         captchaToken: isCaptchaDisabled() ? 'disabled' : 'checkbox-verified',
@@ -178,6 +186,27 @@ export function RegisterView() {
           error={fieldError(errors.mobileNo?.message)}
           {...register('mobileNo')}
         />
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <IconInput
+            label={t('auth.dob')}
+            type="date"
+            autoComplete="bday"
+            error={fieldError(errors.dateOfBirth?.message)}
+            {...register('dateOfBirth')}
+          />
+          <Select
+            label={t('auth.gender')}
+            error={fieldError(errors.gender?.message)}
+            {...register('gender')}
+          >
+            <option value="" disabled>
+              {t('auth.genderSelect')}
+            </option>
+            <option value="MALE">{t('auth.genderMale')}</option>
+            <option value="FEMALE">{t('auth.genderFemale')}</option>
+          </Select>
+        </div>
 
         <IconInput
           label={t('auth.email')}

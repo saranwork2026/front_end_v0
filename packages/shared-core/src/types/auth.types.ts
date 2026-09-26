@@ -1,9 +1,14 @@
 import type { ProfileStatus, UserRole, UserStatus } from './common.types';
+import type { Gender } from './profile.types';
 
 export interface RegisterRequest {
   firstName: string;
   lastName: string;
   mobileNo: string;
+  /** Date of birth (YYYY-MM-DD). Persisted to the profile basic section at registration. */
+  dateOfBirth: string;
+  /** MALE / FEMALE — matches the backend Gender enum. */
+  gender: Gender;
   email?: string;
   password: string;
   captchaToken: string;
