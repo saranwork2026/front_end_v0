@@ -71,6 +71,28 @@ describe('DateOfBirthPicker', () => {
       .filter((v) => v !== '')
   }
 
+  it('disables the Day select until both Year and Month are chosen, then enables it with the clamped range', async () => {
+    const user = userEvent.setup()
+    render(<ControlledPicker />)
+
+    // Nothing chosen: Day is gated and shows no numeric options.
+    expect(daySelect().disabled).toBe(true)
+    expect(dayValues(daySelect())).toHaveLength(0)
+
+    // Only a year: still gated (month missing).
+    await user.selectOptions(yearSelect(), '2001')
+    expect(daySelect().disabled).toBe(true)
+    expect(dayValues(daySelect())).toHaveLength(0)
+
+    // Year + month (Feb 2001, non-leap) → enabled with exactly 28 days.
+    await user.selectOptions(monthSelect(), '2')
+    expect(daySelect().disabled).toBe(false)
+    const values = dayValues(daySelect())
+    expect(values).toHaveLength(28)
+    expect(values).toContain('28')
+    expect(values).not.toContain('29')
+  })
+
   it('clamps February day options for a non-leap year (Feb 28, no Feb 29/30)', () => {
     render(<ControlledPicker initial="2001-02-15" />)
     const values = dayValues(daySelect())

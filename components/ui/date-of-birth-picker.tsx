@@ -178,21 +178,21 @@ export function DateOfBirthPicker({
       )}
       <div className="grid grid-cols-3 gap-2" role="group" aria-labelledby={label ? `${baseId}-label` : undefined}>
         <Select
-          id={`${baseId}-day`}
-          label={t('common.day')}
-          value={hasDay ? String(d) : ''}
+          id={`${baseId}-year`}
+          label={t('common.year')}
+          value={hasYear ? String(y) : ''}
           disabled={disabled}
           className={error ? 'border-destructive focus-visible:ring-destructive/30' : undefined}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : undefined}
-          onChange={(e) => handleDayChange(e.target.value)}
+          onChange={(e) => handleYearChange(e.target.value)}
         >
           <option value="" disabled>
             {placeholder}
           </option>
-          {Array.from({ length: dayCount }, (_, i) => i + 1).map((dayNum) => (
-            <option key={dayNum} value={String(dayNum)}>
-              {dayNum}
+          {years.map((yr) => (
+            <option key={yr} value={String(yr)}>
+              {yr}
             </option>
           ))}
         </Select>
@@ -218,23 +218,25 @@ export function DateOfBirthPicker({
         </Select>
 
         <Select
-          id={`${baseId}-year`}
-          label={t('common.year')}
-          value={hasYear ? String(y) : ''}
-          disabled={disabled}
+          id={`${baseId}-day`}
+          label={t('common.day')}
+          value={hasDay ? String(d) : ''}
+          disabled={disabled || !(hasYear && hasMonth)}
           className={error ? 'border-destructive focus-visible:ring-destructive/30' : undefined}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : undefined}
-          onChange={(e) => handleYearChange(e.target.value)}
+          onChange={(e) => handleDayChange(e.target.value)}
         >
           <option value="" disabled>
             {placeholder}
           </option>
-          {years.map((yr) => (
-            <option key={yr} value={String(yr)}>
-              {yr}
-            </option>
-          ))}
+          {hasYear && hasMonth
+            ? Array.from({ length: dayCount }, (_, i) => i + 1).map((dayNum) => (
+                <option key={dayNum} value={String(dayNum)}>
+                  {dayNum}
+                </option>
+              ))
+            : null}
         </Select>
       </div>
       {error && (
