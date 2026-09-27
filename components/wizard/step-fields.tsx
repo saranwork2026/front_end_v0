@@ -6,6 +6,7 @@ import { profileApi } from '@/src/lib/api'
 import { Icon } from '@/components/ui/icon'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
+import { DateOfBirthPicker } from '@/components/ui/date-of-birth-picker'
 import { SearchableSelect } from '@/components/ui/searchable-select'
 import { HoroscopePhotoManager } from '@/components/photos/horoscope-photo-manager'
 import { HoroscopeChartPanel } from '@/components/horoscope/horoscope-chart-panel'
@@ -195,12 +196,11 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
             onChange={(e) => onChange({ lastName: e.target.value })}
             autoComplete="family-name"
           />
-          <Input
+          <DateOfBirthPicker
             label={t('wizard.fields.dob')}
-            type="date"
             value={form.dob}
             error={errors.dob}
-            onChange={(e) => onChange({ dob: e.target.value })}
+            onChange={(dob) => onChange({ dob })}
           />
           <Select
             label={t('wizard.fields.gender')}

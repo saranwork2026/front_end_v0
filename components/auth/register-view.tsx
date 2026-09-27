@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { registerSchema, type RegisterFormValues, type ApiError } from '@matrimony/shared-core'
@@ -14,6 +14,7 @@ import { IconInput } from '@/components/auth/icon-input'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
 import { Select } from '@/components/ui/select'
+import { DateOfBirthPicker } from '@/components/ui/date-of-birth-picker'
 import { checkPassword, passwordRules } from '@/lib/auth-data'
 import { authApi } from '@/src/lib/api'
 import { isCaptchaDisabled } from '@/src/lib/captcha'
@@ -41,6 +42,7 @@ export function RegisterView() {
 
   const {
     register,
+    control,
     handleSubmit,
     watch,
     formState: { errors, isSubmitting },
@@ -187,26 +189,30 @@ export function RegisterView() {
           {...register('mobileNo')}
         />
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <IconInput
-            label={t('auth.dob')}
-            type="date"
-            autoComplete="bday"
-            error={fieldError(errors.dateOfBirth?.message)}
-            {...register('dateOfBirth')}
-          />
-          <Select
-            label={t('auth.gender')}
-            error={fieldError(errors.gender?.message)}
-            {...register('gender')}
-          >
-            <option value="" disabled>
-              {t('auth.genderSelect')}
-            </option>
-            <option value="MALE">{t('auth.genderMale')}</option>
-            <option value="FEMALE">{t('auth.genderFemale')}</option>
-          </Select>
-        </div>
+        <Controller
+          control={control}
+          name="dateOfBirth"
+          render={({ field }) => (
+            <DateOfBirthPicker
+              label={t('auth.dob')}
+              value={field.value ?? ''}
+              error={fieldError(errors.dateOfBirth?.message)}
+              onChange={field.onChange}
+            />
+          )}
+        />
+
+        <Select
+          label={t('auth.gender')}
+          error={fieldError(errors.gender?.message)}
+          {...register('gender')}
+        >
+          <option value="" disabled>
+            {t('auth.genderSelect')}
+          </option>
+          <option value="MALE">{t('auth.genderMale')}</option>
+          <option value="FEMALE">{t('auth.genderFemale')}</option>
+        </Select>
 
         <IconInput
           label={t('auth.email')}
