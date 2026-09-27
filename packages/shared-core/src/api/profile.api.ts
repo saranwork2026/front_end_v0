@@ -75,6 +75,14 @@ export interface PartnerPreference {
   preferredEducations?: string[];
   preferredMaritalStatuses?: string[];
   preferredMotherTongues?: string[];
+  // --- Phase 2 additions: parity with the search filters ---
+  preferredStates?: string[];
+  preferredCountries?: string[];
+  preferredProfessions?: string[];
+  preferredNakshatras?: string[];
+  preferredRaasis?: string[];
+  preferredDhosams?: string[];
+  preferredPhysicalStatuses?: string[];
 }
 
 export function createProfileApi(client: AxiosInstance) {

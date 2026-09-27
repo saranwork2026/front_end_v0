@@ -1,4 +1,4 @@
-import type { ActivityStatus, Gender, Manglik, MaritalStatus } from './profile.types';
+import type { ActivityStatus, Gender, Manglik, MaritalStatus, PhysicalStatus } from './profile.types';
 
 export type { ActivityStatus };
 
@@ -20,9 +20,17 @@ export interface SearchFilters {
   maxAnnualIncome?: number;
   minHeightCm?: number;
   maxHeightCm?: number;
+  physicalStatus?: PhysicalStatus;
   nakshatra?: string;
   raasi?: string;
   dhosam?: string;
+  // --- Quick filters ---
+  /** Only include profiles that have a primary (non-deleted) photo. */
+  hasPhoto?: boolean;
+  /** Only include admin-verified (trust-badge) profiles. */
+  verifiedOnly?: boolean;
+  /** Only include profiles created within the last N days (e.g. 7 / 30 / 90). */
+  recentlyJoinedDays?: number;
 }
 
 export interface SearchResult {

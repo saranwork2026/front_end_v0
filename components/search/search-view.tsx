@@ -20,6 +20,7 @@ import { toProfileCard, flattenProfileResponse } from '@/src/lib/adapters'
 import {
   buildActiveChips,
   countActiveFilters,
+  defaultSearchFilters,
   removeFilter,
   validateFilters,
   type ChipKey,
@@ -44,26 +45,26 @@ export function SearchView() {
 
   const { isShortlisted, toggle } = useShortlist()
 
-  // Seed a sensible default age bound from the user's OWN age/gender:
-  // a male member defaults to strictly younger women (maxAge = age - 1); a
-  // female member defaults to strictly older men (minAge = age + 1). The user
-  // can still widen/clear it — this is only the starting filter, not a cap.
-  // (Opposite-gender itself is enforced server-side, so we don't send gender.)
+  // Seed the agreed first-load defaults (age floor 18 male / 21 female, plus
+  // Never Married, Tamil, Hindu, Manglik No, India, Tamil Nadu, Normal, 147 cm
+  // height floor — see preferenceDefaults.ts). The user's own gender only
+  // drives the min-age floor; everything else is a fixed starting point the
+  // user can widen/clear. Opposite-gender matching is enforced server-side, so
+  // we never send gender itself. Only seed fields the user hasn't touched yet.
   useEffect(() => {
     let cancelled = false
     profileApi
       .getProfile()
       .then((res) => {
         if (cancelled) return
-        const { gender, age } = flattenProfileResponse(res.data as unknown as Record<string, unknown>)
-        if (!age || (gender !== 'MALE' && gender !== 'FEMALE')) return
-        const seeded: SearchFilters =
-          gender === 'MALE' ? { maxAge: age - 1 } : { minAge: age + 1 }
-        // Only seed fields the user hasn't touched yet (draft is still empty here).
+        const { gender } = flattenProfileResponse(res.data as unknown as Record<string, unknown>)
+        const seeded = defaultSearchFilters(gender as SearchFilters['gender'])
         setDraft((d) => ({ ...seeded, ...d }))
       })
       .catch(() => {
-        // No profile / not fetchable — just skip the default; search still works.
+        // No profile / not fetchable — fall back to gender-agnostic defaults
+        // (min age 18). Search still works.
+        if (!cancelled) setDraft((d) => ({ ...defaultSearchFilters(), ...d }))
       })
     return () => {
       cancelled = true

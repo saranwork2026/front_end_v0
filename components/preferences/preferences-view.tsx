@@ -15,6 +15,9 @@ import { HEIGHT_CM_OPTIONS } from '@/src/data/numericOptions'
 import {
   allCastes,
   cities,
+  countryOptions,
+  defaultPreference,
+  dhosamPrefOptions,
   educationLabel,
   educationOptions,
   emptyPreference,
@@ -23,11 +26,19 @@ import {
   maritalStatusLabel,
   maritalStatusValues,
   motherTongues,
+  nakshatraOptions,
+  physicalStatusPrefOptions,
+  professionOptions,
+  raasiOptions,
   religions,
   savePartnerPreference,
+  stateOptions,
   validatePreference,
   type PartnerPreference,
 } from '@/lib/preferences-data'
+import type { Gender } from '@matrimony/shared-core'
+import { profileApi } from '@/src/lib/api'
+import { flattenProfileResponse } from '@/src/lib/adapters'
 
 // value = actual rupees (what the backend stores), label = LPA display.
 const incomeOptions = [
@@ -41,6 +52,21 @@ const incomeOptions = [
   { value: 5000000, label: '₹50 LPA' },
 ]
 const heightOptions = HEIGHT_CM_OPTIONS.map((h) => ({ cm: h.value, label: h.label }))
+
+// Value → label lookups for the Phase 2 multi-selects (options carry a
+// display label distinct from the backend value).
+const nakshatraLabelMap = new Map(nakshatraOptions.map((o) => [o.value, o.label]))
+const raasiLabelMap = new Map(raasiOptions.map((o) => [o.value, o.label]))
+const dhosamLabelMap = new Map(dhosamPrefOptions.map((o) => [o.value, o.label]))
+const physicalStatusLabelMap = new Map<string, string>(
+  physicalStatusPrefOptions.map((o) => [o.value, o.label]),
+)
+const professionLabelMap = new Map(professionOptions.map((o) => [o.value, o.label]))
+const nakshatraLabel = (v: string) => nakshatraLabelMap.get(v) ?? v
+const raasiLabel = (v: string) => raasiLabelMap.get(v) ?? v
+const dhosamLabel = (v: string) => dhosamLabelMap.get(v) ?? v
+const physicalStatusLabel = (v: string) => physicalStatusLabelMap.get(v) ?? v
+const professionLabel = (v: string) => professionLabelMap.get(v) ?? v
 
 function Section({
   title,
@@ -100,17 +126,43 @@ export function PreferencesView({
   const [saving, setSaving] = React.useState(false)
   const [toasts, setToasts] = React.useState<ToastItem[]>([])
 
-  // Seed from the saved partner preference. SUBSCRIPTION/PREFERENCE_NOT_FOUND
-  // (no prefs yet) falls back to the "open to all" empty defaults.
+  // Seed from the saved partner preference when one exists. When there is none
+  // yet (new member, or PREFERENCE_NOT_FOUND), seed the agreed first-load
+  // defaults (age floor 18 male / 21 female, height 147 cm, Never Married,
+  // Tamil, Hindu, Manglik No — see lib/preferences-data.defaultPreference and
+  // src/data/preferenceDefaults.ts), using the member's own gender for the
+  // min-age floor. Everything stays editable.
   React.useEffect(() => {
-    if (initial === 'empty') return
     let cancelled = false
+
+    // Resolve the member's own gender first (drives the min-age default), then
+    // apply saved prefs on top if any exist.
+    const seedDefaults = () =>
+      profileApi
+        .getProfile()
+        .then((res) => {
+          if (cancelled) return
+          const { gender } = flattenProfileResponse(res.data as unknown as Record<string, unknown>)
+          setForm(defaultPreference(gender as Gender | undefined))
+        })
+        .catch(() => {
+          if (!cancelled) setForm(defaultPreference())
+        })
+
+    if (initial === 'empty') {
+      void seedDefaults()
+      return () => {
+        cancelled = true
+      }
+    }
+
     getPartnerPreference()
       .then((p) => {
         if (!cancelled) setForm(p)
       })
       .catch(() => {
-        /* No saved preference yet — keep empty defaults. */
+        // No saved preference yet — seed the agreed defaults.
+        void seedDefaults()
       })
     return () => {
       cancelled = true
@@ -391,6 +443,24 @@ export function PreferencesView({
             disabled={form.anyEducation}
             onChange={(educationCodes) => set({ educationCodes })}
           />
+
+          <div className="flex items-center justify-between pt-1">
+            <span className="text-sm font-medium text-foreground">
+              {t('page.preferences.profession')}
+            </span>
+            <OpenToAll
+              checked={form.anyProfession}
+              onChange={(v) => set({ anyProfession: v, ...(v ? { professions: [] } : {}) })}
+            />
+          </div>
+          <MultiSelect
+            options={professionOptions.map((o) => o.value)}
+            optionLabel={professionLabel}
+            value={form.professions}
+            disabled={form.anyProfession}
+            searchable
+            onChange={(professions) => set({ professions })}
+          />
         </div>
       </Section>
 
@@ -421,6 +491,126 @@ export function PreferencesView({
             searchable
             searchPlaceholder={t('page.preferences.searchCity')}
             onChange={(cities) => set({ cities })}
+          />
+
+          <div className="flex items-center justify-between pt-1">
+            <span className="text-sm font-medium text-foreground">
+              {t('page.preferences.preferredStates')}
+            </span>
+            <OpenToAll
+              checked={form.anyState}
+              onChange={(v) => set({ anyState: v, ...(v ? { states: [] } : {}) })}
+            />
+          </div>
+          <MultiSelect
+            options={stateOptions}
+            value={form.states}
+            disabled={form.anyState}
+            searchable
+            searchPlaceholder={t('page.preferences.searchState')}
+            onChange={(states) => set({ states })}
+          />
+
+          <div className="flex items-center justify-between pt-1">
+            <span className="text-sm font-medium text-foreground">
+              {t('page.preferences.preferredCountries')}
+            </span>
+            <OpenToAll
+              checked={form.anyCountry}
+              onChange={(v) => set({ anyCountry: v, ...(v ? { countries: [] } : {}) })}
+            />
+          </div>
+          <MultiSelect
+            options={countryOptions}
+            value={form.countries}
+            disabled={form.anyCountry}
+            searchable
+            searchPlaceholder={t('page.preferences.searchCountry')}
+            onChange={(countries) => set({ countries })}
+          />
+        </div>
+      </Section>
+
+      <Section
+        title={t('page.preferences.secPhysicalTitle')}
+        description={t('page.preferences.secPhysicalDesc')}
+      >
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-foreground">
+              {t('page.preferences.physicalStatus')}
+            </span>
+            <OpenToAll
+              checked={form.anyPhysicalStatus}
+              onChange={(v) => set({ anyPhysicalStatus: v, ...(v ? { physicalStatuses: [] } : {}) })}
+            />
+          </div>
+          <MultiSelect
+            options={physicalStatusPrefOptions.map((o) => o.value)}
+            optionLabel={physicalStatusLabel}
+            value={form.physicalStatuses}
+            disabled={form.anyPhysicalStatus}
+            onChange={(physicalStatuses) => set({ physicalStatuses })}
+          />
+        </div>
+      </Section>
+
+      <Section
+        title={t('page.preferences.secHoroscopeTitle')}
+        description={t('page.preferences.secHoroscopeDesc')}
+      >
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-foreground">
+              {t('page.preferences.nakshatra')}
+            </span>
+            <OpenToAll
+              checked={form.anyNakshatra}
+              onChange={(v) => set({ anyNakshatra: v, ...(v ? { nakshatras: [] } : {}) })}
+            />
+          </div>
+          <MultiSelect
+            options={nakshatraOptions.map((o) => o.value)}
+            optionLabel={nakshatraLabel}
+            value={form.nakshatras}
+            disabled={form.anyNakshatra}
+            searchable
+            onChange={(nakshatras) => set({ nakshatras })}
+          />
+
+          <div className="flex items-center justify-between pt-1">
+            <span className="text-sm font-medium text-foreground">
+              {t('page.preferences.raasi')}
+            </span>
+            <OpenToAll
+              checked={form.anyRaasi}
+              onChange={(v) => set({ anyRaasi: v, ...(v ? { raasis: [] } : {}) })}
+            />
+          </div>
+          <MultiSelect
+            options={raasiOptions.map((o) => o.value)}
+            optionLabel={raasiLabel}
+            value={form.raasis}
+            disabled={form.anyRaasi}
+            searchable
+            onChange={(raasis) => set({ raasis })}
+          />
+
+          <div className="flex items-center justify-between pt-1">
+            <span className="text-sm font-medium text-foreground">
+              {t('page.preferences.dhosam')}
+            </span>
+            <OpenToAll
+              checked={form.anyDhosam}
+              onChange={(v) => set({ anyDhosam: v, ...(v ? { dhosams: [] } : {}) })}
+            />
+          </div>
+          <MultiSelect
+            options={dhosamPrefOptions.map((o) => o.value)}
+            optionLabel={dhosamLabel}
+            value={form.dhosams}
+            disabled={form.anyDhosam}
+            onChange={(dhosams) => set({ dhosams })}
           />
         </div>
       </Section>

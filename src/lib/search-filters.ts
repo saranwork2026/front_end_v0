@@ -1,5 +1,35 @@
-import type { SearchFilters } from '@matrimony/shared-core'
+import type { Gender, SearchFilters } from '@matrimony/shared-core'
 import { HIGHEST_EDUCATION_OPTIONS } from '@/src/data/educationOptions'
+import {
+  DEFAULT_COUNTRY,
+  DEFAULT_MANGLIK,
+  DEFAULT_MARITAL_STATUS,
+  DEFAULT_MIN_HEIGHT_CM,
+  DEFAULT_MOTHER_TONGUE,
+  DEFAULT_PHYSICAL_STATUS,
+  DEFAULT_RELIGION,
+  DEFAULT_STATE,
+  defaultMinAge,
+} from '@/src/data/preferenceDefaults'
+
+/**
+ * The agreed first-load defaults for Search, shared in spirit with Partner
+ * Preferences (see preferenceDefaults.ts). Applied only when the user hasn't
+ * set filters yet; every value remains editable/clearable.
+ */
+export function defaultSearchFilters(gender?: Gender | null): SearchFilters {
+  return {
+    minAge: defaultMinAge(gender),
+    minHeightCm: DEFAULT_MIN_HEIGHT_CM,
+    maritalStatus: DEFAULT_MARITAL_STATUS,
+    motherTongue: DEFAULT_MOTHER_TONGUE,
+    religion: DEFAULT_RELIGION,
+    manglik: DEFAULT_MANGLIK,
+    country: DEFAULT_COUNTRY,
+    state: DEFAULT_STATE,
+    physicalStatus: DEFAULT_PHYSICAL_STATUS,
+  }
+}
 
 /** Active-filter chip keys (grouped ranges collapse to one chip). */
 export type ChipKey = keyof SearchFilters | 'age' | 'income' | 'height'
@@ -15,6 +45,7 @@ const MARITAL_LABEL: Record<string, string> = {
   WIDOWED: 'Widowed',
 }
 const MANGLIK_LABEL: Record<string, string> = { YES: 'Manglik: Yes', NO: 'Manglik: No', DONT_KNOW: "Manglik: Don't know" }
+const PHYSICAL_STATUS_LABEL: Record<string, string> = { NORMAL: 'Normal', PHYSICALLY_CHALLENGED: 'Physically Challenged' }
 
 function educationLabel(code?: string): string {
   if (!code) return ''
@@ -41,6 +72,11 @@ export function buildActiveChips(f: SearchFilters): ActiveChip[] {
   if (f.nakshatra) chips.push({ key: 'nakshatra', label: f.nakshatra })
   if (f.raasi) chips.push({ key: 'raasi', label: f.raasi })
   if (f.dhosam) chips.push({ key: 'dhosam', label: `Dhosam: ${f.dhosam}` })
+  if (f.physicalStatus) chips.push({ key: 'physicalStatus', label: PHYSICAL_STATUS_LABEL[f.physicalStatus] ?? f.physicalStatus })
+  if (f.hasPhoto) chips.push({ key: 'hasPhoto', label: 'Has photo' })
+  if (f.verifiedOnly) chips.push({ key: 'verifiedOnly', label: 'Verified only' })
+  if (f.recentlyJoinedDays)
+    chips.push({ key: 'recentlyJoinedDays', label: `Joined in last ${f.recentlyJoinedDays} days` })
   return chips
 }
 

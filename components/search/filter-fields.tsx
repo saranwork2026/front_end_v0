@@ -10,6 +10,8 @@ import { HIGHEST_EDUCATION_OPTIONS } from '@/src/data/educationOptions'
 import { COUNTRIES } from '@/src/data/countryData'
 import { INDIAN_STATES } from '@/src/data/indianStatesData'
 import { NAKSHATRA_OPTIONS, RAASI_OPTIONS } from '@/src/data/horoscopeData'
+import { PHYSICAL_STATUS_OPTIONS, RECENTLY_JOINED_OPTIONS } from '@/src/data/preferenceDefaults'
+import { OCCUPATIONS } from '@/src/data/occupationData'
 
 interface FilterFieldsProps {
   value: SearchFilters
@@ -199,12 +201,18 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
             </option>
           ))}
         </Select>
-        <Input
+        <Select
           label={t('page.search.profession')}
-          placeholder={t('page.search.professionPlaceholder')}
           value={value.profession ?? ''}
           onChange={(e) => onChange({ profession: e.target.value || undefined })}
-        />
+        >
+          <option value="">{t('page.search.any')}</option>
+          {OCCUPATIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </Select>
         <div className="grid grid-cols-2 gap-3">
           <Input
             label={t('page.search.minIncome')}
@@ -246,6 +254,20 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
             onChange={(e) => onChange({ maxHeightCm: toNum(e.target.value) })}
           />
         </div>
+        <Select
+          label={t('page.search.physicalStatus')}
+          value={value.physicalStatus ?? ''}
+          onChange={(e) =>
+            onChange({ physicalStatus: (e.target.value || undefined) as SearchFilters['physicalStatus'] })
+          }
+        >
+          <option value="">{t('page.search.any')}</option>
+          {PHYSICAL_STATUS_OPTIONS.map((p) => (
+            <option key={p.value} value={p.value}>
+              {t(`options.physicalStatus.${p.value}` as never, { defaultValue: p.label })}
+            </option>
+          ))}
+        </Select>
       </Group>
 
       <Group title={t('page.search.groupHoroscope')}>
@@ -282,6 +304,39 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
           {DHOSAMS.map((d) => (
             <option key={d.value} value={d.value}>
               {d.label}
+            </option>
+          ))}
+        </Select>
+      </Group>
+
+      <Group title={t('page.search.groupQuick')}>
+        <label className="flex min-h-11 items-center gap-3 text-sm font-medium text-foreground">
+          <input
+            type="checkbox"
+            className="size-4 rounded border-border text-primary focus:ring-primary"
+            checked={value.hasPhoto ?? false}
+            onChange={(e) => onChange({ hasPhoto: e.target.checked || undefined })}
+          />
+          {t('page.search.hasPhoto')}
+        </label>
+        <label className="flex min-h-11 items-center gap-3 text-sm font-medium text-foreground">
+          <input
+            type="checkbox"
+            className="size-4 rounded border-border text-primary focus:ring-primary"
+            checked={value.verifiedOnly ?? false}
+            onChange={(e) => onChange({ verifiedOnly: e.target.checked || undefined })}
+          />
+          {t('page.search.verifiedOnly')}
+        </label>
+        <Select
+          label={t('page.search.recentlyJoined')}
+          value={value.recentlyJoinedDays != null ? String(value.recentlyJoinedDays) : ''}
+          onChange={(e) => onChange({ recentlyJoinedDays: e.target.value ? Number(e.target.value) : undefined })}
+        >
+          <option value="">{t('page.search.any')}</option>
+          {RECENTLY_JOINED_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {t(`options.recentlyJoined.${o.value}` as never, { defaultValue: o.label })}
             </option>
           ))}
         </Select>
