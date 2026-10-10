@@ -5,6 +5,8 @@ export interface UnlockContactResponse {
   email: string | null;
   paymentId: number | null;
   amount: number | null;
+  /** Public payment reference MM-{profileId}-{paymentId} for the UPI QR/note. */
+  reference: string | null;
   message: string;
 }
 

@@ -32,7 +32,7 @@ export function useContactUnlock() {
           setContact({ mobileNo: data.mobileNo, email: data.email })
         } else if (data.paymentId) {
           navigate(`/payments/${data.paymentId}`, {
-            state: { amount: data.amount, paymentType: 'CONTACT_UNLOCK' },
+            state: { amount: data.amount, paymentType: 'CONTACT_UNLOCK', reference: data.reference },
           })
         }
       } catch (err: unknown) {

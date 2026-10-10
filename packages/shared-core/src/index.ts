@@ -122,6 +122,8 @@ export type {
   PaymentMethod,
   ManualPaymentRequest,
   ManualPaymentResponse,
+  ManualPaymentInitiateRequest,
+  ManualPaymentInitiateResponse,
   ContactUnlockManualPaymentRequest,
 } from './types/payments.types';
 

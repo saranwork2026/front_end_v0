@@ -80,6 +80,9 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
   const [paying, setPaying] = useState(false)
   const [claiming, setClaiming] = useState(false)
   const [toasts, setToasts] = useState<ToastItem[]>([])
+  // Manual-payment row created up front so the UPI QR carries a real reference
+  // (MM-{profileId}-{paymentId}) backed by a PENDING payment row.
+  const [manualPayment, setManualPayment] = useState<{ paymentId: number; reference: string } | null>(null)
 
   function pushToast(message: string, variant: ToastItem['variant']) {
     setToasts((t) => [...t, { id: Date.now() + Math.floor(Math.random() * 1000), message, variant }])
@@ -102,6 +105,25 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
   useEffect(() => {
     void load()
   }, [load])
+
+  // Once the plan is known, create the PENDING payment row up front so the UPI
+  // QR/reference is backed by a real paymentId before the user pays. Best
+  // effort — if it fails, the form still works and falls back to a local ref.
+  useEffect(() => {
+    if (!plan || manualPayment) return
+    let active = true
+    paymentsApi
+      .initiateManualSubscription({ planId: plan.planId })
+      .then((res) => {
+        if (active) setManualPayment({ paymentId: res.data.paymentId, reference: res.data.reference })
+      })
+      .catch(() => {
+        /* non-fatal — form falls back to a locally generated reference */
+      })
+    return () => {
+      active = false
+    }
+  }, [plan, manualPayment])
 
   async function handlePayNow() {
     if (!plan) return
@@ -131,6 +153,7 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
     try {
       await paymentsApi.submitManualPayment({
         planId: plan.planId,
+        paymentId: manualPayment?.paymentId,
         paymentMethod: data.paymentMethod,
         referenceNote: data.referenceNote,
         screenshot: data.screenshot,
@@ -349,6 +372,8 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
             onSubmit={handleManualSubmit}
             submitting={claiming}
             onCancel={() => navigate('/plans')}
+            amount={total}
+            reference={manualPayment?.reference}
           />
         </section>
       </div>

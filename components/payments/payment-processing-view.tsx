@@ -37,6 +37,8 @@ interface PaymentLocationState {
   paymentType?: PaymentType
   /** True when this payment is part of the post-submission onboarding flow. */
   onboarding?: boolean
+  /** Public payment reference MM-{profileId}-{paymentId} for the UPI QR/note. */
+  reference?: string
 }
 
 /**
@@ -53,6 +55,7 @@ export function PaymentProcessingView({ paymentId }: PaymentProcessingViewProps)
   const amount = state.amount
   const paymentType = state.paymentType
   const onboarding = state.onboarding === true
+  const reference = state.reference
 
   const [phase, setPhase] = useState<Phase>('payment')
   const [paying, setPaying] = useState(false)
@@ -307,7 +310,7 @@ export function PaymentProcessingView({ paymentId }: PaymentProcessingViewProps)
             {t('page.payments.orPayCashUpiDesc')}
           </p>
           <div className="mt-4">
-            <ManualPaymentForm onSubmit={handleManualSubmit} submitting={claiming} />
+            <ManualPaymentForm onSubmit={handleManualSubmit} submitting={claiming} amount={amount} reference={reference} />
           </div>
         </section>
       )}

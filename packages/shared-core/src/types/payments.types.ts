@@ -45,7 +45,25 @@ export interface ManualPaymentResponse {
   paymentId: string;
   amount: number;
   paymentMethod: PaymentMethod;
+  /** Public reference MM-{profileId}-{paymentId} used in the UPI QR/note. */
+  reference?: string;
   message: string;
+}
+
+/** Initiate a manual (cash/UPI) subscription payment — creates the PENDING row. */
+export interface ManualPaymentInitiateRequest {
+  planId: number;
+}
+
+/**
+ * Response for POST /payments/subscription/manual/initiate. Carries the
+ * freshly-created paymentId + the public reference (MM-{profileId}-{paymentId})
+ * the QR/deep-link is built from, before the user pays.
+ */
+export interface ManualPaymentInitiateResponse {
+  paymentId: number;
+  amount: number;
+  reference: string;
 }
 
 /**
