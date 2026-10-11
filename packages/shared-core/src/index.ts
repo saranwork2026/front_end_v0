@@ -194,6 +194,7 @@ export type {
   ReportChatMessage,
   AdminCreateUserPayload,
   AdminCreateUserResult,
+  AdminConfirmOtpPayload,
   FullProfileRequest,
   AssistedRegistrationRequestView,
   PaymentReferenceType,

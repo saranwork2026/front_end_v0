@@ -25,6 +25,7 @@ import type {
   ReportContext,
   AdminCreateUserPayload,
   AdminCreateUserResult,
+  AdminConfirmOtpPayload,
   FullProfileRequest,
   AssistedRegistrationRequestView,
   AdminPayment,
@@ -179,9 +180,19 @@ export function createAdminApi(client: AxiosInstance) {
       return client.delete<{ message: string }>(`/admin/success-stories/${id}`);
     },
 
-    // --- Assisted member creation ---
+    // --- Assisted member creation (two-step: create + send OTP → confirm OTP) ---
     createUser(payload: AdminCreateUserPayload) {
       return client.post<AdminCreateUserResult>('/admin/users', payload);
+    },
+
+    /** Confirm the create-stage OTP the customer received, activating the member. */
+    confirmCreateOtp(profileId: string, payload: AdminConfirmOtpPayload) {
+      return client.post<AdminCreateUserResult>(`/admin/users/${profileId}/confirm-otp`, payload);
+    },
+
+    /** Resend the create-stage OTP to the customer's mobile. */
+    resendCreateOtp(profileId: string) {
+      return client.post<{ message: string }>(`/admin/users/${profileId}/create-otp/resend`, {});
     },
 
     /** "View as member" — audited read-only snapshot of the member's own profile view. */

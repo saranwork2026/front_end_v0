@@ -9,6 +9,7 @@ import { Dialog } from '@/components/ui/dialog'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Icon } from '@/components/ui/icon'
 import { Input } from '@/components/ui/input'
+import { DateOfBirthPicker } from '@/components/ui/date-of-birth-picker'
 import { Pagination } from '@/components/ui/pagination'
 import { Select } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -424,20 +425,33 @@ function CreateMemberDialog({
   onClose: () => void
   onCreated: (msg: string) => void
 }) {
+  // Two-step flow: 'form' (name/mobile/DOB/gender/email) → 'otp' (enter the OTP
+  // sent to the customer's mobile) → 'done' (show the temp password to hand over).
+  const [step, setStep] = useState<'form' | 'otp' | 'done'>('form')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [mobileNo, setMobileNo] = useState('')
+  const [dateOfBirth, setDateOfBirth] = useState('')
+  const [gender, setGender] = useState<'' | 'MALE' | 'FEMALE'>('')
   const [email, setEmail] = useState('')
+  const [otp, setOtp] = useState('')
   const [busy, setBusy] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [result, setResult] = useState<{ profileId: string; temporaryPassword: string } | null>(null)
+  // Pending member created in step 1, awaiting OTP confirmation in step 2.
+  const [pending, setPending] = useState<{ profileId: string; maskedMobile: string | null; temporaryPassword: string | null } | null>(null)
+  const [result, setResult] = useState<{ profileId: string; temporaryPassword: string | null } | null>(null)
 
   function reset() {
+    setStep('form')
     setFirstName('')
     setLastName('')
     setMobileNo('')
+    setDateOfBirth('')
+    setGender('')
     setEmail('')
+    setOtp('')
     setErrors({})
+    setPending(null)
     setResult(null)
     setBusy(false)
   }
@@ -447,11 +461,14 @@ function CreateMemberDialog({
     onClose()
   }
 
+  // Step 1 — create the member and send the OTP to the customer's mobile.
   async function submit() {
     const next: Record<string, string> = {}
     if (!firstName.trim()) next.firstName = 'First name is required.'
     if (!lastName.trim()) next.lastName = 'Last name is required.'
     if (!/^[6-9]\d{9}$/.test(mobileNo)) next.mobileNo = 'Enter a valid 10-digit mobile starting 6-9.'
+    if (!dateOfBirth) next.dateOfBirth = 'Date of birth is required.'
+    if (!gender) next.gender = 'Gender is required.'
     setErrors(next)
     if (Object.keys(next).length > 0) return
 
@@ -461,12 +478,61 @@ function CreateMemberDialog({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         mobileNo: mobileNo.trim(),
+        dateOfBirth,
+        gender: gender as 'MALE' | 'FEMALE',
         email: email.trim() || undefined,
       })
-      setResult({ profileId: res.data.profileId, temporaryPassword: res.data.temporaryPassword })
-      onCreated(`Assisted member ${res.data.profileId} created.`)
+      setPending({
+        profileId: res.data.profileId,
+        maskedMobile: res.data.maskedMobile,
+        temporaryPassword: res.data.temporaryPassword,
+      })
+      setStep('otp')
+    } catch (err) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        'Could not create the member. Check the details and try again.'
+      setErrors({ form: msg })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  // Step 2 — confirm the OTP the customer read back, activating the member.
+  async function confirmOtp() {
+    if (!pending) return
+    if (!otp.trim()) {
+      setErrors({ otp: 'Enter the OTP the customer received.' })
+      return
+    }
+    setBusy(true)
+    try {
+      const res = await adminApi.confirmCreateOtp(pending.profileId, { otp: otp.trim() })
+      setResult({
+        profileId: res.data.profileId,
+        // The temp password was returned at create time; carry it through to the handoff screen.
+        temporaryPassword: pending.temporaryPassword,
+      })
+      setStep('done')
+      onCreated(`Assisted member ${res.data.profileId} created and activated.`)
+    } catch (err) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        'OTP verification failed. Check the code and try again.'
+      setErrors({ otp: msg })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function resendOtp() {
+    if (!pending) return
+    setBusy(true)
+    try {
+      await adminApi.resendCreateOtp(pending.profileId)
+      setErrors({})
     } catch {
-      setErrors({ form: 'Could not create the member. Try again.' })
+      setErrors({ otp: 'Could not resend the OTP. Try again.' })
     } finally {
       setBusy(false)
     }
@@ -476,31 +542,60 @@ function CreateMemberDialog({
     <Dialog
       open={open}
       onClose={() => (busy ? null : close())}
-      title={result ? 'Member created' : 'Create assisted member'}
+      title={
+        step === 'done' ? 'Member created' : step === 'otp' ? 'Verify customer OTP' : 'Create assisted member'
+      }
       description={
-        result
+        step === 'done'
           ? 'Share these credentials with the walk-in member. The temporary password is shown only once.'
-          : 'Register a walk-in member. They will verify and set a password on first login.'
+          : step === 'otp'
+            ? `Enter the OTP sent to the customer's mobile ${pending?.maskedMobile ?? ''}. Ask the customer to read it back to you.`
+            : 'Register a walk-in member — same details as the sign-up screen. An OTP goes to their mobile to confirm.'
       }
       footer={
-        result ? (
+        step === 'done' ? (
           <Button onClick={close}>Done</Button>
+        ) : step === 'otp' ? (
+          <>
+            <Button variant="ghost" onClick={resendOtp} disabled={busy}>
+              Resend OTP
+            </Button>
+            <Button onClick={confirmOtp} loading={busy}>
+              Verify &amp; activate
+            </Button>
+          </>
         ) : (
           <>
             <Button variant="ghost" onClick={close} disabled={busy}>
               Cancel
             </Button>
             <Button onClick={submit} loading={busy}>
-              Create member
+              Continue
             </Button>
           </>
         )
       }
     >
-      {result ? (
+      {step === 'done' ? (
         <div className="space-y-3">
-          <CredRow label="Profile ID" value={result.profileId} />
-          <CredRow label="Temporary password" value={result.temporaryPassword} />
+          <CredRow label="Profile ID" value={result?.profileId ?? ''} />
+          <CredRow label="Temporary password" value={result?.temporaryPassword ?? '—'} />
+        </div>
+      ) : step === 'otp' ? (
+        <div className="space-y-4">
+          {errors.otp && (
+            <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {errors.otp}
+            </p>
+          )}
+          <Input
+            label="OTP"
+            inputMode="numeric"
+            value={otp}
+            onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            hint="6-digit code sent to the customer's mobile."
+            required
+          />
         </div>
       ) : (
         <div className="space-y-4">
@@ -534,6 +629,25 @@ function CreateMemberDialog({
             hint="10 digits, starts with 6-9."
             required
           />
+          <DateOfBirthPicker
+            label="Date of birth"
+            value={dateOfBirth}
+            error={errors.dateOfBirth}
+            onChange={setDateOfBirth}
+          />
+          <Select
+            label="Gender"
+            value={gender}
+            error={errors.gender}
+            onChange={(e) => setGender(e.target.value as 'MALE' | 'FEMALE')}
+            required
+          >
+            <option value="" disabled>
+              Select…
+            </option>
+            <option value="MALE">Male</option>
+            <option value="FEMALE">Female</option>
+          </Select>
           <Input
             label="Email (optional)"
             type="email"

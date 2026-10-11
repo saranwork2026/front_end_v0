@@ -357,20 +357,40 @@ export interface ReportContext {
 
 // --- Admin-assisted member creation ---
 
+/**
+ * Create-member payload — mirrors the public registration screen (name, mobile,
+ * DOB, gender, optional email). The member is created OTP_PENDING; the admin
+ * then confirms the OTP sent to the customer's mobile to activate it.
+ */
 export interface AdminCreateUserPayload {
   firstName: string;
   lastName: string;
   mobileNo: string;
+  /** ISO date (yyyy-MM-dd). */
+  dateOfBirth: string;
+  gender: 'MALE' | 'FEMALE';
   email?: string;
 }
 
-/** Matches backend AdminCreateUserResponse. */
+/** Matches backend AdminCreateUserResponse (both the create and confirm-otp responses). */
 export interface AdminCreateUserResult {
+  userId: string;
   profileId: string;
   firstName: string;
   mobileNo: string;
-  temporaryPassword: string;
+  /** Masked mobile the OTP was sent to (e.g. 98****3210). */
+  maskedMobile: string | null;
+  /** Channels an OTP was dispatched to (currently just ["SMS"]). */
+  otpChannels: string[] | null;
+  /** True while the member is OTP_PENDING and awaiting the create-stage OTP. */
+  otpRequired: boolean;
+  /** One-time temporary password to share — present on the create response. */
+  temporaryPassword: string | null;
   message: string;
+}
+
+export interface AdminConfirmOtpPayload {
+  otp: string;
 }
 
 // --- Admin-assisted registration (fill full profile on a member's behalf) ---
