@@ -20,7 +20,7 @@ const INR = new Intl.NumberFormat('en-IN', {
   maximumFractionDigits: 0,
 })
 
-type Phase = 'form' | 'success' | 'claim-submitted'
+type Phase = 'form' | 'claim-submitted'
 
 interface SubscriptionPaymentViewProps {
   planId?: string
@@ -77,7 +77,6 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
   const [error, setError] = useState(false)
   const [plan, setPlan] = useState<SubscriptionPlan | null>(null)
   const [phase, setPhase] = useState<Phase>('form')
-  const [paying, setPaying] = useState(false)
   const [claiming, setClaiming] = useState(false)
   const [toasts, setToasts] = useState<ToastItem[]>([])
   // Manual-payment row created up front so the UPI QR carries a real reference
@@ -124,24 +123,6 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
       active = false
     }
   }, [plan, manualPayment])
-
-  async function handlePayNow() {
-    if (!plan) return
-    setPaying(true)
-    try {
-      const res = await paymentsApi.initSubscription({ planId: plan.planId, paymentGateway: 'MOCK' })
-      navigate(`/payments/${res.data.paymentId}`, {
-        state: { amount: res.data.amount, paymentType: res.data.paymentType, onboarding },
-      })
-    } catch (err) {
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        t('page.payments.payStartError')
-      pushToast(message, 'error')
-    } finally {
-      setPaying(false)
-    }
-  }
 
   async function handleManualSubmit(data: {
     paymentMethod: PaymentMethod
@@ -218,28 +199,19 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
   const total = plan.price
   const features = includedFeatures(plan, t)
 
-  if (phase === 'success' || phase === 'claim-submitted') {
-    const submitted = phase === 'claim-submitted'
+  if (phase === 'claim-submitted') {
     return (
       <>
         <div className="mx-auto flex w-full max-w-lg px-4 flex-col items-center gap-5 rounded-2xl border border-border bg-card p-8 text-center">
-          <span
-            className={
-              submitted
-                ? 'flex size-16 items-center justify-center rounded-full bg-warning/15 text-warning'
-                : 'flex size-16 items-center justify-center rounded-full bg-success/15 text-success'
-            }
-          >
-            <Icon name={submitted ? 'clock' : 'circle-check'} size={34} />
+          <span className="flex size-16 items-center justify-center rounded-full bg-warning/15 text-warning">
+            <Icon name="clock" size={34} />
           </span>
           <div className="flex flex-col gap-1.5">
             <h1 className="text-balance font-serif text-2xl text-foreground">
-              {submitted ? t('page.payments.claimReceived') : t('page.payments.paymentSuccessful')}
+              {t('page.payments.claimReceived')}
             </h1>
             <p className="text-pretty text-sm text-muted-foreground">
-              {submitted
-                ? t('page.payments.claimReceivedDesc')
-                : t('page.payments.successDesc', { plan: plan.name })}
+              {t('page.payments.claimReceivedDesc')}
             </p>
           </div>
 
@@ -342,30 +314,14 @@ export function SubscriptionPaymentView({ planId }: SubscriptionPaymentViewProps
           </div>
         </section>
 
-        {/* Instant pay (mock gateway) */}
-        <section className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5">
-          <div className="flex flex-col gap-0.5">
-            <h2 className="font-serif text-lg text-foreground">{t('page.payments.payInstantly')}</h2>
-            <p className="text-sm text-muted-foreground">
-              {t('page.payments.payInstantlyDesc')}
-            </p>
-          </div>
-          <Button onClick={handlePayNow} loading={paying} size="lg">
-            <Icon name="lock" size={16} />
-            {t('page.payments.payNowAmount', { amount: INR.format(total) })}
-          </Button>
-          <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-            <Icon name="shield" size={13} />
-            {t('page.payments.demoGateway')}
-          </p>
-        </section>
-
-        {/* Manual payment */}
+        {/* Manual payment (UPI / Cash) — the only payment path. The instant
+            MOCK-gateway option was removed: no automated gateway is wired up,
+            so all purchases go through the admin-verified UPI/Cash claim. */}
         <section className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5">
           <div className="flex flex-col gap-0.5">
-            <h2 className="font-serif text-lg text-foreground">{t('page.payments.orPayManually')}</h2>
+            <h2 className="font-serif text-lg text-foreground">{t('page.payments.payByUpiCash')}</h2>
             <p className="text-sm text-muted-foreground">
-              {t('page.payments.orPayManuallyDesc')}
+              {t('page.payments.payByUpiCashDesc')}
             </p>
           </div>
           <ManualPaymentForm

@@ -1236,7 +1236,10 @@ export const en = {
         backToPlans: 'Back to plans',
         completeTitle: 'Complete your payment',
         completeSubtitle:
-          'Review your plan, then pay instantly or submit a manual payment for our team to verify.',
+          'Review your plan, then pay by UPI or cash and submit your payment for our team to verify.',
+        payByUpiCash: 'Pay by UPI or cash',
+        payByUpiCashDesc:
+          'Pay via UPI (scan the QR or open your UPI app) or cash, then submit the details below. Our team verifies it and activates your plan.',
         selectedPlan: 'Selected plan',
         membership: '{{validity}} membership',
         totalPayable: 'Total payable',
