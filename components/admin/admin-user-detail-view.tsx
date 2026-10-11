@@ -224,15 +224,15 @@ export function AdminUserDetailView({ profileId }: AdminUserDetailViewProps) {
     }
   }
 
-  async function handleExport() {
+  async function handleExport(lang: 'en' | 'ta' = 'en') {
     if (!profile) return
     try {
-      const res = await adminApi.exportUserBiodataPdf(profile.profileId)
+      const res = await adminApi.exportUserBiodataPdf(profile.profileId, lang)
       const blob = new Blob([res.data as BlobPart], { type: 'application/pdf' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `biodata-${profile.profileId}.pdf`
+      a.download = `biodata-${profile.profileId}${lang === 'ta' ? '-ta' : ''}.pdf`
       document.body.appendChild(a)
       a.click()
       a.remove()
@@ -375,7 +375,8 @@ export function AdminUserDetailView({ profileId }: AdminUserDetailViewProps) {
               { label: flagged ? 'Unflag member' : 'Flag member', icon: 'flag', onSelect: () => setModal({ kind: 'flag' }) },
               { label: featured ? 'Remove featured' : 'Feature member', icon: 'star', onSelect: onFeatureToggle },
               { label: boosted ? 'Remove boost' : 'Boost profile', icon: 'sparkles', onSelect: onBoostToggle },
-              { label: 'Export biodata (PDF)', icon: 'download', onSelect: handleExport },
+              { label: 'Export biodata (English)', icon: 'download', onSelect: () => handleExport('en') },
+              { label: 'Export biodata (Tamil)', icon: 'download', onSelect: () => handleExport('ta') },
               ...(canPurge
                 ? [{ label: 'Delete member', icon: 'trash' as const, onSelect: () => setModal({ kind: 'purge' }), danger: true }]
                 : []),

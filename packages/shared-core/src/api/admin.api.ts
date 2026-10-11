@@ -194,9 +194,16 @@ export function createAdminApi(client: AxiosInstance) {
       return client.get<Record<string, unknown>>(`/admin/users/${profileId}/export?format=json`);
     },
 
-    /** Per-member biodata export — returns a printable PDF (binary). */
-    exportUserBiodataPdf(profileId: string) {
-      return client.get<Blob>(`/admin/users/${profileId}/export`, { responseType: 'blob' });
+    /**
+     * Per-member biodata export — returns a printable PDF (binary).
+     * `lang` selects the sheet language: 'en' (default) or 'ta' (Tamil — all
+     * labels, section titles, enums, and raasi/nakshatra rendered in Tamil).
+     */
+    exportUserBiodataPdf(profileId: string, lang: 'en' | 'ta' = 'en') {
+      return client.get<Blob>(`/admin/users/${profileId}/export`, {
+        params: { lang },
+        responseType: 'blob',
+      });
     },
 
     // --- Admin sessions ---
