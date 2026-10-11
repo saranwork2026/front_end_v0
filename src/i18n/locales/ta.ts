@@ -701,6 +701,29 @@ export const ta: Resources = {
         deleteWarningPre: 'இந்த செயல் ',
         deleteWarningPost:
           '. நீக்கப்பட்டவுடன், உங்கள் கணக்கு மற்றும் தரவை மீட்டெடுக்க முடியாது.',
+        // Verify your ID
+        verifyIdTitle: 'உங்கள் அடையாளத்தைச் சரிபார்க்கவும்',
+        verifyIdDesc:
+          'சரிபார்க்கப்பட்ட பேட்ஜ் பெற அரசு அடையாள ஆவணத்தைப் பதிவேற்றவும். உங்கள் ஆவணம் எங்கள் குழுவால் தனிப்பட்ட முறையில் மதிப்பாய்வு செய்யப்படும், உங்கள் சுயவிவரத்தில் ஒருபோதும் காட்டப்படாது.',
+        verifyIdApproved: 'சரிபார்க்கப்பட்டது',
+        verifyIdPending: 'மதிப்பாய்வில் உள்ளது',
+        verifyIdRejected: 'நிராகரிக்கப்பட்டது',
+        verifyIdReasonLabel: 'காரணம்:',
+        verifyIdDocTypeLabel: 'ஆவண வகை',
+        verifyIdFileLabel: 'ஆவணத்தைப் பதிவேற்று (படம் அல்லது PDF)',
+        verifyIdSubmitCta: 'சரிபார்ப்புக்கு சமர்ப்பி',
+        verifyIdNoFile: 'பதிவேற்ற ஒரு ஆவணத்தைத் தேர்ந்தெடுக்கவும்.',
+        verifyIdSubmittedToast: 'உங்கள் அடையாளம் சமர்ப்பிக்கப்பட்டது. விரைவில் மதிப்பாய்வு செய்வோம்.',
+        verifyIdError: 'உங்கள் ஆவணத்தைச் சமர்ப்பிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',
+        // Appear offline (privacy)
+        appearOfflineTitle: 'ஆஃப்லைனில் தோன்று',
+        appearOfflineDesc:
+          'மற்ற உறுப்பினர்களிடமிருந்து உங்கள் “கடைசியாக செயலில்” நிலையை மறைக்கவும். உங்கள் சொந்த செயல்பாட்டை நீங்கள் இன்னும் பார்க்கலாம், பொருத்தங்கள் வழக்கம் போல் வேலை செய்யும்.',
+        appearOfflineOnCta: 'ஆஃப்லைனில் காட்டப்படுகிறது',
+        appearOfflineOffCta: 'ஆஃப்லைனில் தோன்று',
+        appearOfflineOnToast: 'உங்கள் செயல்பாடு இப்போது மற்ற உறுப்பினர்களிடமிருந்து மறைக்கப்பட்டுள்ளது.',
+        appearOfflineOffToast: 'உங்கள் செயல்பாடு இப்போது மற்ற உறுப்பினர்களுக்குத் தெரியும்.',
+        appearOfflineError: 'உங்கள் தனியுரிமை அமைப்பைப் புதுப்பிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',
       },
       plans: {
         eyebrowOnboarding: 'கடைசி படி (விருப்பமானது)',
@@ -1406,6 +1429,14 @@ export const ta: Resources = {
         strengthIncompleteDesc: 'அதிக விவரங்களுடன் கூடிய சுயவிவரங்கள் கணிசமாக அதிக ஆர்வத்தைப் பெறுகின்றன.',
         viewProfileBtn: 'சுயவிவரத்தைப் பார்',
         completeProfileBtn: 'சுயவிவரத்தை பூர்த்தி செய்',
+        share: 'பகிர்',
+        shareProfileAria: 'இந்த சுயவிவரத்தைப் பகிர்',
+        shareCopyLink: 'இணைப்பை நகலெடு',
+        shareWhatsApp: 'வாட்ஸ்அப்பில் பகிர்',
+        shareLinkCopied: 'சுயவிவர இணைப்பு நகலெடுக்கப்பட்டது.',
+        shareLinkCopyError: 'இணைப்பை நகலெடுக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',
+        shareWaMessage: 'Magizh Matrimony-இல் இந்த சுயவிவரத்தைப் பாருங்கள்: {{link}}',
+        shareWaMessageNamed: 'Magizh Matrimony-இல் {{name}} அவர்களைப் பாருங்கள்: {{link}}',
       },
       profileViews: {
         title: 'சுயவிவரப் பார்வைகள்',

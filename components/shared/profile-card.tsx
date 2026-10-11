@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 
 import { Badge } from '@/components/ui/badge'
 import { Icon } from '@/components/ui/icon'
+import { ShareButton } from '@/components/shared/share-button'
 import { cn, focalPosition } from '@/lib/utils'
 
 export interface ProfileCardProfile {
@@ -45,6 +46,10 @@ interface ProfileCardProps {
   isShortlisted?: boolean
   onShortlistToggle?: (profileId: string) => void
   onClick?: (profileId: string) => void
+  /** Show the share control (copy link + WhatsApp) over the photo. */
+  showShareButton?: boolean
+  /** Toast sink for the share control (the card has no Toaster of its own). */
+  onShareToast?: (message: string, variant: 'success' | 'error' | 'info') => void
 }
 
 export function ProfileCard({
@@ -54,6 +59,8 @@ export function ProfileCard({
   isShortlisted = false,
   onShortlistToggle,
   onClick,
+  showShareButton = false,
+  onShareToast,
 }: ProfileCardProps) {
   const { t } = useTranslation()
   const height = cmToFeet(profile.heightCm)
@@ -153,6 +160,17 @@ export function ProfileCard({
           >
             <Icon name={isShortlisted ? 'star-filled' : 'star'} size={18} />
           </button>
+        )}
+
+        {showShareButton && (
+          <div className="absolute bottom-3 left-3">
+            <ShareButton
+              profileId={profile.profileId}
+              name={name}
+              variant="icon"
+              onToast={onShareToast}
+            />
+          </div>
         )}
       </div>
 

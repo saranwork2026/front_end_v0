@@ -711,6 +711,29 @@ export const en = {
         deleteWarningPre: 'This action is ',
         deleteWarningPost:
           '. Once deleted, your account and data cannot be recovered.',
+        // Verify your ID
+        verifyIdTitle: 'Verify your ID',
+        verifyIdDesc:
+          'Upload a government ID to earn a Verified badge. Your document is reviewed privately by our team and never shown on your profile.',
+        verifyIdApproved: 'Verified',
+        verifyIdPending: 'Under review',
+        verifyIdRejected: 'Rejected',
+        verifyIdReasonLabel: 'Reason:',
+        verifyIdDocTypeLabel: 'Document type',
+        verifyIdFileLabel: 'Upload document (image or PDF)',
+        verifyIdSubmitCta: 'Submit for verification',
+        verifyIdNoFile: 'Please choose a document to upload.',
+        verifyIdSubmittedToast: 'Your ID was submitted. We’ll review it shortly.',
+        verifyIdError: 'Could not submit your document. Please try again.',
+        // Appear offline (privacy)
+        appearOfflineTitle: 'Appear offline',
+        appearOfflineDesc:
+          'Hide your “last active” status from other members. You can still see your own activity, and matches still work as usual.',
+        appearOfflineOnCta: 'Showing offline',
+        appearOfflineOffCta: 'Appear offline',
+        appearOfflineOnToast: 'Your activity is now hidden from other members.',
+        appearOfflineOffToast: 'Your activity is now visible to other members.',
+        appearOfflineError: 'Could not update your privacy setting. Please try again.',
       },
       plans: {
         eyebrowOnboarding: 'Last step (optional)',
@@ -1430,6 +1453,14 @@ export const en = {
         strengthIncompleteDesc: 'Profiles with more detail receive significantly more interest.',
         viewProfileBtn: 'View profile',
         completeProfileBtn: 'Complete profile',
+        share: 'Share',
+        shareProfileAria: 'Share this profile',
+        shareCopyLink: 'Copy link',
+        shareWhatsApp: 'Share on WhatsApp',
+        shareLinkCopied: 'Profile link copied to clipboard.',
+        shareLinkCopyError: 'Could not copy the link. Please try again.',
+        shareWaMessage: 'Check out this profile on Magizh Matrimony: {{link}}',
+        shareWaMessageNamed: 'Check out {{name}} on Magizh Matrimony: {{link}}',
       },
       profileViews: {
         title: 'Profile views',

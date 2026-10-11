@@ -33,6 +33,9 @@ export interface ProfileStrength {
   completionPct: number;
   completed: boolean;
   missingSections: ProfileSection[];
+  /** Human-readable "do this next" prompts, one per missing section, in the
+   *  same recommended order as missingSections (e.g. "Add your horoscope"). */
+  nextBestActions?: string[] | null;
 }
 /**
  * Coarse, privacy-bucketed "last active"/online indicator (never an exact
@@ -73,6 +76,9 @@ export interface UserProfile {
   verified?: boolean | null;
   /** Coarse "last active"/online indicator (set when viewing another member). */
   activityStatus?: ActivityStatus | null;
+  /** Privacy toggle (owner's own profile only) — true when the member chose to
+   *  hide their activity from others. */
+  appearOffline?: boolean | null;
   photoVisibility: VisibilityLevel;
   contactVisibility: VisibilityLevel;
   // Religious

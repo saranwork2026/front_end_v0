@@ -16,6 +16,7 @@ import { DetailSections } from '@/components/profile/detail-sections'
 import { ConnectPanel } from '@/components/profile/connect-panel'
 import { ContactPanel } from '@/components/profile/contact-panel'
 import { ReportBlockActions } from '@/components/profile/report-block'
+import { ShareButton, buildShareLink } from '@/components/shared/share-button'
 import { toProfileDetail, visiblePhotoUrls, type ProfileDetail } from '@/lib/profile-detail-data'
 import {
   apiClient,
@@ -260,7 +261,10 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
   const handleShare = () => {
     if (!profile) return
     const name = [profile.firstName, profile.lastName].filter(Boolean).join(' ')
-    const text = `Check out this profile on Magizh Matrimony: ${name} (${profile.profileId})`
+    // Share the public landing-page link (keyed by profileId) so recipients
+    // can preview the profile and sign up — consistent with ShareButton.
+    const link = buildShareLink(profile.profileId)
+    const text = t('page.shared.shareWaMessageNamed', { name, link })
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer')
   }
 
@@ -375,6 +379,7 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
           onMessage={() => navigate(`/chat/${profileId}`)}
           onShortlistToggle={handleShortlistToggle}
           onShare={handleShare}
+          onShareToast={pushToast}
           onRequestPhotoAccess={handleRequestPhotoAccess}
           onManagePhotos={() => navigate('/photos')}
           onRequestHoroscope={handleRequestHoroscope}
@@ -470,6 +475,7 @@ interface ReadyContentProps {
   onSendInterest: () => void
   onShortlistToggle: () => void
   onShare: () => void
+  onShareToast: (message: string, variant: 'success' | 'error' | 'info') => void
   onRequestPhotoAccess: () => void
   onManagePhotos: () => void
   onRequestHoroscope: () => void
@@ -496,6 +502,7 @@ function ReadyContent({
   onSendInterest,
   onShortlistToggle,
   onShare,
+  onShareToast,
   onRequestPhotoAccess,
   onManagePhotos,
   onRequestHoroscope,
@@ -644,9 +651,13 @@ function ReadyContent({
               <Icon name={interestState === 'sent' ? 'check' : 'heart-filled'} size={18} />
               {interestState === 'sent' ? t('page.profile.interestSent') : t('page.profile.sendInterest')}
             </Button>
-            <Button variant="secondary" size="md" onClick={onShare} aria-label={t('page.profile.shareProfile')} className="shrink-0">
-              <Icon name="share" size={18} />
-            </Button>
+            <ShareButton
+              profileId={profile.profileId}
+              name={name}
+              variant="icon"
+              onToast={onShareToast}
+              className="shrink-0"
+            />
           </div>
         </div>
       )}

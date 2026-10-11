@@ -13,5 +13,13 @@ export function createAccountApi(client: AxiosInstance) {
     deleteAccount() {
       return client.delete<{ message: string }>('/user/account');
     },
+
+    /** Privacy toggle — hide/show the member's activity indicator to others. */
+    setAppearOffline(appearOffline: boolean) {
+      return client.put<{ message: string; appearOffline: boolean }>(
+        '/user/account/appear-offline',
+        { appearOffline },
+      );
+    },
   };
 }
