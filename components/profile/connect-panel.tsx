@@ -4,15 +4,20 @@ import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
+import { ShareButton } from '@/components/shared/share-button'
 
 interface ConnectPanelProps {
   interestState: 'idle' | 'sending' | 'sent'
   shortlisted: boolean
   photosLocked: boolean
   photoAccessState: 'none' | 'requested' | 'granted'
+  /** Public id of the profile being viewed — used by the reusable ShareButton. */
+  profileId: string
+  /** Display name of the profile being viewed (for the WhatsApp message). */
+  name?: string
   onSendInterest: () => void
   onShortlistToggle: () => void
-  onShare: () => void
+  onShareToast: (message: string, variant: 'success' | 'error' | 'info') => void
   onRequestPhotoAccess: () => void
   onMessage: () => void
 }
@@ -26,9 +31,11 @@ export function ConnectPanel({
   shortlisted,
   photosLocked,
   photoAccessState,
+  profileId,
+  name,
   onSendInterest,
   onShortlistToggle,
-  onShare,
+  onShareToast,
   onRequestPhotoAccess,
   onMessage,
 }: ConnectPanelProps) {
@@ -81,14 +88,12 @@ export function ConnectPanel({
             <Icon name={shortlisted ? 'star-filled' : 'star'} size={18} />
             {shortlisted ? t('page.profile.shortlisted') : t('page.profile.shortlist')}
           </Button>
-          <Button
-            variant="secondary"
-            size="icon"
-            onClick={onShare}
-            aria-label={t('page.profile.shareProfile')}
-          >
-            <Icon name="share" size={18} />
-          </Button>
+          <ShareButton
+            profileId={profileId}
+            name={name}
+            variant="icon"
+            onToast={onShareToast}
+          />
         </div>
 
         {photosLocked && (

@@ -16,7 +16,7 @@ import { DetailSections } from '@/components/profile/detail-sections'
 import { ConnectPanel } from '@/components/profile/connect-panel'
 import { ContactPanel } from '@/components/profile/contact-panel'
 import { ReportBlockActions } from '@/components/profile/report-block'
-import { ShareButton, buildShareLink } from '@/components/shared/share-button'
+import { ShareButton } from '@/components/shared/share-button'
 import { toProfileDetail, visiblePhotoUrls, type ProfileDetail } from '@/lib/profile-detail-data'
 import {
   apiClient,
@@ -258,16 +258,6 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
 
   const handleShortlistToggle = () => void toggleShortlist(profileId)
 
-  const handleShare = () => {
-    if (!profile) return
-    const name = [profile.firstName, profile.lastName].filter(Boolean).join(' ')
-    // Share the public landing-page link (keyed by profileId) so recipients
-    // can preview the profile and sign up — consistent with ShareButton.
-    const link = buildShareLink(profile.profileId)
-    const text = t('page.shared.shareWaMessageNamed', { name, link })
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer')
-  }
-
   const requestAccess = async (type: 'PHOTO' | 'CONTACT') => {
     try {
       await accessApi.sendAccessRequest(profileId, type)
@@ -378,7 +368,6 @@ export function ProfileDetailView({ profileId, previewState }: ProfileDetailView
           onSendInterest={() => void handleSendInterest()}
           onMessage={() => navigate(`/chat/${profileId}`)}
           onShortlistToggle={handleShortlistToggle}
-          onShare={handleShare}
           onShareToast={pushToast}
           onRequestPhotoAccess={handleRequestPhotoAccess}
           onManagePhotos={() => navigate('/photos')}
@@ -474,7 +463,6 @@ interface ReadyContentProps {
   contactQuota: number
   onSendInterest: () => void
   onShortlistToggle: () => void
-  onShare: () => void
   onShareToast: (message: string, variant: 'success' | 'error' | 'info') => void
   onRequestPhotoAccess: () => void
   onManagePhotos: () => void
@@ -501,7 +489,6 @@ function ReadyContent({
   contactQuota,
   onSendInterest,
   onShortlistToggle,
-  onShare,
   onShareToast,
   onRequestPhotoAccess,
   onManagePhotos,
@@ -606,9 +593,11 @@ function ReadyContent({
                   shortlisted={shortlisted}
                   photosLocked={profile.photosLocked}
                   photoAccessState={photoAccess}
+                  profileId={profile.profileId}
+                  name={name}
                   onSendInterest={onSendInterest}
                   onShortlistToggle={onShortlistToggle}
-                  onShare={onShare}
+                  onShareToast={onShareToast}
                   onRequestPhotoAccess={onRequestPhotoAccess}
                   onMessage={onMessage}
                 />
