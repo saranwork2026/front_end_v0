@@ -5,6 +5,7 @@ import type { SearchFilters } from '@matrimony/shared-core'
 
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
+import { WEIGHT_KG_OPTIONS } from '@/src/data/numericOptions'
 import { RELIGIONS, MOTHER_TONGUES, getCasteOptions } from '@/src/data/religionCasteData'
 import { HIGHEST_EDUCATION_OPTIONS } from '@/src/data/educationOptions'
 import { COUNTRIES } from '@/src/data/countryData'
@@ -253,6 +254,32 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
             value={value.maxHeightCm ?? ''}
             onChange={(e) => onChange({ maxHeightCm: toNum(e.target.value) })}
           />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Select
+            label={t('page.search.minWeight')}
+            value={value.minWeightKg ?? ''}
+            onChange={(e) => onChange({ minWeightKg: toNum(e.target.value) })}
+          >
+            <option value="">{t('page.search.any')}</option>
+            {WEIGHT_KG_OPTIONS.map((w) => (
+              <option key={w.value} value={w.value}>
+                {w.label}
+              </option>
+            ))}
+          </Select>
+          <Select
+            label={t('page.search.maxWeight')}
+            value={value.maxWeightKg ?? ''}
+            onChange={(e) => onChange({ maxWeightKg: toNum(e.target.value) })}
+          >
+            <option value="">{t('page.search.any')}</option>
+            {WEIGHT_KG_OPTIONS.map((w) => (
+              <option key={w.value} value={w.value}>
+                {w.label}
+              </option>
+            ))}
+          </Select>
         </div>
         <Select
           label={t('page.search.physicalStatus')}

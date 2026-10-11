@@ -20,6 +20,8 @@ export interface SearchFilters {
   maxAnnualIncome?: number;
   minHeightCm?: number;
   maxHeightCm?: number;
+  minWeightKg?: number;
+  maxWeightKg?: number;
   physicalStatus?: PhysicalStatus;
   nakshatra?: string;
   raasi?: string;

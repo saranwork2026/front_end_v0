@@ -32,6 +32,8 @@ export interface PartnerPreference {
   maxAge?: number
   minHeightCm?: number
   maxHeightCm?: number
+  minWeightKg?: number
+  maxWeightKg?: number
   minAnnualIncome?: number
   maxAnnualIncome?: number
   manglik?: string // UI value: 'Any' | 'YES' | 'NO' | 'DONT_KNOW'
@@ -195,6 +197,8 @@ export function validatePreference(p: PartnerPreference): Record<string, string>
     errors.maxAge = 'Max age must be greater than or equal to min age.'
   if (p.minHeightCm != null && p.maxHeightCm != null && p.minHeightCm > p.maxHeightCm)
     errors.maxHeightCm = 'Max height must be greater than or equal to min height.'
+  if (p.minWeightKg != null && p.maxWeightKg != null && p.minWeightKg > p.maxWeightKg)
+    errors.maxWeightKg = 'Max weight must be greater than or equal to min weight.'
   if (p.minAnnualIncome != null && p.maxAnnualIncome != null && p.minAnnualIncome > p.maxAnnualIncome)
     errors.maxAnnualIncome = 'Max income must be greater than or equal to min income.'
   // Per-list caps (partnerPreferenceSchema enforces max 20 on each array).
@@ -224,6 +228,8 @@ function toApi(p: PartnerPreference): ApiPartnerPreference {
     maxAge: p.maxAge,
     minHeightCm: p.minHeightCm,
     maxHeightCm: p.maxHeightCm,
+    minWeightKg: p.minWeightKg,
+    maxWeightKg: p.maxWeightKg,
     minAnnualIncome: p.minAnnualIncome,
     maxAnnualIncome: p.maxAnnualIncome,
     manglikPreference: manglik,
@@ -266,6 +272,8 @@ function fromApi(d: ApiPartnerPreference): PartnerPreference {
     maxAge: d.maxAge,
     minHeightCm: d.minHeightCm,
     maxHeightCm: d.maxHeightCm,
+    minWeightKg: d.minWeightKg,
+    maxWeightKg: d.maxWeightKg,
     minAnnualIncome: d.minAnnualIncome,
     maxAnnualIncome: d.maxAnnualIncome,
     manglik: d.manglikPreference ?? 'Any',

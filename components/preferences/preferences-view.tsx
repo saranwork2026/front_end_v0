@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { MultiSelect } from '@/components/ui/multi-select'
 import { Select } from '@/components/ui/select'
 import { Toaster, type ToastItem } from '@/components/ui/toast'
-import { HEIGHT_CM_OPTIONS } from '@/src/data/numericOptions'
+import { HEIGHT_CM_OPTIONS, WEIGHT_KG_OPTIONS } from '@/src/data/numericOptions'
 import {
   allCastes,
   cities,
@@ -52,9 +52,10 @@ const incomeOptions = [
   { value: 5000000, label: '₹50 LPA' },
 ]
 const heightOptions = HEIGHT_CM_OPTIONS.map((h) => ({ cm: h.value, label: h.label }))
+const weightOptions = WEIGHT_KG_OPTIONS.map((w) => ({ kg: w.value, label: w.label }))
 
-// Value → label lookups for the Phase 2 multi-selects (options carry a
-// display label distinct from the backend value).
+// Value → label lookups for the multi-selects (options carry a display label
+// distinct from the backend value).
 const nakshatraLabelMap = new Map(nakshatraOptions.map((o) => [o.value, o.label]))
 const raasiLabelMap = new Map(raasiOptions.map((o) => [o.value, o.label]))
 const dhosamLabelMap = new Map(dhosamPrefOptions.map((o) => [o.value, o.label]))
@@ -67,28 +68,6 @@ const raasiLabel = (v: string) => raasiLabelMap.get(v) ?? v
 const dhosamLabel = (v: string) => dhosamLabelMap.get(v) ?? v
 const physicalStatusLabel = (v: string) => physicalStatusLabelMap.get(v) ?? v
 const professionLabel = (v: string) => professionLabelMap.get(v) ?? v
-
-function Section({
-  title,
-  description,
-  children,
-}: {
-  title: string
-  description?: string
-  children: React.ReactNode
-}) {
-  return (
-    <section className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6">
-      <div className="mb-4">
-        <h2 className="font-serif text-lg text-foreground">{title}</h2>
-        {description && (
-          <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
-        )}
-      </div>
-      {children}
-    </section>
-  )
-}
 
 /** A labelled "Open to all" switch used by the no-bar toggles. */
 function OpenToAll({
@@ -109,6 +88,31 @@ function OpenToAll({
       />
       {t('page.preferences.openToAll')}
     </label>
+  )
+}
+
+/**
+ * A single field block inside the one card: an individual field label, an
+ * optional per-field "Open to all" toggle, and the field control(s). Every
+ * field renders its own label (no "&"-joined section titles).
+ */
+function Field({
+  label,
+  toggle,
+  children,
+}: {
+  label: string
+  toggle?: React.ReactNode
+  children: React.ReactNode
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-sm font-medium text-foreground">{label}</span>
+        {toggle}
+      </div>
+      {children}
+    </div>
   )
 }
 
@@ -205,11 +209,57 @@ export function PreferencesView({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <Section
-        title={t('page.preferences.secAgeHeightTitle')}
-        description={t('page.preferences.secAgeHeightDesc')}
-      >
-        <div className="grid gap-4 sm:grid-cols-2">
+      {/* ONE single card — every criterion is an individual field in a fixed
+          order (marital status, mother tongue, age, height, weight, physical
+          status, education, profession, income, country, state, city,
+          religion, caste, nakshatra, raasi, manglik, dhosam). No section
+          cards, no section descriptions, no "&"-joined titles. */}
+      <div className="space-y-5 rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6">
+        {/* 1. Marital status */}
+        <Field
+          label={t('page.preferences.maritalStatus')}
+          toggle={
+            <OpenToAll
+              checked={form.anyMaritalStatus}
+              onChange={(v) =>
+                set({ anyMaritalStatus: v, ...(v ? { maritalStatuses: [] } : {}) })
+              }
+            />
+          }
+        >
+          <MultiSelect
+            options={maritalStatusValues}
+            optionLabel={maritalStatusLabel}
+            value={form.maritalStatuses}
+            disabled={form.anyMaritalStatus}
+            onChange={(maritalStatuses) => set({ maritalStatuses })}
+          />
+        </Field>
+
+        {/* 2. Mother tongue */}
+        <Field
+          label={t('page.preferences.motherTongue')}
+          toggle={
+            <OpenToAll
+              checked={form.anyMotherTongue}
+              onChange={(v) =>
+                set({ anyMotherTongue: v, ...(v ? { motherTongues: [] } : {}) })
+              }
+            />
+          }
+        >
+          <MultiSelect
+            options={motherTongues}
+            value={form.motherTongues}
+            disabled={form.anyMotherTongue}
+            searchable
+            searchPlaceholder={t('page.preferences.searchLanguage')}
+            onChange={(motherTongues) => set({ motherTongues })}
+          />
+        </Field>
+
+        {/* 3. Age */}
+        <Field label={t('page.preferences.age')}>
           <div className="grid grid-cols-2 gap-3">
             <Input
               label={t('page.preferences.minAge')}
@@ -231,6 +281,10 @@ export function PreferencesView({
               onChange={(e) => set({ maxAge: toNum(e.target.value) })}
             />
           </div>
+        </Field>
+
+        {/* 4. Height */}
+        <Field label={t('page.preferences.height')}>
           <div className="grid grid-cols-2 gap-3">
             <Select
               label={t('page.preferences.minHeight')}
@@ -258,14 +312,103 @@ export function PreferencesView({
               ))}
             </Select>
           </div>
-        </div>
-      </Section>
+        </Field>
 
-      <Section
-        title={t('page.preferences.secIncomeHoroTitle')}
-        description={t('page.preferences.secIncomeHoroDesc')}
-      >
-        <div className="grid gap-4 sm:grid-cols-2">
+        {/* 5. Weight (NEW) */}
+        <Field label={t('page.preferences.weight')}>
+          <div className="grid grid-cols-2 gap-3">
+            <Select
+              label={t('page.preferences.minWeight')}
+              value={form.minWeightKg ?? ''}
+              onChange={(e) => set({ minWeightKg: toNum(e.target.value) })}
+            >
+              <option value="">{t('page.preferences.any')}</option>
+              {weightOptions.map((w) => (
+                <option key={w.kg} value={w.kg}>
+                  {w.label}
+                </option>
+              ))}
+            </Select>
+            <Select
+              label={t('page.preferences.maxWeight')}
+              value={form.maxWeightKg ?? ''}
+              error={errors.maxWeightKg}
+              onChange={(e) => set({ maxWeightKg: toNum(e.target.value) })}
+            >
+              <option value="">{t('page.preferences.any')}</option>
+              {weightOptions.map((w) => (
+                <option key={w.kg} value={w.kg}>
+                  {w.label}
+                </option>
+              ))}
+            </Select>
+          </div>
+        </Field>
+
+        {/* 6. Physical status */}
+        <Field
+          label={t('page.preferences.physicalStatus')}
+          toggle={
+            <OpenToAll
+              checked={form.anyPhysicalStatus}
+              onChange={(v) =>
+                set({ anyPhysicalStatus: v, ...(v ? { physicalStatuses: [] } : {}) })
+              }
+            />
+          }
+        >
+          <MultiSelect
+            options={physicalStatusPrefOptions.map((o) => o.value)}
+            optionLabel={physicalStatusLabel}
+            value={form.physicalStatuses}
+            disabled={form.anyPhysicalStatus}
+            onChange={(physicalStatuses) => set({ physicalStatuses })}
+          />
+        </Field>
+
+        {/* 7. Education */}
+        <Field
+          label={t('page.preferences.education')}
+          toggle={
+            <OpenToAll
+              checked={form.anyEducation}
+              onChange={(v) =>
+                set({ anyEducation: v, ...(v ? { educationCodes: [] } : {}) })
+              }
+            />
+          }
+        >
+          <MultiSelect
+            options={educationOptions.map((o) => o.code)}
+            optionLabel={educationLabel}
+            value={form.educationCodes}
+            disabled={form.anyEducation}
+            onChange={(educationCodes) => set({ educationCodes })}
+          />
+        </Field>
+
+        {/* 8. Profession */}
+        <Field
+          label={t('page.preferences.profession')}
+          toggle={
+            <OpenToAll
+              checked={form.anyProfession}
+              onChange={(v) => set({ anyProfession: v, ...(v ? { professions: [] } : {}) })}
+            />
+          }
+        >
+          <MultiSelect
+            options={professionOptions.map((o) => o.value)}
+            optionLabel={professionLabel}
+            value={form.professions}
+            disabled={form.anyProfession}
+            searchable
+            onChange={(professions) => set({ professions })}
+          />
+        </Field>
+
+        {/* 9. Income */}
+        <Field label={t('page.preferences.income')}>
           <div className="grid grid-cols-2 gap-3">
             <Select
               label={t('page.preferences.minIncome')}
@@ -293,196 +436,58 @@ export function PreferencesView({
               ))}
             </Select>
           </div>
-          <Select
-            label={t('page.preferences.manglik')}
-            value={form.manglik ?? ''}
-            onChange={(e) => set({ manglik: e.target.value || undefined })}
-          >
-            {manglikPrefOptions.map((m) => (
-              <option key={m.value} value={m.value}>
-                {m.label}
-              </option>
-            ))}
-          </Select>
-        </div>
-      </Section>
+        </Field>
 
-      <Section
-        title={t('page.preferences.secCommunityTitle')}
-        description={t('page.preferences.secCommunityDesc')}
-      >
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-foreground">
-              {t('page.preferences.religion')}
-            </span>
+        {/* 10. Country */}
+        <Field
+          label={t('page.preferences.preferredCountries')}
+          toggle={
             <OpenToAll
-              checked={form.anyReligion}
-              onChange={(v) =>
-                set({
-                  anyReligion: v,
-                  ...(v ? { religions: [] } : {}),
-                })
-              }
+              checked={form.anyCountry}
+              onChange={(v) => set({ anyCountry: v, ...(v ? { countries: [] } : {}) })}
             />
-          </div>
+          }
+        >
           <MultiSelect
-            options={religions}
-            value={form.religions}
-            disabled={form.anyReligion}
-            emptyHint={t('page.preferences.openAllReligions')}
+            options={countryOptions}
+            value={form.countries}
+            disabled={form.anyCountry}
             searchable
-            onChange={(religions) => set({ religions })}
+            searchPlaceholder={t('page.preferences.searchCountry')}
+            onChange={(countries) => set({ countries })}
           />
+        </Field>
 
-          <div className="flex items-center justify-between pt-1">
-            <span className="text-sm font-medium text-foreground">
-              {t('page.preferences.caste')}
-            </span>
-            {/* Caste no-bar is independent of religion no-bar (backend has both). */}
+        {/* 11. State */}
+        <Field
+          label={t('page.preferences.preferredStates')}
+          toggle={
             <OpenToAll
-              checked={form.anyCaste}
-              onChange={(v) =>
-                set({
-                  anyCaste: v,
-                  ...(v ? { castes: [] } : {}),
-                })
-              }
+              checked={form.anyState}
+              onChange={(v) => set({ anyState: v, ...(v ? { states: [] } : {}) })}
             />
-          </div>
+          }
+        >
           <MultiSelect
-            options={allCastes}
-            value={form.castes}
-            disabled={form.anyCaste}
-            emptyHint={t('page.preferences.openAllCastes')}
+            options={stateOptions}
+            value={form.states}
+            disabled={form.anyState}
             searchable
-            searchPlaceholder={t('page.preferences.searchCaste')}
-            onChange={(castes) => set({ castes })}
+            searchPlaceholder={t('page.preferences.searchState')}
+            onChange={(states) => set({ states })}
           />
-        </div>
-      </Section>
+        </Field>
 
-      <Section
-        title={t('page.preferences.secMaritalTongueTitle')}
-        description={t('page.preferences.secMaritalTongueDesc')}
-      >
-        <div className="grid gap-6 sm:grid-cols-2">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-foreground">
-                {t('page.preferences.maritalStatus')}
-              </span>
-              <OpenToAll
-                checked={form.anyMaritalStatus}
-                onChange={(v) =>
-                  set({
-                    anyMaritalStatus: v,
-                    ...(v ? { maritalStatuses: [] } : {}),
-                  })
-                }
-              />
-            </div>
-            <MultiSelect
-              options={maritalStatusValues}
-              optionLabel={maritalStatusLabel}
-              value={form.maritalStatuses}
-              disabled={form.anyMaritalStatus}
-              onChange={(maritalStatuses) => set({ maritalStatuses })}
-            />
-          </div>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-foreground">
-                {t('page.preferences.motherTongue')}
-              </span>
-              <OpenToAll
-                checked={form.anyMotherTongue}
-                onChange={(v) =>
-                  set({
-                    anyMotherTongue: v,
-                    ...(v ? { motherTongues: [] } : {}),
-                  })
-                }
-              />
-            </div>
-            <MultiSelect
-              options={motherTongues}
-              value={form.motherTongues}
-              disabled={form.anyMotherTongue}
-              searchable
-              searchPlaceholder={t('page.preferences.searchLanguage')}
-              onChange={(motherTongues) => set({ motherTongues })}
-            />
-          </div>
-        </div>
-      </Section>
-
-      <Section
-        title={t('page.preferences.secEducationTitle')}
-        description={t('page.preferences.secEducationDesc')}
-      >
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-foreground">
-              {t('page.preferences.education')}
-            </span>
-            <OpenToAll
-              checked={form.anyEducation}
-              onChange={(v) =>
-                set({
-                  anyEducation: v,
-                  ...(v ? { educationCodes: [] } : {}),
-                })
-              }
-            />
-          </div>
-          <MultiSelect
-            options={educationOptions.map((o) => o.code)}
-            optionLabel={educationLabel}
-            value={form.educationCodes}
-            disabled={form.anyEducation}
-            onChange={(educationCodes) => set({ educationCodes })}
-          />
-
-          <div className="flex items-center justify-between pt-1">
-            <span className="text-sm font-medium text-foreground">
-              {t('page.preferences.profession')}
-            </span>
-            <OpenToAll
-              checked={form.anyProfession}
-              onChange={(v) => set({ anyProfession: v, ...(v ? { professions: [] } : {}) })}
-            />
-          </div>
-          <MultiSelect
-            options={professionOptions.map((o) => o.value)}
-            optionLabel={professionLabel}
-            value={form.professions}
-            disabled={form.anyProfession}
-            searchable
-            onChange={(professions) => set({ professions })}
-          />
-        </div>
-      </Section>
-
-      <Section
-        title={t('page.preferences.secLocationTitle')}
-        description={t('page.preferences.secLocationDesc')}
-      >
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-foreground">
-              {t('page.preferences.preferredCities')}
-            </span>
+        {/* 12. City */}
+        <Field
+          label={t('page.preferences.preferredCities')}
+          toggle={
             <OpenToAll
               checked={form.anyLocation}
-              onChange={(v) =>
-                set({
-                  anyLocation: v,
-                  ...(v ? { cities: [] } : {}),
-                })
-              }
+              onChange={(v) => set({ anyLocation: v, ...(v ? { cities: [] } : {}) })}
             />
-          </div>
+          }
+        >
           <MultiSelect
             options={cities}
             value={form.cities}
@@ -492,83 +497,59 @@ export function PreferencesView({
             searchPlaceholder={t('page.preferences.searchCity')}
             onChange={(cities) => set({ cities })}
           />
+        </Field>
 
-          <div className="flex items-center justify-between pt-1">
-            <span className="text-sm font-medium text-foreground">
-              {t('page.preferences.preferredStates')}
-            </span>
+        {/* 13. Religion */}
+        <Field
+          label={t('page.preferences.religion')}
+          toggle={
             <OpenToAll
-              checked={form.anyState}
-              onChange={(v) => set({ anyState: v, ...(v ? { states: [] } : {}) })}
+              checked={form.anyReligion}
+              onChange={(v) => set({ anyReligion: v, ...(v ? { religions: [] } : {}) })}
             />
-          </div>
+          }
+        >
           <MultiSelect
-            options={stateOptions}
-            value={form.states}
-            disabled={form.anyState}
+            options={religions}
+            value={form.religions}
+            disabled={form.anyReligion}
+            emptyHint={t('page.preferences.openAllReligions')}
             searchable
-            searchPlaceholder={t('page.preferences.searchState')}
-            onChange={(states) => set({ states })}
+            onChange={(religions) => set({ religions })}
           />
+        </Field>
 
-          <div className="flex items-center justify-between pt-1">
-            <span className="text-sm font-medium text-foreground">
-              {t('page.preferences.preferredCountries')}
-            </span>
+        {/* 14. Caste */}
+        <Field
+          label={t('page.preferences.caste')}
+          toggle={
             <OpenToAll
-              checked={form.anyCountry}
-              onChange={(v) => set({ anyCountry: v, ...(v ? { countries: [] } : {}) })}
+              checked={form.anyCaste}
+              onChange={(v) => set({ anyCaste: v, ...(v ? { castes: [] } : {}) })}
             />
-          </div>
+          }
+        >
           <MultiSelect
-            options={countryOptions}
-            value={form.countries}
-            disabled={form.anyCountry}
+            options={allCastes}
+            value={form.castes}
+            disabled={form.anyCaste}
+            emptyHint={t('page.preferences.openAllCastes')}
             searchable
-            searchPlaceholder={t('page.preferences.searchCountry')}
-            onChange={(countries) => set({ countries })}
+            searchPlaceholder={t('page.preferences.searchCaste')}
+            onChange={(castes) => set({ castes })}
           />
-        </div>
-      </Section>
+        </Field>
 
-      <Section
-        title={t('page.preferences.secPhysicalTitle')}
-        description={t('page.preferences.secPhysicalDesc')}
-      >
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-foreground">
-              {t('page.preferences.physicalStatus')}
-            </span>
-            <OpenToAll
-              checked={form.anyPhysicalStatus}
-              onChange={(v) => set({ anyPhysicalStatus: v, ...(v ? { physicalStatuses: [] } : {}) })}
-            />
-          </div>
-          <MultiSelect
-            options={physicalStatusPrefOptions.map((o) => o.value)}
-            optionLabel={physicalStatusLabel}
-            value={form.physicalStatuses}
-            disabled={form.anyPhysicalStatus}
-            onChange={(physicalStatuses) => set({ physicalStatuses })}
-          />
-        </div>
-      </Section>
-
-      <Section
-        title={t('page.preferences.secHoroscopeTitle')}
-        description={t('page.preferences.secHoroscopeDesc')}
-      >
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-foreground">
-              {t('page.preferences.nakshatra')}
-            </span>
+        {/* 15. Nakshatra */}
+        <Field
+          label={t('page.preferences.nakshatra')}
+          toggle={
             <OpenToAll
               checked={form.anyNakshatra}
               onChange={(v) => set({ anyNakshatra: v, ...(v ? { nakshatras: [] } : {}) })}
             />
-          </div>
+          }
+        >
           <MultiSelect
             options={nakshatraOptions.map((o) => o.value)}
             optionLabel={nakshatraLabel}
@@ -577,16 +558,18 @@ export function PreferencesView({
             searchable
             onChange={(nakshatras) => set({ nakshatras })}
           />
+        </Field>
 
-          <div className="flex items-center justify-between pt-1">
-            <span className="text-sm font-medium text-foreground">
-              {t('page.preferences.raasi')}
-            </span>
+        {/* 16. Raasi */}
+        <Field
+          label={t('page.preferences.raasi')}
+          toggle={
             <OpenToAll
               checked={form.anyRaasi}
               onChange={(v) => set({ anyRaasi: v, ...(v ? { raasis: [] } : {}) })}
             />
-          </div>
+          }
+        >
           <MultiSelect
             options={raasiOptions.map((o) => o.value)}
             optionLabel={raasiLabel}
@@ -595,16 +578,32 @@ export function PreferencesView({
             searchable
             onChange={(raasis) => set({ raasis })}
           />
+        </Field>
 
-          <div className="flex items-center justify-between pt-1">
-            <span className="text-sm font-medium text-foreground">
-              {t('page.preferences.dhosam')}
-            </span>
+        {/* 17. Manglik */}
+        <Field label={t('page.preferences.manglik')}>
+          <Select
+            value={form.manglik ?? ''}
+            onChange={(e) => set({ manglik: e.target.value || undefined })}
+          >
+            {manglikPrefOptions.map((m) => (
+              <option key={m.value} value={m.value}>
+                {m.label}
+              </option>
+            ))}
+          </Select>
+        </Field>
+
+        {/* 18. Dhosam */}
+        <Field
+          label={t('page.preferences.dhosam')}
+          toggle={
             <OpenToAll
               checked={form.anyDhosam}
               onChange={(v) => set({ anyDhosam: v, ...(v ? { dhosams: [] } : {}) })}
             />
-          </div>
+          }
+        >
           <MultiSelect
             options={dhosamPrefOptions.map((o) => o.value)}
             optionLabel={dhosamLabel}
@@ -612,8 +611,8 @@ export function PreferencesView({
             disabled={form.anyDhosam}
             onChange={(dhosams) => set({ dhosams })}
           />
-        </div>
-      </Section>
+        </Field>
+      </div>
 
       {/* Sticky submit — full-width on mobile */}
       <div className="sticky bottom-0 -mx-4 border-t border-border bg-background/95 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:pt-1">

@@ -32,7 +32,7 @@ export function defaultSearchFilters(gender?: Gender | null): SearchFilters {
 }
 
 /** Active-filter chip keys (grouped ranges collapse to one chip). */
-export type ChipKey = keyof SearchFilters | 'age' | 'income' | 'height'
+export type ChipKey = keyof SearchFilters | 'age' | 'income' | 'height' | 'weight'
 
 export interface ActiveChip {
   key: ChipKey
@@ -69,6 +69,8 @@ export function buildActiveChips(f: SearchFilters): ActiveChip[] {
     chips.push({ key: 'income', label: `₹${f.minAnnualIncome ?? 0}–${f.maxAnnualIncome ?? '∞'}` })
   if (f.minHeightCm || f.maxHeightCm)
     chips.push({ key: 'height', label: `${f.minHeightCm ?? 'any'}–${f.maxHeightCm ?? 'any'} cm` })
+  if (f.minWeightKg || f.maxWeightKg)
+    chips.push({ key: 'weight', label: `${f.minWeightKg ?? 'any'}–${f.maxWeightKg ?? 'any'} kg` })
   if (f.nakshatra) chips.push({ key: 'nakshatra', label: f.nakshatra })
   if (f.raasi) chips.push({ key: 'raasi', label: f.raasi })
   if (f.dhosam) chips.push({ key: 'dhosam', label: `Dhosam: ${f.dhosam}` })
@@ -88,6 +90,8 @@ export function removeFilter(f: SearchFilters, key: ChipKey): SearchFilters {
       return { ...f, minAnnualIncome: undefined, maxAnnualIncome: undefined }
     case 'height':
       return { ...f, minHeightCm: undefined, maxHeightCm: undefined }
+    case 'weight':
+      return { ...f, minWeightKg: undefined, maxWeightKg: undefined }
     case 'religion':
       return { ...f, religion: undefined, caste: undefined }
     default:
@@ -108,6 +112,8 @@ export function validateFilters(f: SearchFilters): string | null {
     return 'page.search.rangeAgeError'
   if (f.minHeightCm && f.maxHeightCm && f.minHeightCm > f.maxHeightCm)
     return 'page.search.rangeHeightError'
+  if (f.minWeightKg && f.maxWeightKg && f.minWeightKg > f.maxWeightKg)
+    return 'page.search.rangeWeightError'
   if (f.minAnnualIncome && f.maxAnnualIncome && f.minAnnualIncome > f.maxAnnualIncome)
     return 'page.search.rangeIncomeError'
   return null

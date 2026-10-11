@@ -64,6 +64,8 @@ export interface PartnerPreference {
   maxAge?: number;
   minHeightCm?: number;
   maxHeightCm?: number;
+  minWeightKg?: number;
+  maxWeightKg?: number;
   minAnnualIncome?: number;
   maxAnnualIncome?: number;
   manglikPreference?: string;
