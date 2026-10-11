@@ -31,10 +31,21 @@ export function Dialog({
 }: DialogProps) {
   const panelRef = useRef<HTMLDivElement>(null)
 
+  // Keep the latest onClose in a ref so the open-effect below does NOT depend on
+  // it. Callers routinely pass an inline arrow (e.g. onClose={() => close()}),
+  // which is a new identity every render; if the effect depended on onClose it
+  // would re-run on every parent re-render (e.g. each keystroke in a form field
+  // inside the dialog) and call panelRef.focus(), stealing focus out of the
+  // field the user is typing in. Scoping the effect to [open] alone fixes that.
+  const onCloseRef = useRef(onClose)
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
+
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') onCloseRef.current()
     }
     document.addEventListener('keydown', onKey)
     const prevOverflow = document.body.style.overflow
@@ -44,7 +55,7 @@ export function Dialog({
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = prevOverflow
     }
-  }, [open, onClose])
+  }, [open])
 
   if (!open || typeof document === 'undefined') return null
 
