@@ -332,7 +332,7 @@ export function AdminUserDetailView({ profileId }: AdminUserDetailViewProps) {
             <p className="font-mono text-sm text-muted-foreground">{profile.profileId}</p>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <StatusBadge status={profile.status} />
-              <Badge variant="neutral">{profile.profileCompletionPct}% complete</Badge>
+              <Badge variant="neutral">{profile.profileCompletionPct ?? 0}% complete</Badge>
               {blocked && <Badge variant="danger">Blocked</Badge>}
               {flagged && <Badge variant="danger">Flagged</Badge>}
               {featured && <Badge variant="gold">Featured</Badge>}
