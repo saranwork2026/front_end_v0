@@ -390,7 +390,10 @@ export interface AdminCreateUserResult {
 }
 
 export interface AdminConfirmOtpPayload {
-  otp: string;
+  /** SMS code — always required. */
+  smsOtp: string;
+  /** Email code — required only when an email OTP was sent at create time. */
+  emailOtp?: string;
 }
 
 // --- Admin-assisted registration (fill full profile on a member's behalf) ---

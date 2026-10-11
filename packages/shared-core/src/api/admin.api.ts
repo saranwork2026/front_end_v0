@@ -190,9 +190,12 @@ export function createAdminApi(client: AxiosInstance) {
       return client.post<AdminCreateUserResult>(`/admin/users/${profileId}/confirm-otp`, payload);
     },
 
-    /** Resend the create-stage OTP to the customer's mobile. */
-    resendCreateOtp(profileId: string) {
-      return client.post<{ message: string }>(`/admin/users/${profileId}/create-otp/resend`, {});
+    /** Resend a create-stage OTP (SMS or EMAIL) to the customer. */
+    resendCreateOtp(profileId: string, channel: 'SMS' | 'EMAIL' = 'SMS') {
+      return client.post<{ message: string }>(
+        `/admin/users/${profileId}/create-otp/resend?channel=${channel}`,
+        {},
+      );
     },
 
     /** "View as member" — audited read-only snapshot of the member's own profile view. */

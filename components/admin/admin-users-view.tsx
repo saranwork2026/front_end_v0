@@ -434,11 +434,17 @@ function CreateMemberDialog({
   const [dateOfBirth, setDateOfBirth] = useState('')
   const [gender, setGender] = useState<'' | 'MALE' | 'FEMALE'>('')
   const [email, setEmail] = useState('')
-  const [otp, setOtp] = useState('')
+  const [smsOtp, setSmsOtp] = useState('')
+  const [emailOtp, setEmailOtp] = useState('')
   const [busy, setBusy] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   // Pending member created in step 1, awaiting OTP confirmation in step 2.
-  const [pending, setPending] = useState<{ profileId: string; maskedMobile: string | null; temporaryPassword: string | null } | null>(null)
+  const [pending, setPending] = useState<{
+    profileId: string
+    maskedMobile: string | null
+    temporaryPassword: string | null
+    channels: string[]
+  } | null>(null)
   const [result, setResult] = useState<{ profileId: string; temporaryPassword: string | null } | null>(null)
 
   function reset() {
@@ -449,7 +455,8 @@ function CreateMemberDialog({
     setDateOfBirth('')
     setGender('')
     setEmail('')
-    setOtp('')
+    setSmsOtp('')
+    setEmailOtp('')
     setErrors({})
     setPending(null)
     setResult(null)
@@ -486,6 +493,7 @@ function CreateMemberDialog({
         profileId: res.data.profileId,
         maskedMobile: res.data.maskedMobile,
         temporaryPassword: res.data.temporaryPassword,
+        channels: res.data.otpChannels ?? ['SMS'],
       })
       setStep('otp')
     } catch (err) {
@@ -498,19 +506,32 @@ function CreateMemberDialog({
     }
   }
 
-  // Step 2 — confirm the OTP the customer read back, activating the member.
+  // Step 2 — confirm the OTP(s) the customer read back, activating the member.
+  // When an email was provided, BOTH codes are required (public-registration parity).
   async function confirmOtp() {
     if (!pending) return
-    if (!otp.trim()) {
-      setErrors({ otp: 'Enter the OTP the customer received.' })
-      return
-    }
+    const emailSent = pending.channels.includes('EMAIL')
+    const next: Record<string, string> = {}
+    if (!smsOtp.trim()) next.smsOtp = 'Enter the SMS code the customer received.'
+    if (emailSent && !emailOtp.trim()) next.emailOtp = 'Enter the email code from the customer’s inbox.'
+    setErrors(next)
+    if (Object.keys(next).length > 0) return
+
     setBusy(true)
     try {
-      const res = await adminApi.confirmCreateOtp(pending.profileId, { otp: otp.trim() })
+      const res = await adminApi.confirmCreateOtp(pending.profileId, {
+        smsOtp: smsOtp.trim(),
+        emailOtp: emailSent ? emailOtp.trim() : undefined,
+      })
+      // Activation only succeeds when all required channels verified; the
+      // backend echoes otpRequired=true if something is still pending.
+      if (res.data.otpRequired) {
+        setErrors({ form: res.data.message })
+        return
+      }
       setResult({
         profileId: res.data.profileId,
-        // The temp password was returned at create time; carry it through to the handoff screen.
+        // The temp password was returned at create time; carry it to the handoff screen.
         temporaryPassword: pending.temporaryPassword,
       })
       setStep('done')
@@ -518,21 +539,21 @@ function CreateMemberDialog({
     } catch (err) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        'OTP verification failed. Check the code and try again.'
-      setErrors({ otp: msg })
+        'OTP verification failed. Check the code(s) and try again.'
+      setErrors({ form: msg })
     } finally {
       setBusy(false)
     }
   }
 
-  async function resendOtp() {
+  async function resendOtp(channel: 'SMS' | 'EMAIL') {
     if (!pending) return
     setBusy(true)
     try {
-      await adminApi.resendCreateOtp(pending.profileId)
+      await adminApi.resendCreateOtp(pending.profileId, channel)
       setErrors({})
     } catch {
-      setErrors({ otp: 'Could not resend the OTP. Try again.' })
+      setErrors({ form: `Could not resend the ${channel} OTP. Try again.` })
     } finally {
       setBusy(false)
     }
@@ -557,9 +578,14 @@ function CreateMemberDialog({
           <Button onClick={close}>Done</Button>
         ) : step === 'otp' ? (
           <>
-            <Button variant="ghost" onClick={resendOtp} disabled={busy}>
-              Resend OTP
+            <Button variant="ghost" onClick={() => resendOtp('SMS')} disabled={busy}>
+              Resend SMS
             </Button>
+            {pending?.channels.includes('EMAIL') && (
+              <Button variant="ghost" onClick={() => resendOtp('EMAIL')} disabled={busy}>
+                Resend email
+              </Button>
+            )}
             <Button onClick={confirmOtp} loading={busy}>
               Verify &amp; activate
             </Button>
@@ -583,19 +609,31 @@ function CreateMemberDialog({
         </div>
       ) : step === 'otp' ? (
         <div className="space-y-4">
-          {errors.otp && (
+          {errors.form && (
             <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
-              {errors.otp}
+              {errors.form}
             </p>
           )}
           <Input
-            label="OTP"
+            label="SMS OTP"
             inputMode="numeric"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            value={smsOtp}
+            onChange={(e) => setSmsOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            error={errors.smsOtp}
             hint="6-digit code sent to the customer's mobile."
             required
           />
+          {pending?.channels.includes('EMAIL') && (
+            <Input
+              label="Email OTP"
+              inputMode="numeric"
+              value={emailOtp}
+              onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              error={errors.emailOtp}
+              hint="6-digit code sent to the customer's email — you need their inbox."
+              required
+            />
+          )}
         </div>
       ) : (
         <div className="space-y-4">
