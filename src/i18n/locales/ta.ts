@@ -801,7 +801,7 @@ export const ta: Resources = {
         maxWeight: 'அதிகபட்ச எடை (கிலோ)',
         minIncome: 'குறைந்தபட்ச வருமானம்',
         maxIncome: 'அதிகபட்ச வருமானம்',
-        manglik: 'செவ்வாய் / தோஷம்',
+        manglik: 'செவ்வாய்',
         religion: 'மதம்',
         caste: 'ஜாதி / சமூகம்',
         maritalStatus: 'திருமண நிலை',

@@ -811,7 +811,7 @@ export const en = {
         maxWeight: 'Max weight (kg)',
         minIncome: 'Min income',
         maxIncome: 'Max income',
-        manglik: 'Manglik / Dhosam',
+        manglik: 'Manglik',
         religion: 'Religion',
         caste: 'Caste / Community',
         maritalStatus: 'Marital status',

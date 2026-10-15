@@ -76,19 +76,85 @@ describe('PreferencesView — single card + weight', () => {
     expect(pushMock).toHaveBeenCalledWith('/plans?onboarding=1')
   })
 
-  it('renders the field labels in the specified single-card order', async () => {
+  it('renders ALL 18 field labels in the exact specified single-card order', async () => {
     render(<PreferencesView />)
     await waitFor(() => expect(getPartnerPreferenceMock).toHaveBeenCalled())
 
-    // The field labels in document order; weight sits between height and
-    // physical status.
+    // The full fixed field order (marital status → … → dhosam), weight at #5.
+    const order = [
+      'Marital status',
+      'Mother tongue',
+      'Age',
+      'Height',
+      'Weight',
+      'Physical status',
+      'Education',
+      'Profession',
+      'Income',
+      'Preferred countries',
+      'Preferred states',
+      'Preferred cities',
+      'Religion',
+      'Caste / Community',
+      'Nakshatra',
+      'Raasi',
+      'Manglik',
+      'Dhosam',
+    ]
     const container = document.querySelector('form')!
     const text = within(container)
-    const marital = text.getByText('Marital status')
-    const weight = text.getByText('Weight')
-    const dhosam = text.getByText('Dhosam')
-    // DOCUMENT_POSITION_FOLLOWING (4) means the arg comes after.
-    expect(marital.compareDocumentPosition(weight) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    expect(weight.compareDocumentPosition(dhosam) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    // Resolve each field's visible label SPAN (the Field header) and assert
+    // each follows the previous one in document order — locking the whole
+    // sequence. Some label strings can also appear elsewhere (e.g. inside a
+    // native <Select> option), so match the <span> header specifically.
+    const els = order.map((label) => {
+      const matches = text.getAllByText(label).filter((el) => el.tagName === 'SPAN')
+      expect(matches.length).toBeGreaterThan(0)
+      return matches[0]
+    })
+    for (let i = 1; i < els.length; i += 1) {
+      expect(
+        els[i - 1].compareDocumentPosition(els[i]) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy()
+    }
+    // Manglik is a standalone label — not the combined "Manglik / Dhosam".
+    expect(text.queryByText('Manglik / Dhosam')).toBeNull()
+  })
+
+  it('Country renders as a searchable multi-select dropdown: open, filter, pick multiple, close, restore', async () => {
+    const user = userEvent.setup()
+    // Seed a saved preference so the restore path is exercised.
+    getPartnerPreferenceMock.mockResolvedValue({ data: { preferredCountries: ['India'] } })
+    render(<PreferencesView />)
+    await waitFor(() => expect(getPartnerPreferenceMock).toHaveBeenCalled())
+
+    // Saved value restored as a chip (not an inline pill wall of every option).
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /remove india/i })).toBeInTheDocument(),
+    )
+
+    // The control is a combobox trigger (dropdown), not an always-open list.
+    const trigger = screen.getByRole('combobox', { name: 'Preferred countries' })
+    expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    // Listbox is closed initially.
+    expect(screen.queryByRole('listbox')).toBeNull()
+
+    // Open → listbox appears with a search box.
+    await user.click(trigger)
+    expect(trigger).toHaveAttribute('aria-expanded', 'true')
+    const listbox = screen.getByRole('listbox')
+    expect(listbox).toHaveAttribute('aria-multiselectable', 'true')
+
+    // Filter + select a second country (panel stays open for multi-select).
+    const search = screen.getByRole('searchbox')
+    await user.type(search, 'united')
+    const options = within(listbox).getAllByRole('option')
+    expect(options.length).toBeGreaterThan(0)
+    await user.click(options[0])
+    expect(screen.getByRole('listbox')).toBeInTheDocument() // still open
+
+    // Close by clicking outside.
+    await user.click(document.body)
+    await waitFor(() => expect(screen.queryByRole('listbox')).toBeNull())
   })
 })

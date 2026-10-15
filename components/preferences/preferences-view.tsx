@@ -8,7 +8,7 @@ import { landingStore } from '@/src/stores/landing'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
 import { Input } from '@/components/ui/input'
-import { MultiSelect } from '@/components/ui/multi-select'
+import { SearchableMultiSelect } from '@/components/ui/searchable-multi-select'
 import { Select } from '@/components/ui/select'
 import { Toaster, type ToastItem } from '@/components/ui/toast'
 import { HEIGHT_CM_OPTIONS, WEIGHT_KG_OPTIONS } from '@/src/data/numericOptions'
@@ -103,15 +103,24 @@ function Field({
 }: {
   label: string
   toggle?: React.ReactNode
-  children: React.ReactNode
+  /**
+   * Either plain field control(s), or a render function receiving the id of
+   * this field's visible label span so a custom control (e.g. the dropdown
+   * trigger) can associate itself via aria-labelledby without duplicating the
+   * visible label text.
+   */
+  children: React.ReactNode | ((labelId: string) => React.ReactNode)
 }) {
+  const labelId = React.useId()
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-sm font-medium text-foreground">{label}</span>
+        <span id={labelId} className="text-sm font-medium text-foreground">
+          {label}
+        </span>
         {toggle}
       </div>
-      {children}
+      {typeof children === 'function' ? children(labelId) : children}
     </div>
   )
 }
@@ -162,10 +171,15 @@ export function PreferencesView({
 
     getPartnerPreference()
       .then((p) => {
-        if (!cancelled) setForm(p)
+        if (!cancelled) {
+          setForm(p)
+          // Event-only diagnostic — no preference values are logged.
+          console.info('[preferences] loaded saved partner preferences')
+        }
       })
       .catch(() => {
         // No saved preference yet — seed the agreed defaults.
+        console.info('[preferences] no saved partner preferences; seeding defaults')
         void seedDefaults()
       })
     return () => {
@@ -186,21 +200,27 @@ export function PreferencesView({
     const nextErrors = validatePreference(form)
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) {
+      // Event-only: log that validation blocked the save and which field keys
+      // failed — never the field values.
+      console.warn('[preferences] save blocked by validation', Object.keys(nextErrors))
       pushToast(t('page.preferences.fixFields'), 'error')
       return
     }
     setSaving(true)
+    console.info('[preferences] saving partner preferences')
     try {
       await savePartnerPreference(form)
       // Reflect that preferences now exist so the landing funnel advances to
       // the plans step instead of bouncing the user back to preferences.
       landingStore.getState().setLandingSignals({ hasPartnerPreferences: true })
+      console.info('[preferences] partner preferences saved')
       pushToast(t('page.preferences.savedToast'), 'success')
       // Onboarding step after profile submission: surface membership packages
       // next (skippable). The ?onboarding=1 flag tells the plans page to show a
       // "remind me later" path to matches.
       router.push('/plans?onboarding=1')
     } catch {
+      console.error('[preferences] failed to save partner preferences')
       pushToast(t('page.preferences.saveError'), 'error')
     } finally {
       setSaving(false)
@@ -227,13 +247,16 @@ export function PreferencesView({
             />
           }
         >
-          <MultiSelect
-            options={maritalStatusValues}
-            optionLabel={maritalStatusLabel}
-            value={form.maritalStatuses}
-            disabled={form.anyMaritalStatus}
-            onChange={(maritalStatuses) => set({ maritalStatuses })}
-          />
+          {(labelId) => (
+            <SearchableMultiSelect
+              labelledBy={labelId}
+              options={maritalStatusValues}
+              optionLabel={maritalStatusLabel}
+              value={form.maritalStatuses}
+              disabled={form.anyMaritalStatus}
+              onChange={(maritalStatuses) => set({ maritalStatuses })}
+            />
+          )}
         </Field>
 
         {/* 2. Mother tongue */}
@@ -248,14 +271,16 @@ export function PreferencesView({
             />
           }
         >
-          <MultiSelect
-            options={motherTongues}
-            value={form.motherTongues}
-            disabled={form.anyMotherTongue}
-            searchable
-            searchPlaceholder={t('page.preferences.searchLanguage')}
-            onChange={(motherTongues) => set({ motherTongues })}
-          />
+          {(labelId) => (
+            <SearchableMultiSelect
+              labelledBy={labelId}
+              options={motherTongues}
+              value={form.motherTongues}
+              disabled={form.anyMotherTongue}
+              searchPlaceholder={t('page.preferences.searchLanguage')}
+              onChange={(motherTongues) => set({ motherTongues })}
+            />
+          )}
         </Field>
 
         {/* 3. Age */}
@@ -357,13 +382,16 @@ export function PreferencesView({
             />
           }
         >
-          <MultiSelect
-            options={physicalStatusPrefOptions.map((o) => o.value)}
-            optionLabel={physicalStatusLabel}
-            value={form.physicalStatuses}
-            disabled={form.anyPhysicalStatus}
-            onChange={(physicalStatuses) => set({ physicalStatuses })}
-          />
+          {(labelId) => (
+            <SearchableMultiSelect
+              labelledBy={labelId}
+              options={physicalStatusPrefOptions.map((o) => o.value)}
+              optionLabel={physicalStatusLabel}
+              value={form.physicalStatuses}
+              disabled={form.anyPhysicalStatus}
+              onChange={(physicalStatuses) => set({ physicalStatuses })}
+            />
+          )}
         </Field>
 
         {/* 7. Education */}
@@ -378,13 +406,16 @@ export function PreferencesView({
             />
           }
         >
-          <MultiSelect
-            options={educationOptions.map((o) => o.code)}
-            optionLabel={educationLabel}
-            value={form.educationCodes}
-            disabled={form.anyEducation}
-            onChange={(educationCodes) => set({ educationCodes })}
-          />
+          {(labelId) => (
+            <SearchableMultiSelect
+              labelledBy={labelId}
+              options={educationOptions.map((o) => o.code)}
+              optionLabel={educationLabel}
+              value={form.educationCodes}
+              disabled={form.anyEducation}
+              onChange={(educationCodes) => set({ educationCodes })}
+            />
+          )}
         </Field>
 
         {/* 8. Profession */}
@@ -397,14 +428,16 @@ export function PreferencesView({
             />
           }
         >
-          <MultiSelect
-            options={professionOptions.map((o) => o.value)}
-            optionLabel={professionLabel}
-            value={form.professions}
-            disabled={form.anyProfession}
-            searchable
-            onChange={(professions) => set({ professions })}
-          />
+          {(labelId) => (
+            <SearchableMultiSelect
+              labelledBy={labelId}
+              options={professionOptions.map((o) => o.value)}
+              optionLabel={professionLabel}
+              value={form.professions}
+              disabled={form.anyProfession}
+              onChange={(professions) => set({ professions })}
+            />
+          )}
         </Field>
 
         {/* 9. Income */}
@@ -448,14 +481,16 @@ export function PreferencesView({
             />
           }
         >
-          <MultiSelect
-            options={countryOptions}
-            value={form.countries}
-            disabled={form.anyCountry}
-            searchable
-            searchPlaceholder={t('page.preferences.searchCountry')}
-            onChange={(countries) => set({ countries })}
-          />
+          {(labelId) => (
+            <SearchableMultiSelect
+              labelledBy={labelId}
+              options={countryOptions}
+              value={form.countries}
+              disabled={form.anyCountry}
+              searchPlaceholder={t('page.preferences.searchCountry')}
+              onChange={(countries) => set({ countries })}
+            />
+          )}
         </Field>
 
         {/* 11. State */}
@@ -468,14 +503,16 @@ export function PreferencesView({
             />
           }
         >
-          <MultiSelect
-            options={stateOptions}
-            value={form.states}
-            disabled={form.anyState}
-            searchable
-            searchPlaceholder={t('page.preferences.searchState')}
-            onChange={(states) => set({ states })}
-          />
+          {(labelId) => (
+            <SearchableMultiSelect
+              labelledBy={labelId}
+              options={stateOptions}
+              value={form.states}
+              disabled={form.anyState}
+              searchPlaceholder={t('page.preferences.searchState')}
+              onChange={(states) => set({ states })}
+            />
+          )}
         </Field>
 
         {/* 12. City */}
@@ -488,15 +525,17 @@ export function PreferencesView({
             />
           }
         >
-          <MultiSelect
-            options={cities}
-            value={form.cities}
-            disabled={form.anyLocation}
-            emptyHint={t('page.preferences.openAllLocations')}
-            searchable
-            searchPlaceholder={t('page.preferences.searchCity')}
-            onChange={(cities) => set({ cities })}
-          />
+          {(labelId) => (
+            <SearchableMultiSelect
+              labelledBy={labelId}
+              options={cities}
+              value={form.cities}
+              disabled={form.anyLocation}
+              emptyHint={t('page.preferences.openAllLocations')}
+              searchPlaceholder={t('page.preferences.searchCity')}
+              onChange={(cities) => set({ cities })}
+            />
+          )}
         </Field>
 
         {/* 13. Religion */}
@@ -509,14 +548,16 @@ export function PreferencesView({
             />
           }
         >
-          <MultiSelect
-            options={religions}
-            value={form.religions}
-            disabled={form.anyReligion}
-            emptyHint={t('page.preferences.openAllReligions')}
-            searchable
-            onChange={(religions) => set({ religions })}
-          />
+          {(labelId) => (
+            <SearchableMultiSelect
+              labelledBy={labelId}
+              options={religions}
+              value={form.religions}
+              disabled={form.anyReligion}
+              emptyHint={t('page.preferences.openAllReligions')}
+              onChange={(religions) => set({ religions })}
+            />
+          )}
         </Field>
 
         {/* 14. Caste */}
@@ -529,15 +570,17 @@ export function PreferencesView({
             />
           }
         >
-          <MultiSelect
-            options={allCastes}
-            value={form.castes}
-            disabled={form.anyCaste}
-            emptyHint={t('page.preferences.openAllCastes')}
-            searchable
-            searchPlaceholder={t('page.preferences.searchCaste')}
-            onChange={(castes) => set({ castes })}
-          />
+          {(labelId) => (
+            <SearchableMultiSelect
+              labelledBy={labelId}
+              options={allCastes}
+              value={form.castes}
+              disabled={form.anyCaste}
+              emptyHint={t('page.preferences.openAllCastes')}
+              searchPlaceholder={t('page.preferences.searchCaste')}
+              onChange={(castes) => set({ castes })}
+            />
+          )}
         </Field>
 
         {/* 15. Nakshatra */}
@@ -550,14 +593,16 @@ export function PreferencesView({
             />
           }
         >
-          <MultiSelect
-            options={nakshatraOptions.map((o) => o.value)}
-            optionLabel={nakshatraLabel}
-            value={form.nakshatras}
-            disabled={form.anyNakshatra}
-            searchable
-            onChange={(nakshatras) => set({ nakshatras })}
-          />
+          {(labelId) => (
+            <SearchableMultiSelect
+              labelledBy={labelId}
+              options={nakshatraOptions.map((o) => o.value)}
+              optionLabel={nakshatraLabel}
+              value={form.nakshatras}
+              disabled={form.anyNakshatra}
+              onChange={(nakshatras) => set({ nakshatras })}
+            />
+          )}
         </Field>
 
         {/* 16. Raasi */}
@@ -570,28 +615,33 @@ export function PreferencesView({
             />
           }
         >
-          <MultiSelect
-            options={raasiOptions.map((o) => o.value)}
-            optionLabel={raasiLabel}
-            value={form.raasis}
-            disabled={form.anyRaasi}
-            searchable
-            onChange={(raasis) => set({ raasis })}
-          />
+          {(labelId) => (
+            <SearchableMultiSelect
+              labelledBy={labelId}
+              options={raasiOptions.map((o) => o.value)}
+              optionLabel={raasiLabel}
+              value={form.raasis}
+              disabled={form.anyRaasi}
+              onChange={(raasis) => set({ raasis })}
+            />
+          )}
         </Field>
 
         {/* 17. Manglik */}
         <Field label={t('page.preferences.manglik')}>
-          <Select
-            value={form.manglik ?? ''}
-            onChange={(e) => set({ manglik: e.target.value || undefined })}
-          >
-            {manglikPrefOptions.map((m) => (
-              <option key={m.value} value={m.value}>
-                {m.label}
-              </option>
-            ))}
-          </Select>
+          {(labelId) => (
+            <Select
+              aria-labelledby={labelId}
+              value={form.manglik ?? ''}
+              onChange={(e) => set({ manglik: e.target.value || undefined })}
+            >
+              {manglikPrefOptions.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                </option>
+              ))}
+            </Select>
+          )}
         </Field>
 
         {/* 18. Dhosam */}
@@ -604,13 +654,16 @@ export function PreferencesView({
             />
           }
         >
-          <MultiSelect
-            options={dhosamPrefOptions.map((o) => o.value)}
-            optionLabel={dhosamLabel}
-            value={form.dhosams}
-            disabled={form.anyDhosam}
-            onChange={(dhosams) => set({ dhosams })}
-          />
+          {(labelId) => (
+            <SearchableMultiSelect
+              labelledBy={labelId}
+              options={dhosamPrefOptions.map((o) => o.value)}
+              optionLabel={dhosamLabel}
+              value={form.dhosams}
+              disabled={form.anyDhosam}
+              onChange={(dhosams) => set({ dhosams })}
+            />
+          )}
         </Field>
       </div>
 
