@@ -14,6 +14,7 @@ const validPreference = {
   preferredReligions: ['Hindu'],
   preferredCastes: [],
   preferredCities: ['Chennai'],
+  preferredDistricts: ['Thanjavur'],
   preferredEducations: [],
   preferredMaritalStatuses: [],
   preferredMotherTongues: [],
@@ -61,6 +62,17 @@ describe('partnerPreferenceSchema', () => {
   it('should reject more than 20 preferred religions', () => {
     const tooMany = Array.from({ length: 21 }, (_, i) => `R${i}`);
     const result = partnerPreferenceSchema.safeParse({ ...validPreference, preferredReligions: tooMany });
+    expect(result.success).toBe(false);
+  });
+
+  it('should accept up to 20 preferred districts', () => {
+    const twenty = Array.from({ length: 20 }, (_, i) => `D${i}`);
+    expect(partnerPreferenceSchema.safeParse({ ...validPreference, preferredDistricts: twenty }).success).toBe(true);
+  });
+
+  it('should reject more than 20 preferred districts', () => {
+    const tooMany = Array.from({ length: 21 }, (_, i) => `D${i}`);
+    const result = partnerPreferenceSchema.safeParse({ ...validPreference, preferredDistricts: tooMany });
     expect(result.success).toBe(false);
   });
 });

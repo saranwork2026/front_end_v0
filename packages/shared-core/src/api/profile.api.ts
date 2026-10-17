@@ -74,6 +74,7 @@ export interface PartnerPreference {
   preferredReligions?: string[];
   preferredCastes?: string[];
   preferredCities?: string[];
+  preferredDistricts?: string[];
   preferredEducations?: string[];
   preferredMaritalStatuses?: string[];
   preferredMotherTongues?: string[];

@@ -10,6 +10,7 @@ import { RELIGIONS, MOTHER_TONGUES, getCasteOptions } from '@/src/data/religionC
 import { HIGHEST_EDUCATION_OPTIONS } from '@/src/data/educationOptions'
 import { COUNTRIES } from '@/src/data/countryData'
 import { INDIAN_STATES } from '@/src/data/indianStatesData'
+import { districtsForState, hasDistrictsForState } from '@/src/data/indianDistrictsData'
 import { NAKSHATRA_OPTIONS, RAASI_OPTIONS } from '@/src/data/horoscopeData'
 import { PHYSICAL_STATUS_OPTIONS, RECENTLY_JOINED_OPTIONS } from '@/src/data/preferenceDefaults'
 import { OCCUPATIONS } from '@/src/data/occupationData'
@@ -173,7 +174,13 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
         <Select
           label={t('page.search.state')}
           value={value.state ?? ''}
-          onChange={(e) => onChange({ state: e.target.value || undefined })}
+          onChange={(e) => {
+            const state = e.target.value || undefined
+            const keepDistrict =
+              value.district &&
+              districtsForState(state).some((d) => d.value === value.district)
+            onChange({ state, district: keepDistrict ? value.district : undefined })
+          }}
         >
           <option value="">{t('page.search.any')}</option>
           {INDIAN_STATES.map((s) => (
@@ -182,6 +189,20 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
             </option>
           ))}
         </Select>
+        {hasDistrictsForState(value.state) && (
+          <Select
+            label={t('page.search.district')}
+            value={value.district ?? ''}
+            onChange={(e) => onChange({ district: e.target.value || undefined })}
+          >
+            <option value="">{t('page.search.any')}</option>
+            {districtsForState(value.state).map((d) => (
+              <option key={d.value} value={d.value}>
+                {d.label}
+              </option>
+            ))}
+          </Select>
+        )}
         <Input
           label={t('page.search.city')}
           placeholder={t('page.search.cityPlaceholder')}

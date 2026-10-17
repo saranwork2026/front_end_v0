@@ -101,10 +101,12 @@ export interface WizardForm {
   workLocation: string
   nativeCountry: string
   nativeState: string
+  nativeDistrict: string
   nativeCity: string
   currentSameAsNative: boolean
   currentCountry: string
   currentState: string
+  currentDistrict: string
   currentCity: string
   citizenshipCountry: string
   residencyStatus: string
@@ -151,8 +153,8 @@ export const emptyForm: WizardForm = {
   photos: [], firstName: '', lastName: '', dob: '', gender: '', maritalStatus: '', motherTongue: '',
   religion: '', sect: '', caste: '', subCaste: '', gothram: '', manglik: '', openToOtherReligion: '', openToOtherCaste: '',
   education: '', educationDetail: '', profession: '', employedIn: '', annualIncome: '', companyName: '', workLocation: '',
-  nativeCountry: '', nativeState: '', nativeCity: '', currentSameAsNative: false,
-  currentCountry: '', currentState: '', currentCity: '', citizenshipCountry: '', residencyStatus: '',
+  nativeCountry: '', nativeState: '', nativeDistrict: '', nativeCity: '', currentSameAsNative: false,
+  currentCountry: '', currentState: '', currentDistrict: '', currentCity: '', citizenshipCountry: '', residencyStatus: '',
   heightCm: '', weightKg: '', bloodGroup: '', complexion: '', physicalStatus: '', bodyType: '',
   familyType: '', familyValues: '', fatherStatus: '', fatherProfession: '', motherStatus: '', motherProfession: '',
   brothers: '', brothersMarried: '', sisters: '', sistersMarried: '', assetDetails: '', birthOrder: '', ownHouse: false,
@@ -339,9 +341,11 @@ function locationDto(f: WizardForm): LocationSectionRequest {
   return {
     currentCity: str(f.currentCity),
     currentState: str(f.currentState),
+    currentDistrict: str(f.currentDistrict),
     currentCountry: str(f.currentCountry),
     nativeCity: str(f.nativeCity),
     nativeState: str(f.nativeState),
+    nativeDistrict: str(f.nativeDistrict),
     nativeCountry: str(f.nativeCountry),
     citizenshipCountry: str(f.citizenshipCountry),
     residencyStatus: (str(f.residencyStatus) as LocationSectionRequest['residencyStatus']) ?? undefined,
@@ -462,10 +466,12 @@ export function seedFromProfile(p: UserProfile): WizardForm {
     workLocation: p.workLocation ?? '',
     nativeCountry: p.nativeCountry ?? '',
     nativeState: p.nativeState ?? '',
+    nativeDistrict: p.nativeDistrict ?? '',
     nativeCity: p.nativeCity ?? '',
     currentSameAsNative: false,
     currentCountry: p.currentCountry ?? '',
     currentState: p.currentState ?? '',
+    currentDistrict: p.currentDistrict ?? '',
     currentCity: p.currentCity ?? '',
     citizenshipCountry: p.citizenshipCountry ?? '',
     residencyStatus: p.residencyStatus ?? '',

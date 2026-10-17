@@ -73,6 +73,12 @@ export function buildActiveChips(f: SearchFilters, t?: TFunction): ActiveChip[] 
     chips.push({ key: 'manglik', label: tr('page.search.chipManglik', { value: optionLabel(tr, 'manglik', f.manglik), defaultValue: `Manglik: ${optionLabel(tr, 'manglik', f.manglik)}` }) })
   if (f.country) chips.push({ key: 'country', label: optionLabel(tr, 'country', f.country) })
   if (f.state) chips.push({ key: 'state', label: optionLabel(tr, 'state', f.state) })
+  // District values are English-stored controlled vocabulary (like city/state);
+  // the chip shows the stored value, consistent with the city chip below. Tamil
+  // display for districts is handled where the dropdown renders via
+  // districtTamilLabel (not the i18n options.* table, which is unauthored for
+  // state/city/district by design — see optionLabel.ts).
+  if (f.district) chips.push({ key: 'district', label: f.district })
   if (f.city) chips.push({ key: 'city', label: f.city })
   if (f.education) chips.push({ key: 'education', label: optionLabel(tr, 'education', f.education) })
   if (f.profession) chips.push({ key: 'profession', label: optionLabel(tr, 'profession', f.profession) })
@@ -106,6 +112,8 @@ export function removeFilter(f: SearchFilters, key: ChipKey): SearchFilters {
       return { ...f, minWeightKg: undefined, maxWeightKg: undefined }
     case 'religion':
       return { ...f, religion: undefined, caste: undefined }
+    case 'district':
+      return { ...f, district: undefined }
     default:
       return { ...f, [key]: undefined }
   }
