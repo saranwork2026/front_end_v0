@@ -1,9 +1,7 @@
 'use client'
-
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/navigation'
-
 import { landingStore } from '@/src/stores/landing'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
@@ -16,6 +14,7 @@ import {
   allCastes,
   cities,
   countryOptions,
+  districtOptions,
   defaultPreference,
   dhosamPrefOptions,
   educationLabel,
@@ -39,7 +38,6 @@ import {
 import type { Gender } from '@matrimony/shared-core'
 import { profileApi } from '@/src/lib/api'
 import { flattenProfileResponse } from '@/src/lib/adapters'
-
 // value = actual rupees (what the backend stores), label = LPA display.
 const incomeOptions = [
   { value: 300000, label: '₹3 LPA' },
@@ -53,7 +51,6 @@ const incomeOptions = [
 ]
 const heightOptions = HEIGHT_CM_OPTIONS.map((h) => ({ cm: h.value, label: h.label }))
 const weightOptions = WEIGHT_KG_OPTIONS.map((w) => ({ kg: w.value, label: w.label }))
-
 // Value → label lookups for the multi-selects (options carry a display label
 // distinct from the backend value).
 const nakshatraLabelMap = new Map(nakshatraOptions.map((o) => [o.value, o.label]))
@@ -68,7 +65,6 @@ const raasiLabel = (v: string) => raasiLabelMap.get(v) ?? v
 const dhosamLabel = (v: string) => dhosamLabelMap.get(v) ?? v
 const physicalStatusLabel = (v: string) => physicalStatusLabelMap.get(v) ?? v
 const professionLabel = (v: string) => professionLabelMap.get(v) ?? v
-
 /** A labelled "Open to all" switch used by the no-bar toggles. */
 function OpenToAll({
   checked,
@@ -90,7 +86,6 @@ function OpenToAll({
     </label>
   )
 }
-
 /**
  * A single field block inside the one card: an individual field label, an
  * optional per-field "Open to all" toggle, and the field control(s). Every
@@ -124,9 +119,7 @@ function Field({
     </div>
   )
 }
-
 const toNum = (v: string) => (v === '' ? undefined : Number(v))
-
 export function PreferencesView({
   initial = 'saved',
 }: {
@@ -138,7 +131,6 @@ export function PreferencesView({
   const [errors, setErrors] = React.useState<Record<string, string>>({})
   const [saving, setSaving] = React.useState(false)
   const [toasts, setToasts] = React.useState<ToastItem[]>([])
-
   // Seed from the saved partner preference when one exists. When there is none
   // yet (new member, or PREFERENCE_NOT_FOUND), seed the agreed first-load
   // defaults (age floor 18 male / 21 female, height 147 cm, Never Married,
@@ -147,7 +139,6 @@ export function PreferencesView({
   // min-age floor. Everything stays editable.
   React.useEffect(() => {
     let cancelled = false
-
     // Resolve the member's own gender first (drives the min-age default), then
     // apply saved prefs on top if any exist.
     const seedDefaults = () =>
@@ -161,14 +152,12 @@ export function PreferencesView({
         .catch(() => {
           if (!cancelled) setForm(defaultPreference())
         })
-
     if (initial === 'empty') {
       void seedDefaults()
       return () => {
         cancelled = true
       }
     }
-
     getPartnerPreference()
       .then((p) => {
         if (!cancelled) {
@@ -186,15 +175,12 @@ export function PreferencesView({
       cancelled = true
     }
   }, [initial])
-
   const pushToast = (message: string, variant: ToastItem['variant']) =>
     setToasts((t) => [...t, { id: Date.now() + Math.random(), message, variant }])
   const dismissToast = (id: number) =>
     setToasts((t) => t.filter((x) => x.id !== id))
-
   const set = (patch: Partial<PartnerPreference>) =>
     setForm((f) => ({ ...f, ...patch }))
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const nextErrors = validatePreference(form)
@@ -226,13 +212,12 @@ export function PreferencesView({
       setSaving(false)
     }
   }
-
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {/* ONE single card — every criterion is an individual field in a fixed
           order (marital status, mother tongue, age, height, weight, physical
-          status, education, profession, income, country, state, city,
-          religion, caste, nakshatra, raasi, manglik, dhosam). No section
+          status, education, profession, income, country, state, district,
+          city, religion, caste, nakshatra, raasi, manglik, dhosam). No section
           cards, no section descriptions, no "&"-joined titles. */}
       <div className="space-y-5 rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6">
         {/* 1. Marital status */}
@@ -258,7 +243,6 @@ export function PreferencesView({
             />
           )}
         </Field>
-
         {/* 2. Mother tongue */}
         <Field
           label={t('page.preferences.motherTongue')}
@@ -282,7 +266,6 @@ export function PreferencesView({
             />
           )}
         </Field>
-
         {/* 3. Age */}
         <Field label={t('page.preferences.age')}>
           <div className="grid grid-cols-2 gap-3">
@@ -307,7 +290,6 @@ export function PreferencesView({
             />
           </div>
         </Field>
-
         {/* 4. Height */}
         <Field label={t('page.preferences.height')}>
           <div className="grid grid-cols-2 gap-3">
@@ -338,7 +320,6 @@ export function PreferencesView({
             </Select>
           </div>
         </Field>
-
         {/* 5. Weight (NEW) */}
         <Field label={t('page.preferences.weight')}>
           <div className="grid grid-cols-2 gap-3">
@@ -369,7 +350,6 @@ export function PreferencesView({
             </Select>
           </div>
         </Field>
-
         {/* 6. Physical status */}
         <Field
           label={t('page.preferences.physicalStatus')}
@@ -393,7 +373,6 @@ export function PreferencesView({
             />
           )}
         </Field>
-
         {/* 7. Education */}
         <Field
           label={t('page.preferences.education')}
@@ -417,7 +396,6 @@ export function PreferencesView({
             />
           )}
         </Field>
-
         {/* 8. Profession */}
         <Field
           label={t('page.preferences.profession')}
@@ -439,7 +417,6 @@ export function PreferencesView({
             />
           )}
         </Field>
-
         {/* 9. Income */}
         <Field label={t('page.preferences.income')}>
           <div className="grid grid-cols-2 gap-3">
@@ -470,7 +447,6 @@ export function PreferencesView({
             </Select>
           </div>
         </Field>
-
         {/* 10. Country */}
         <Field
           label={t('page.preferences.preferredCountries')}
@@ -492,7 +468,6 @@ export function PreferencesView({
             />
           )}
         </Field>
-
         {/* 11. State */}
         <Field
           label={t('page.preferences.preferredStates')}
@@ -514,8 +489,30 @@ export function PreferencesView({
             />
           )}
         </Field>
-
-        {/* 12. City */}
+        {/* 12. District — multi-select with its own "Open to all" (anyDistrict)
+            toggle, same idiom as City/State/Country, placed between State and
+            City per the fixed field order. */}
+        <Field
+          label={t('page.preferences.preferredDistricts')}
+          toggle={
+            <OpenToAll
+              checked={form.anyDistrict}
+              onChange={(v) => set({ anyDistrict: v, ...(v ? { districts: [] } : {}) })}
+            />
+          }
+        >
+          {(labelId) => (
+            <SearchableMultiSelect
+              labelledBy={labelId}
+              options={districtOptions}
+              value={form.districts}
+              disabled={form.anyDistrict}
+              searchPlaceholder={t('page.preferences.searchDistrict')}
+              onChange={(districts) => set({ districts })}
+            />
+          )}
+        </Field>
+        {/* 13. City */}
         <Field
           label={t('page.preferences.preferredCities')}
           toggle={
@@ -537,8 +534,7 @@ export function PreferencesView({
             />
           )}
         </Field>
-
-        {/* 13. Religion */}
+        {/* 14. Religion */}
         <Field
           label={t('page.preferences.religion')}
           toggle={
@@ -559,8 +555,7 @@ export function PreferencesView({
             />
           )}
         </Field>
-
-        {/* 14. Caste */}
+        {/* 15. Caste */}
         <Field
           label={t('page.preferences.caste')}
           toggle={
@@ -582,8 +577,7 @@ export function PreferencesView({
             />
           )}
         </Field>
-
-        {/* 15. Nakshatra */}
+        {/* 16. Nakshatra */}
         <Field
           label={t('page.preferences.nakshatra')}
           toggle={
@@ -604,8 +598,7 @@ export function PreferencesView({
             />
           )}
         </Field>
-
-        {/* 16. Raasi */}
+        {/* 17. Raasi */}
         <Field
           label={t('page.preferences.raasi')}
           toggle={
@@ -626,8 +619,7 @@ export function PreferencesView({
             />
           )}
         </Field>
-
-        {/* 17. Manglik */}
+        {/* 18. Manglik */}
         <Field label={t('page.preferences.manglik')}>
           {(labelId) => (
             <Select
@@ -643,8 +635,7 @@ export function PreferencesView({
             </Select>
           )}
         </Field>
-
-        {/* 18. Dhosam */}
+        {/* 19. Dhosam */}
         <Field
           label={t('page.preferences.dhosam')}
           toggle={
@@ -666,7 +657,6 @@ export function PreferencesView({
           )}
         </Field>
       </div>
-
       {/* Sticky submit — full-width on mobile */}
       <div className="sticky bottom-0 -mx-4 border-t border-border bg-background/95 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:pt-1">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
@@ -684,7 +674,6 @@ export function PreferencesView({
           </Button>
         </div>
       </div>
-
       <Toaster toasts={toasts} onDismiss={dismissToast} />
     </form>
   )

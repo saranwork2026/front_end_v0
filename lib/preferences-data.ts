@@ -4,6 +4,7 @@ import { HIGHEST_EDUCATION_OPTIONS } from '@/src/data/educationOptions'
 import { RELIGIONS, MOTHER_TONGUES, CASTES_BY_RELIGION } from '@/src/data/religionCasteData'
 import { PREFERRED_CITIES } from '@/src/data/cityData'
 import { INDIAN_STATES } from '@/src/data/indianStatesData'
+import { allDistricts } from '@/src/data/indianDistrictsData'
 import { COUNTRIES } from '@/src/data/countryData'
 import { NAKSHATRA_OPTIONS, RAASI_OPTIONS } from '@/src/data/horoscopeData'
 import { OCCUPATIONS } from '@/src/data/occupationData'
@@ -43,6 +44,7 @@ export interface PartnerPreference {
   motherTongues: string[]
   educationCodes: string[]
   cities: string[]
+  districts: string[]
   // --- Phase 2: parity with search filters ---
   states: string[]
   countries: string[]
@@ -58,6 +60,8 @@ export interface PartnerPreference {
   anyMotherTongue: boolean
   anyEducation: boolean
   anyLocation: boolean
+  /** Dedicated per-field "Open to all" toggle for Preferred Districts. */
+  anyDistrict: boolean
   // Phase 2 "open to all" toggles (empty array = open to all, mirroring the others)
   anyState: boolean
   anyCountry: boolean
@@ -76,6 +80,7 @@ export const emptyPreference: PartnerPreference = {
   motherTongues: [],
   educationCodes: [],
   cities: [],
+  districts: [],
   states: [],
   countries: [],
   professions: [],
@@ -89,6 +94,7 @@ export const emptyPreference: PartnerPreference = {
   anyMotherTongue: true,
   anyEducation: true,
   anyLocation: true,
+  anyDistrict: true,
   anyState: true,
   anyCountry: true,
   anyProfession: true,
@@ -152,6 +158,9 @@ export const allCastes = Array.from(
   new Set(Object.values(CASTES_BY_RELIGION).flatMap((list) => list.map((c) => c.value))),
 ).sort((a, b) => a.localeCompare(b))
 export const cities = PREFERRED_CITIES.map((c) => c.value)
+// Flat, de-duped list of every district across all states (like allCastes),
+// since Partner Preferences is a cross-state multi-select, not state-scoped.
+export const districtOptions = allDistricts
 export const maritalStatuses = [
   { value: 'NEVER_MARRIED', label: 'Never Married' },
   { value: 'DIVORCED', label: 'Divorced' },
@@ -208,6 +217,7 @@ export function validatePreference(p: PartnerPreference): Record<string, string>
   if (p.motherTongues.length > MAX_PREF_ITEMS) errors.motherTongues = TOO_MANY
   if (p.educationCodes.length > MAX_PREF_ITEMS) errors.educationCodes = TOO_MANY
   if (p.cities.length > MAX_PREF_ITEMS) errors.cities = TOO_MANY
+  if (p.districts.length > MAX_PREF_ITEMS) errors.districts = TOO_MANY
   if (p.states.length > MAX_PREF_ITEMS) errors.states = TOO_MANY
   if (p.countries.length > MAX_PREF_ITEMS) errors.countries = TOO_MANY
   if (p.professions.length > MAX_PREF_ITEMS) errors.professions = TOO_MANY
@@ -241,6 +251,7 @@ function toApi(p: PartnerPreference): ApiPartnerPreference {
     preferredMotherTongues: p.anyMotherTongue ? [] : p.motherTongues,
     preferredEducations: p.anyEducation ? [] : p.educationCodes,
     preferredCities: p.anyLocation ? [] : p.cities,
+    preferredDistricts: p.anyDistrict ? [] : p.districts,
     // Phase 2 parity fields
     preferredStates: p.anyState ? [] : p.states,
     preferredCountries: p.anyCountry ? [] : p.countries,
@@ -260,6 +271,7 @@ function fromApi(d: ApiPartnerPreference): PartnerPreference {
   const motherTongues = d.preferredMotherTongues ?? []
   const educationCodes = d.preferredEducations ?? []
   const cityList = d.preferredCities ?? []
+  const districtList = d.preferredDistricts ?? []
   const states = d.preferredStates ?? []
   const countries = d.preferredCountries ?? []
   const professions = d.preferredProfessions ?? []
@@ -283,6 +295,7 @@ function fromApi(d: ApiPartnerPreference): PartnerPreference {
     motherTongues,
     educationCodes,
     cities: cityList,
+    districts: districtList,
     states,
     countries,
     professions,
@@ -296,6 +309,7 @@ function fromApi(d: ApiPartnerPreference): PartnerPreference {
     anyMotherTongue: motherTongues.length === 0,
     anyEducation: educationCodes.length === 0,
     anyLocation: cityList.length === 0,
+    anyDistrict: districtList.length === 0,
     anyState: states.length === 0,
     anyCountry: countries.length === 0,
     anyProfession: professions.length === 0,

@@ -101,9 +101,11 @@ export interface UserProfile {
   // Location
   currentCity: string;
   currentState: string;
+  currentDistrict?: string;
   currentCountry: string;
   nativeCity: string;
   nativeState: string;
+  nativeDistrict?: string;
   nativeCountry: string;
   citizenshipCountry: string;
   residencyStatus: ResidencyStatus;
@@ -186,9 +188,11 @@ export interface ProfessionalSectionRequest {
 export interface LocationSectionRequest {
   currentCity?: string;
   currentState?: string;
+  currentDistrict?: string;
   currentCountry?: string;
   nativeCity?: string;
   nativeState?: string;
+  nativeDistrict?: string;
   nativeCountry?: string;
   citizenshipCountry?: string;
   residencyStatus?: ResidencyStatus;

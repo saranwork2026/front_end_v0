@@ -99,9 +99,11 @@ export const professionalSectionSchema = z.object({
 export const locationSectionSchema = z.object({
   currentCity: z.string().min(1, 'validation.currentCity.required'),
   currentState: z.string().optional(),
+  currentDistrict: z.string().optional(),
   currentCountry: z.string().optional(),
   nativeCity: z.string().optional(),
   nativeState: z.string().optional(),
+  nativeDistrict: z.string().optional(),
   nativeCountry: z.string().optional(),
   citizenshipCountry: z.string().optional(),
   residencyStatus: z.enum(residencyStatusValues).optional(),

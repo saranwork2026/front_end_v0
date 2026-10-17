@@ -79,9 +79,11 @@ export function buildProfileSections(p: UserProfile): DetailSectionGroup[] {
       fields: [
         { label: 'Current city', value: label(p.currentCity) },
         { label: 'Current state', value: label(p.currentState) },
+        { label: 'Current district', value: label(p.currentDistrict) },
         { label: 'Current country', value: label(p.currentCountry) },
         { label: 'Native city', value: label(p.nativeCity) },
         { label: 'Native state', value: label(p.nativeState) },
+        { label: 'Native district', value: label(p.nativeDistrict) },
         { label: 'Native country', value: label(p.nativeCountry) },
         { label: 'Citizenship', value: label(p.citizenshipCountry) },
         { label: 'Residency', value: humanize(p.residencyStatus) },

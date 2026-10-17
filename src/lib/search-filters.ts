@@ -62,6 +62,7 @@ export function buildActiveChips(f: SearchFilters): ActiveChip[] {
   if (f.manglik) chips.push({ key: 'manglik', label: MANGLIK_LABEL[f.manglik] ?? f.manglik })
   if (f.country) chips.push({ key: 'country', label: f.country })
   if (f.state) chips.push({ key: 'state', label: f.state })
+  if (f.district) chips.push({ key: 'district', label: f.district })
   if (f.city) chips.push({ key: 'city', label: f.city })
   if (f.education) chips.push({ key: 'education', label: educationLabel(f.education) })
   if (f.profession) chips.push({ key: 'profession', label: f.profession })
@@ -94,6 +95,8 @@ export function removeFilter(f: SearchFilters, key: ChipKey): SearchFilters {
       return { ...f, minWeightKg: undefined, maxWeightKg: undefined }
     case 'religion':
       return { ...f, religion: undefined, caste: undefined }
+    case 'district':
+      return { ...f, district: undefined }
     default:
       return { ...f, [key]: undefined }
   }

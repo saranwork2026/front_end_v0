@@ -17,6 +17,7 @@ export const partnerPreferenceSchema = z
     preferredReligions: z.array(z.string()).max(20, 'validation.pref.tooMany'),
     preferredCastes: z.array(z.string()).max(20, 'validation.pref.tooMany'),
     preferredCities: z.array(z.string()).max(20, 'validation.pref.tooMany'),
+    preferredDistricts: z.array(z.string()).max(20, 'validation.pref.tooMany'),
     preferredEducations: z.array(z.string()).max(20, 'validation.pref.tooMany'),
     preferredMaritalStatuses: z.array(z.string()).max(20, 'validation.pref.tooMany'),
     preferredMotherTongues: z.array(z.string()).max(20, 'validation.pref.tooMany'),

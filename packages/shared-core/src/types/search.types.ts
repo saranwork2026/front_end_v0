@@ -13,6 +13,7 @@ export interface SearchFilters {
   manglik?: Manglik;
   city?: string;
   state?: string;
+  district?: string;
   country?: string;
   education?: string;
   profession?: string;

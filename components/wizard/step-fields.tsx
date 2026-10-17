@@ -52,6 +52,7 @@ import {
 } from '@/src/data/religionCasteData'
 import { COUNTRIES } from '@/src/data/countryData'
 import { INDIAN_STATES } from '@/src/data/indianStatesData'
+import { districtsForState, hasDistrictsForState } from '@/src/data/indianDistrictsData'
 import { getRaasiForNakshatraPadham } from '@/src/data/horoscopeData'
 import { COURSE_OPTIONS } from '@/src/data/courseOptions'
 
@@ -392,7 +393,17 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
               <SearchableSelect
                 label={t('wizard.fields.currentCountry')}
                 value={form.currentCountry}
-                onChange={(currentCountry) => onChange({ currentCountry })}
+                onChange={(currentCountry) =>
+                  onChange({
+                    currentCountry,
+                    // India convenience pre-select: fill Tamil Nadu ONLY when the
+                    // state is still empty — never overwrites a chosen state, stays
+                    // fully editable.
+                    ...(currentCountry === 'India' && !form.currentState
+                      ? { currentState: 'Tamil Nadu' }
+                      : {}),
+                  })
+                }
                 options={COUNTRIES}
                 placeholder={t('common.search')}
               />
@@ -400,7 +411,16 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
                 <SearchableSelect
                   label={t('wizard.fields.currentState')}
                   value={form.currentState}
-                  onChange={(currentState) => onChange({ currentState })}
+                  onChange={(currentState) =>
+                    onChange({
+                      currentState,
+                      // Clear a now-invalid district when the state changes.
+                      ...(form.currentDistrict &&
+                      !districtsForState(currentState).some((d) => d.value === form.currentDistrict)
+                        ? { currentDistrict: '' }
+                        : {}),
+                    })
+                  }
                   options={INDIAN_STATES}
                   placeholder={t('common.search')}
                 />
@@ -408,7 +428,30 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
                 <Input
                   label={t('wizard.fields.currentState')}
                   value={form.currentState}
-                  onChange={(e) => onChange({ currentState: e.target.value })}
+                  onChange={(e) =>
+                    onChange({
+                      currentState: e.target.value,
+                      ...(form.currentDistrict &&
+                      !districtsForState(e.target.value).some((d) => d.value === form.currentDistrict)
+                        ? { currentDistrict: '' }
+                        : {}),
+                    })
+                  }
+                />
+              )}
+              {hasDistrictsForState(form.currentState) ? (
+                <SearchableSelect
+                  label={t('wizard.fields.currentDistrict')}
+                  value={form.currentDistrict}
+                  onChange={(currentDistrict) => onChange({ currentDistrict })}
+                  options={districtsForState(form.currentState)}
+                  placeholder={t('common.search')}
+                />
+              ) : (
+                <Input
+                  label={t('wizard.fields.currentDistrict')}
+                  value={form.currentDistrict}
+                  onChange={(e) => onChange({ currentDistrict: e.target.value })}
                 />
               )}
               <Input
@@ -433,6 +476,7 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
                       currentSameAsNative: true,
                       nativeCountry: form.currentCountry,
                       nativeState: form.currentState,
+                      nativeDistrict: form.currentDistrict,
                       nativeCity: form.currentCity,
                     }
                   : { currentSameAsNative: false },
@@ -449,7 +493,14 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
                 <SearchableSelect
                   label={t('wizard.fields.nativeCountry')}
                   value={form.nativeCountry}
-                  onChange={(nativeCountry) => onChange({ nativeCountry })}
+                  onChange={(nativeCountry) =>
+                    onChange({
+                      nativeCountry,
+                      ...(nativeCountry === 'India' && !form.nativeState
+                        ? { nativeState: 'Tamil Nadu' }
+                        : {}),
+                    })
+                  }
                   options={COUNTRIES}
                   placeholder={t('common.search')}
                 />
@@ -460,7 +511,15 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
                 <SearchableSelect
                   label={t('wizard.fields.nativeState')}
                   value={form.nativeState}
-                  onChange={(nativeState) => onChange({ nativeState })}
+                  onChange={(nativeState) =>
+                    onChange({
+                      nativeState,
+                      ...(form.nativeDistrict &&
+                      !districtsForState(nativeState).some((d) => d.value === form.nativeDistrict)
+                        ? { nativeDistrict: '' }
+                        : {}),
+                    })
+                  }
                   options={INDIAN_STATES}
                   placeholder={t('common.search')}
                 />
@@ -468,7 +527,32 @@ export function StepFields({ step, form, errors, onChange, hideHoroscopeUpload }
                 <Input
                   label={t('wizard.fields.nativeState')}
                   value={form.nativeState}
-                  onChange={(e) => onChange({ nativeState: e.target.value })}
+                  onChange={(e) =>
+                    onChange({
+                      nativeState: e.target.value,
+                      ...(form.nativeDistrict &&
+                      !districtsForState(e.target.value).some((d) => d.value === form.nativeDistrict)
+                        ? { nativeDistrict: '' }
+                        : {}),
+                    })
+                  }
+                />
+              )}
+              {form.currentSameAsNative ? (
+                <Input label={t('wizard.fields.nativeDistrict')} value={form.nativeDistrict} disabled />
+              ) : hasDistrictsForState(form.nativeState) ? (
+                <SearchableSelect
+                  label={t('wizard.fields.nativeDistrict')}
+                  value={form.nativeDistrict}
+                  onChange={(nativeDistrict) => onChange({ nativeDistrict })}
+                  options={districtsForState(form.nativeState)}
+                  placeholder={t('common.search')}
+                />
+              ) : (
+                <Input
+                  label={t('wizard.fields.nativeDistrict')}
+                  value={form.nativeDistrict}
+                  onChange={(e) => onChange({ nativeDistrict: e.target.value })}
                 />
               )}
               <Input
