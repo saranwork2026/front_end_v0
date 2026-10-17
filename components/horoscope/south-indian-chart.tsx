@@ -81,16 +81,23 @@ export function SouthIndianChart({ chart, title, className }: SouthIndianChartPr
             return (
               <div
                 key={`${r}-${c}`}
-                className="relative flex flex-wrap content-start gap-x-1.5 gap-y-0.5 border border-border/60 p-1 text-[11px] leading-tight sm:text-xs"
+                className="flex min-h-[3.25rem] flex-col gap-0.5 overflow-hidden border border-border/60 p-1 sm:min-h-[4rem]"
               >
-                <span className="pointer-events-none absolute right-0.5 top-0.5 text-[8px] text-muted-foreground/60">
+                {/* Sign label pinned in normal flow at the top so it can never
+                    overlap the planet tokens below it. */}
+                <span className="break-words text-[8px] leading-none text-muted-foreground/70 sm:text-[9px]">
                   {SIGN_SHORT[sign]}
                 </span>
-                {grahas.map((g) => (
-                  <span key={g} className="font-medium">
-                    {GRAHA_TAMIL[g]}
-                  </span>
-                ))}
+                {/* Planet tokens wrap within the remaining space; each token
+                    stays intact (whitespace-nowrap) and the row wraps between
+                    tokens rather than letting glyphs collide. */}
+                <div className="flex flex-wrap content-start gap-x-1 gap-y-0.5 text-[10px] leading-tight sm:text-xs">
+                  {grahas.map((g) => (
+                    <span key={g} className="whitespace-nowrap font-medium">
+                      {GRAHA_TAMIL[g]}
+                    </span>
+                  ))}
+                </div>
               </div>
             )
           }),
