@@ -71,7 +71,7 @@ export function SearchView() {
     }
   }, [])
 
-  const chips = buildActiveChips(applied)
+  const chips = buildActiveChips(applied, t)
   const activeCount = countActiveFilters(applied)
 
   const runSearch = useCallback(async (next: SearchFilters, searchPage: number) => {

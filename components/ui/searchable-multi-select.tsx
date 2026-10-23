@@ -66,7 +66,10 @@ export function SearchableMultiSelect({
   const q = query.trim().toLowerCase()
   const filtered = React.useMemo(
     () =>
-      options.filter((o) => q === '' || optionLabel(o).toLowerCase().includes(q)),
+      // FR-5: match the localized label OR the English value (`o`).
+      options.filter(
+        (o) => q === '' || optionLabel(o).toLowerCase().includes(q) || o.toLowerCase().includes(q),
+      ),
     // optionLabel is stable per render; options/q drive the filter.
     [options, q, optionLabel],
   )

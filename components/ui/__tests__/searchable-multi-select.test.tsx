@@ -73,6 +73,32 @@ describe('SearchableMultiSelect', () => {
     expect(onChange).toHaveBeenLastCalledWith(['Canada'])
   })
 
+  it('FR-5: filters by the English value OR the localized (Tamil) label', async () => {
+    const user = userEvent.setup()
+    // India → இந்தியா label; search should match either script.
+    const label = (v: string) => (v === 'India' ? 'இந்தியா' : v)
+    render(
+      <SearchableMultiSelect
+        label="Country"
+        options={OPTIONS}
+        value={[]}
+        optionLabel={label}
+        onChange={vi.fn()}
+      />,
+    )
+    await user.click(screen.getByRole('combobox', { name: 'Country' }))
+    const listbox = screen.getByRole('listbox')
+
+    // Type the English value → India surfaces (shown with its Tamil label).
+    await user.type(screen.getByRole('searchbox'), 'india')
+    expect(within(listbox).getByText('இந்தியா')).toBeInTheDocument()
+
+    // Clear and type the Tamil label → India still surfaces.
+    await user.clear(screen.getByRole('searchbox'))
+    await user.type(screen.getByRole('searchbox'), 'இந்தியா')
+    expect(within(listbox).getByText('இந்தியா')).toBeInTheDocument()
+  })
+
   it('is disabled and shows the empty hint when open-to-all is on', () => {
     render(
       <SearchableMultiSelect

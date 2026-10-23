@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Icon } from '@/components/ui/icon'
 import { ShareButton } from '@/components/shared/share-button'
 import { cn, focalPosition } from '@/lib/utils'
+import { optionLabel } from '@/src/i18n/optionLabel'
 
 export interface ProfileCardProfile {
   profileId: string
@@ -65,6 +66,11 @@ export function ProfileCard({
   const { t } = useTranslation()
   const height = cmToFeet(profile.heightCm)
   const name = [profile.firstName, profile.lastName].filter(Boolean).join(' ')
+  // Only the DISPLAYED caste label localizes; religion drives the correct
+  // caste sub-table (undefined sub → English fallback, never blank).
+  const casteDisplay = profile.caste
+    ? optionLabel(t, 'caste', profile.caste, undefined, profile.religion)
+    : undefined
 
   const cardClassName =
     'group flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm outline-none transition-all hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring/60'
@@ -194,9 +200,9 @@ export function ProfileCard({
         </div>
 
         {/* Line 2: Height · Weight · Caste — wraps to next line when long. */}
-        {(height || profile.weightKg || profile.caste) && (
+        {(height || profile.weightKg || casteDisplay) && (
           <p className="text-sm text-muted-foreground text-pretty">
-            {[height, profile.weightKg ? `${profile.weightKg} kg` : null, profile.caste]
+            {[height, profile.weightKg ? `${profile.weightKg} kg` : null, casteDisplay]
               .filter(Boolean)
               .join(' · ')}
           </p>

@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest'
+import type { TFunction } from 'i18next'
 import type { SearchFilters } from '@matrimony/shared-core'
 
+import i18n from '@/src/i18n/config'
 import { buildActiveChips, removeFilter, validateFilters } from '@/src/lib/search-filters'
 
 describe('search-filters weight range', () => {
@@ -35,5 +37,35 @@ describe('search-filters weight range', () => {
 
   it('validateFilters accepts a valid weight range', () => {
     expect(validateFilters({ minWeightKg: 50, maxWeightKg: 80 } as SearchFilters)).toBeNull()
+  })
+})
+
+describe('buildActiveChips localization (optional t)', () => {
+  it('enum chips localize under ta while numeric chips stay numeric', async () => {
+    await i18n.changeLanguage('ta')
+    const t = i18n.t.bind(i18n) as unknown as TFunction
+    const chips = buildActiveChips(
+      { maritalStatus: 'NEVER_MARRIED', religion: 'Hindu', minWeightKg: 50, maxWeightKg: 80 } as SearchFilters,
+      t,
+    )
+    expect(chips.find((c) => c.key === 'maritalStatus')!.label).toBe('திருமணமாகாதவர்')
+    expect(chips.find((c) => c.key === 'religion')!.label).toBe('இந்து')
+    // Numeric chips are language-neutral.
+    expect(chips.find((c) => c.key === 'weight')!.label).toBe('50–80 kg')
+    await i18n.changeLanguage('en')
+  })
+
+  it('search caste chip is religion-scoped when f.religion is present', async () => {
+    await i18n.changeLanguage('ta')
+    const t = i18n.t.bind(i18n) as unknown as TFunction
+    const chips = buildActiveChips({ religion: 'Hindu', caste: 'Brahmin - Iyer' } as SearchFilters, t)
+    expect(chips.find((c) => c.key === 'caste')!.label).toBe('பிராமணர் - ஐயர்')
+    await i18n.changeLanguage('en')
+  })
+
+  it('one-arg call (no t) still produces English labels (identity fallback)', () => {
+    const chips = buildActiveChips({ maritalStatus: 'NEVER_MARRIED' } as SearchFilters)
+    // Identity fallback returns the value (no locale lookup without a real t).
+    expect(chips.find((c) => c.key === 'maritalStatus')!.label).toBe('NEVER_MARRIED')
   })
 })

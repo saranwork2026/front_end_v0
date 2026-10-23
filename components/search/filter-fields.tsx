@@ -13,6 +13,7 @@ import { INDIAN_STATES } from '@/src/data/indianStatesData'
 import { NAKSHATRA_OPTIONS, RAASI_OPTIONS } from '@/src/data/horoscopeData'
 import { PHYSICAL_STATUS_OPTIONS, RECENTLY_JOINED_OPTIONS } from '@/src/data/preferenceDefaults'
 import { OCCUPATIONS } from '@/src/data/occupationData'
+import { optionLabel } from '@/src/i18n/optionLabel'
 
 interface FilterFieldsProps {
   value: SearchFilters
@@ -98,7 +99,7 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
           <option value="">{t('page.search.any')}</option>
           {MARITAL_STATUSES.map((m) => (
             <option key={m.value} value={m.value}>
-              {t(`options.marital.${m.value}` as never, { defaultValue: m.label })}
+              {optionLabel(t, 'marital', m.value, m.label)}
             </option>
           ))}
         </Select>
@@ -110,7 +111,7 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
           <option value="">{t('page.search.any')}</option>
           {MOTHER_TONGUES.map((m) => (
             <option key={m.value} value={m.value}>
-              {m.label}
+              {optionLabel(t, 'motherTongue', m.value, m.label)}
             </option>
           ))}
         </Select>
@@ -125,7 +126,7 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
           <option value="">{t('page.search.any')}</option>
           {RELIGIONS.map((r) => (
             <option key={r.value} value={r.value}>
-              {r.label}
+              {optionLabel(t, 'religion', r.value, r.label)}
             </option>
           ))}
         </Select>
@@ -138,7 +139,7 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
           <option value="">{value.religion ? t('page.search.any') : t('page.search.selectReligionFirst')}</option>
           {casteList.map((c) => (
             <option key={c.value} value={c.value}>
-              {c.label}
+              {optionLabel(t, 'caste', c.value, c.label, value.religion)}
             </option>
           ))}
         </Select>
@@ -150,7 +151,7 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
           <option value="">{t('page.search.any')}</option>
           {MANGLIK.map((m) => (
             <option key={m.value} value={m.value}>
-              {m.label}
+              {optionLabel(t, 'manglik', m.value, m.label)}
             </option>
           ))}
         </Select>
@@ -165,7 +166,7 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
           <option value="">{t('page.search.any')}</option>
           {COUNTRIES.map((c) => (
             <option key={c.value} value={c.value}>
-              {c.label}
+              {optionLabel(t, 'country', c.value, c.label)}
             </option>
           ))}
         </Select>
@@ -177,7 +178,7 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
           <option value="">{t('page.search.any')}</option>
           {INDIAN_STATES.map((s) => (
             <option key={s.value} value={s.value}>
-              {s.label}
+              {optionLabel(t, 'state', s.value, s.label)}
             </option>
           ))}
         </Select>
@@ -198,7 +199,7 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
           <option value="">{t('page.search.any')}</option>
           {HIGHEST_EDUCATION_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>
-              {o.label}
+              {optionLabel(t, 'education', o.value, o.label)}
             </option>
           ))}
         </Select>
@@ -210,7 +211,7 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
           <option value="">{t('page.search.any')}</option>
           {OCCUPATIONS.map((o) => (
             <option key={o.value} value={o.value}>
-              {o.label}
+              {optionLabel(t, 'profession', o.value, o.label)}
             </option>
           ))}
         </Select>
@@ -291,7 +292,7 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
           <option value="">{t('page.search.any')}</option>
           {PHYSICAL_STATUS_OPTIONS.map((p) => (
             <option key={p.value} value={p.value}>
-              {t(`options.physicalStatus.${p.value}` as never, { defaultValue: p.label })}
+              {optionLabel(t, 'physicalStatus', p.value, p.label)}
             </option>
           ))}
         </Select>
@@ -306,7 +307,7 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
           <option value="">{t('page.search.any')}</option>
           {NAKSHATRA_OPTIONS.map((n) => (
             <option key={n.value} value={n.value}>
-              {n.label}
+              {optionLabel(t, 'nakshatra', n.value, n.label)}
             </option>
           ))}
         </Select>
@@ -318,7 +319,7 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
           <option value="">{t('page.search.any')}</option>
           {RAASI_OPTIONS.map((r) => (
             <option key={r.value} value={r.value}>
-              {r.label}
+              {optionLabel(t, 'raasi', r.value, r.label)}
             </option>
           ))}
         </Select>
@@ -330,7 +331,7 @@ export function FilterFields({ value, onChange }: FilterFieldsProps) {
           <option value="">{t('page.search.any')}</option>
           {DHOSAMS.map((d) => (
             <option key={d.value} value={d.value}>
-              {d.label}
+              {optionLabel(t, 'dhosam', d.value, d.label)}
             </option>
           ))}
         </Select>

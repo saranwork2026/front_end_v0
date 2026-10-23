@@ -6,6 +6,7 @@ import type { PhotoResponse } from '@matrimony/shared-core'
 
 import { Icon } from '@/components/ui/icon'
 import { photoApi } from '@/src/lib/api'
+import { optionLabel } from '@/src/i18n/optionLabel'
 import {
   bloodGroupOptions,
   bodyTypeOptions,
@@ -79,9 +80,9 @@ export function ReviewStep({ form, onChangeStep }: ReviewStepProps) {
       rows: [
         { label: t('page.review.rName'), value: [form.firstName, form.lastName].filter(Boolean).join(' ') },
         { label: t('page.review.rDob'), value: form.dob },
-        { label: t('page.review.rGender'), value: form.gender ? lbl(genderOptions, form.gender) : undefined },
-        { label: t('page.review.rMaritalStatus'), value: form.maritalStatus ? lbl(maritalOptions, form.maritalStatus) : undefined },
-        { label: t('page.review.rMotherTongue'), value: form.motherTongue },
+        { label: t('page.review.rGender'), value: form.gender ? optionLabel(t, 'gender', form.gender, lbl(genderOptions, form.gender)) : undefined },
+        { label: t('page.review.rMaritalStatus'), value: form.maritalStatus ? optionLabel(t, 'marital', form.maritalStatus, lbl(maritalOptions, form.maritalStatus)) : undefined },
+        { label: t('page.review.rMotherTongue'), value: form.motherTongue ? optionLabel(t, 'motherTongue', form.motherTongue) : undefined },
       ],
     },
     {
@@ -89,12 +90,12 @@ export function ReviewStep({ form, onChangeStep }: ReviewStepProps) {
       title: t('page.review.secReligious'),
       icon: 'sparkles',
       rows: [
-        { label: t('page.review.rReligion'), value: form.religion },
-        { label: t('page.review.rSect'), value: form.sect },
-        { label: t('page.review.rCaste'), value: form.caste },
+        { label: t('page.review.rReligion'), value: form.religion ? optionLabel(t, 'religion', form.religion) : undefined },
+        { label: t('page.review.rSect'), value: form.sect ? optionLabel(t, 'sect', form.sect) : undefined },
+        { label: t('page.review.rCaste'), value: form.caste ? optionLabel(t, 'caste', form.caste, undefined, form.religion) : undefined },
         { label: t('page.review.rSubCaste'), value: form.subCaste },
-        { label: t('page.review.rGothram'), value: form.gothram },
-        { label: t('page.review.rManglik'), value: form.manglik ? lbl(manglikOptions, form.manglik) : undefined },
+        { label: t('page.review.rGothram'), value: form.gothram ? optionLabel(t, 'gothram', form.gothram) : undefined },
+        { label: t('page.review.rManglik'), value: form.manglik ? optionLabel(t, 'manglik', form.manglik, lbl(manglikOptions, form.manglik)) : undefined },
         { label: t('page.review.rOpenReligion'), value: form.openToOtherReligion === 'true' ? t('page.review.yes') : form.openToOtherReligion === 'false' ? t('page.review.no') : undefined },
         { label: t('page.review.rOpenCaste'), value: form.openToOtherCaste === 'true' ? t('page.review.yes') : form.openToOtherCaste === 'false' ? t('page.review.no') : undefined },
       ],
@@ -104,10 +105,10 @@ export function ReviewStep({ form, onChangeStep }: ReviewStepProps) {
       title: t('page.review.secProfessional'),
       icon: 'settings',
       rows: [
-        { label: t('page.review.rEducation'), value: educationLabel(form.education) },
+        { label: t('page.review.rEducation'), value: form.education ? optionLabel(t, 'education', form.education, educationLabel(form.education)) : undefined },
         { label: t('page.review.rEducationDetail'), value: form.educationDetail },
         { label: t('page.review.rProfession'), value: form.profession },
-        { label: t('page.review.rEmployedIn'), value: form.employedIn ? lbl(employedInOptions, form.employedIn) : undefined },
+        { label: t('page.review.rEmployedIn'), value: form.employedIn ? optionLabel(t, 'employedIn', form.employedIn, lbl(employedInOptions, form.employedIn)) : undefined },
         {
           label: t('page.review.rAnnualIncome'),
           value: form.annualIncome ? `₹${Number(form.annualIncome).toLocaleString('en-IN')}` : undefined,
@@ -134,7 +135,7 @@ export function ReviewStep({ form, onChangeStep }: ReviewStepProps) {
             .join(', '),
         },
         { label: t('page.review.rCitizenship'), value: form.citizenshipCountry },
-        { label: t('page.review.rResidencyStatus'), value: form.residencyStatus ? lbl(residencyStatusOptions, form.residencyStatus) : undefined },
+        { label: t('page.review.rResidencyStatus'), value: form.residencyStatus ? optionLabel(t, 'residency', form.residencyStatus, lbl(residencyStatusOptions, form.residencyStatus)) : undefined },
       ],
     },
     {
@@ -150,10 +151,10 @@ export function ReviewStep({ form, onChangeStep }: ReviewStepProps) {
           label: t('page.review.rWeight'),
           value: form.weightKg ? `${form.weightKg} kg` : undefined,
         },
-        { label: t('page.review.rBloodGroup'), value: form.bloodGroup ? lbl(bloodGroupOptions, form.bloodGroup) : undefined },
-        { label: t('page.review.rComplexion'), value: form.complexion ? lbl(complexionOptions, form.complexion) : undefined },
-        { label: t('page.review.rPhysicalStatus'), value: form.physicalStatus ? lbl(physicalStatusOptions, form.physicalStatus) : undefined },
-        { label: t('page.review.rBodyType'), value: form.bodyType ? lbl(bodyTypeOptions, form.bodyType) : undefined },
+        { label: t('page.review.rBloodGroup'), value: form.bloodGroup ? optionLabel(t, 'bloodGroup', form.bloodGroup, lbl(bloodGroupOptions, form.bloodGroup)) : undefined },
+        { label: t('page.review.rComplexion'), value: form.complexion ? optionLabel(t, 'complexion', form.complexion, lbl(complexionOptions, form.complexion)) : undefined },
+        { label: t('page.review.rPhysicalStatus'), value: form.physicalStatus ? optionLabel(t, 'physicalStatus', form.physicalStatus, lbl(physicalStatusOptions, form.physicalStatus)) : undefined },
+        { label: t('page.review.rBodyType'), value: form.bodyType ? optionLabel(t, 'bodyType', form.bodyType, lbl(bodyTypeOptions, form.bodyType)) : undefined },
       ],
     },
     {
@@ -161,11 +162,11 @@ export function ReviewStep({ form, onChangeStep }: ReviewStepProps) {
       title: t('page.review.secFamily'),
       icon: 'users',
       rows: [
-        { label: t('page.review.rFamilyType'), value: form.familyType ? lbl(familyTypeOptions, form.familyType) : undefined },
-        { label: t('page.review.rFamilyStatus'), value: form.familyValues ? lbl(familyValuesOptions, form.familyValues) : undefined },
-        { label: t('page.review.rFatherStatus'), value: form.fatherStatus ? lbl(parentStatusOptions, form.fatherStatus) : undefined },
+        { label: t('page.review.rFamilyType'), value: form.familyType ? optionLabel(t, 'familyType', form.familyType, lbl(familyTypeOptions, form.familyType)) : undefined },
+        { label: t('page.review.rFamilyStatus'), value: form.familyValues ? optionLabel(t, 'familyValues', form.familyValues, lbl(familyValuesOptions, form.familyValues)) : undefined },
+        { label: t('page.review.rFatherStatus'), value: form.fatherStatus ? optionLabel(t, 'parentStatus', form.fatherStatus, lbl(parentStatusOptions, form.fatherStatus)) : undefined },
         { label: t('page.review.rFatherProfession'), value: form.fatherProfession },
-        { label: t('page.review.rMotherStatus'), value: form.motherStatus ? lbl(parentStatusOptions, form.motherStatus) : undefined },
+        { label: t('page.review.rMotherStatus'), value: form.motherStatus ? optionLabel(t, 'parentStatus', form.motherStatus, lbl(parentStatusOptions, form.motherStatus)) : undefined },
         { label: t('page.review.rMotherProfession'), value: form.motherProfession },
         { label: t('page.review.rBrothers'), value: form.brothers },
         { label: t('page.review.rBrothersMarried'), value: form.brothersMarried },
@@ -181,13 +182,13 @@ export function ReviewStep({ form, onChangeStep }: ReviewStepProps) {
       rows: [
         { label: t('page.review.rBirthTime'), value: form.birthTime },
         { label: t('page.review.rBirthCity'), value: form.birthCity },
-        { label: t('page.review.rNakshatra'), value: form.nakshatra },
+        { label: t('page.review.rNakshatra'), value: form.nakshatra ? optionLabel(t, 'nakshatra', form.nakshatra) : undefined },
         {
           label: t('page.review.rPadam'),
           value: form.padam ? t('page.review.rPadamValue', { n: form.padam }) : undefined,
         },
-        { label: t('page.review.rRaasi'), value: form.raasi },
-        { label: t('page.review.rDhosam'), value: form.dhosam ? lbl(dhosamOptions, form.dhosam) : undefined },
+        { label: t('page.review.rRaasi'), value: form.raasi ? optionLabel(t, 'raasi', form.raasi) : undefined },
+        { label: t('page.review.rDhosam'), value: form.dhosam ? optionLabel(t, 'dhosam', form.dhosam, lbl(dhosamOptions, form.dhosam)) : undefined },
         { label: t('page.review.rLagnam'), value: form.lagnam },
         {
           label: t('page.review.rHoroscopeAvailable'),

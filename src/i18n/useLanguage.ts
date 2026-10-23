@@ -20,6 +20,8 @@ export function useLanguage() {
 
   const setLanguage = useCallback(
     (next: SupportedLanguage) => {
+      // Non-sensitive diagnostic: records only the chosen language code.
+      console.info('[i18n] language changed', next)
       void i18n.changeLanguage(next)
       try {
         localStorage.setItem(LANGUAGE_STORAGE_KEY, next)

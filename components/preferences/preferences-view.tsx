@@ -39,6 +39,7 @@ import {
 import type { Gender } from '@matrimony/shared-core'
 import { profileApi } from '@/src/lib/api'
 import { flattenProfileResponse } from '@/src/lib/adapters'
+import { optionLabel, casteLabelFlat } from '@/src/i18n/optionLabel'
 
 // value = actual rupees (what the backend stores), label = LPA display.
 const incomeOptions = [
@@ -54,8 +55,10 @@ const incomeOptions = [
 const heightOptions = HEIGHT_CM_OPTIONS.map((h) => ({ cm: h.value, label: h.label }))
 const weightOptions = WEIGHT_KG_OPTIONS.map((w) => ({ kg: w.value, label: w.label }))
 
-// Value → label lookups for the multi-selects (options carry a display label
-// distinct from the backend value).
+// English-label fallback maps for the multi-selects (options carry a display
+// label distinct from the backend value). These are ONLY the English fallback
+// source now — the DISPLAY label is resolved per-language at render via
+// optionLabel/casteLabelFlat (see the resolvers built inside PreferencesView).
 const nakshatraLabelMap = new Map(nakshatraOptions.map((o) => [o.value, o.label]))
 const raasiLabelMap = new Map(raasiOptions.map((o) => [o.value, o.label]))
 const dhosamLabelMap = new Map(dhosamPrefOptions.map((o) => [o.value, o.label]))
@@ -63,11 +66,6 @@ const physicalStatusLabelMap = new Map<string, string>(
   physicalStatusPrefOptions.map((o) => [o.value, o.label]),
 )
 const professionLabelMap = new Map(professionOptions.map((o) => [o.value, o.label]))
-const nakshatraLabel = (v: string) => nakshatraLabelMap.get(v) ?? v
-const raasiLabel = (v: string) => raasiLabelMap.get(v) ?? v
-const dhosamLabel = (v: string) => dhosamLabelMap.get(v) ?? v
-const physicalStatusLabel = (v: string) => physicalStatusLabelMap.get(v) ?? v
-const professionLabel = (v: string) => professionLabelMap.get(v) ?? v
 
 /** A labelled "Open to all" switch used by the no-bar toggles. */
 function OpenToAll({
@@ -134,6 +132,25 @@ export function PreferencesView({
 }) {
   const router = useRouter()
   const { t } = useTranslation()
+
+  // Language-aware display resolvers (English fallback via the *Map sources /
+  // the helper's `?? value`). Only the DISPLAYED label switches — the option
+  // value stays the exact English string the backend stores.
+  const religionDisplay = (v: string) => optionLabel(t, 'religion', v)
+  const casteDisplay = (v: string) => casteLabelFlat(t, v)
+  const motherTongueDisplay = (v: string) => optionLabel(t, 'motherTongue', v)
+  const educationDisplay = (v: string) => optionLabel(t, 'education', v, educationLabel(v))
+  const maritalDisplay = (v: string) => optionLabel(t, 'marital', v, maritalStatusLabel(v))
+  const physicalStatusDisplay = (v: string) =>
+    optionLabel(t, 'physicalStatus', v, physicalStatusLabelMap.get(v) ?? v)
+  const nakshatraDisplay = (v: string) => optionLabel(t, 'nakshatra', v, nakshatraLabelMap.get(v) ?? v)
+  const raasiDisplay = (v: string) => optionLabel(t, 'raasi', v, raasiLabelMap.get(v) ?? v)
+  const dhosamDisplay = (v: string) => optionLabel(t, 'dhosamPref', v, dhosamLabelMap.get(v) ?? v)
+  const professionDisplay = (v: string) => optionLabel(t, 'profession', v, professionLabelMap.get(v) ?? v)
+  const countryDisplay = (v: string) => optionLabel(t, 'country', v)
+  const stateDisplay = (v: string) => optionLabel(t, 'state', v)
+  const cityDisplay = (v: string) => optionLabel(t, 'city', v)
+
   const [form, setForm] = React.useState<PartnerPreference>(emptyPreference)
   const [errors, setErrors] = React.useState<Record<string, string>>({})
   const [saving, setSaving] = React.useState(false)
@@ -251,7 +268,7 @@ export function PreferencesView({
             <SearchableMultiSelect
               labelledBy={labelId}
               options={maritalStatusValues}
-              optionLabel={maritalStatusLabel}
+              optionLabel={maritalDisplay}
               value={form.maritalStatuses}
               disabled={form.anyMaritalStatus}
               onChange={(maritalStatuses) => set({ maritalStatuses })}
@@ -275,6 +292,7 @@ export function PreferencesView({
             <SearchableMultiSelect
               labelledBy={labelId}
               options={motherTongues}
+              optionLabel={motherTongueDisplay}
               value={form.motherTongues}
               disabled={form.anyMotherTongue}
               searchPlaceholder={t('page.preferences.searchLanguage')}
@@ -386,7 +404,7 @@ export function PreferencesView({
             <SearchableMultiSelect
               labelledBy={labelId}
               options={physicalStatusPrefOptions.map((o) => o.value)}
-              optionLabel={physicalStatusLabel}
+              optionLabel={physicalStatusDisplay}
               value={form.physicalStatuses}
               disabled={form.anyPhysicalStatus}
               onChange={(physicalStatuses) => set({ physicalStatuses })}
@@ -410,7 +428,7 @@ export function PreferencesView({
             <SearchableMultiSelect
               labelledBy={labelId}
               options={educationOptions.map((o) => o.code)}
-              optionLabel={educationLabel}
+              optionLabel={educationDisplay}
               value={form.educationCodes}
               disabled={form.anyEducation}
               onChange={(educationCodes) => set({ educationCodes })}
@@ -432,7 +450,7 @@ export function PreferencesView({
             <SearchableMultiSelect
               labelledBy={labelId}
               options={professionOptions.map((o) => o.value)}
-              optionLabel={professionLabel}
+              optionLabel={professionDisplay}
               value={form.professions}
               disabled={form.anyProfession}
               onChange={(professions) => set({ professions })}
@@ -485,6 +503,7 @@ export function PreferencesView({
             <SearchableMultiSelect
               labelledBy={labelId}
               options={countryOptions}
+              optionLabel={countryDisplay}
               value={form.countries}
               disabled={form.anyCountry}
               searchPlaceholder={t('page.preferences.searchCountry')}
@@ -507,6 +526,7 @@ export function PreferencesView({
             <SearchableMultiSelect
               labelledBy={labelId}
               options={stateOptions}
+              optionLabel={stateDisplay}
               value={form.states}
               disabled={form.anyState}
               searchPlaceholder={t('page.preferences.searchState')}
@@ -529,6 +549,7 @@ export function PreferencesView({
             <SearchableMultiSelect
               labelledBy={labelId}
               options={cities}
+              optionLabel={cityDisplay}
               value={form.cities}
               disabled={form.anyLocation}
               emptyHint={t('page.preferences.openAllLocations')}
@@ -552,6 +573,7 @@ export function PreferencesView({
             <SearchableMultiSelect
               labelledBy={labelId}
               options={religions}
+              optionLabel={religionDisplay}
               value={form.religions}
               disabled={form.anyReligion}
               emptyHint={t('page.preferences.openAllReligions')}
@@ -574,6 +596,7 @@ export function PreferencesView({
             <SearchableMultiSelect
               labelledBy={labelId}
               options={allCastes}
+              optionLabel={casteDisplay}
               value={form.castes}
               disabled={form.anyCaste}
               emptyHint={t('page.preferences.openAllCastes')}
@@ -597,7 +620,7 @@ export function PreferencesView({
             <SearchableMultiSelect
               labelledBy={labelId}
               options={nakshatraOptions.map((o) => o.value)}
-              optionLabel={nakshatraLabel}
+              optionLabel={nakshatraDisplay}
               value={form.nakshatras}
               disabled={form.anyNakshatra}
               onChange={(nakshatras) => set({ nakshatras })}
@@ -619,7 +642,7 @@ export function PreferencesView({
             <SearchableMultiSelect
               labelledBy={labelId}
               options={raasiOptions.map((o) => o.value)}
-              optionLabel={raasiLabel}
+              optionLabel={raasiDisplay}
               value={form.raasis}
               disabled={form.anyRaasi}
               onChange={(raasis) => set({ raasis })}
@@ -637,7 +660,7 @@ export function PreferencesView({
             >
               {manglikPrefOptions.map((m) => (
                 <option key={m.value} value={m.value}>
-                  {m.label}
+                  {optionLabel(t, 'manglikPref', m.value, m.label)}
                 </option>
               ))}
             </Select>
@@ -658,7 +681,7 @@ export function PreferencesView({
             <SearchableMultiSelect
               labelledBy={labelId}
               options={dhosamPrefOptions.map((o) => o.value)}
-              optionLabel={dhosamLabel}
+              optionLabel={dhosamDisplay}
               value={form.dhosams}
               disabled={form.anyDhosam}
               onChange={(dhosams) => set({ dhosams })}

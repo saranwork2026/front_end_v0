@@ -57,7 +57,11 @@ export function SearchableSelect({
   const filtered = React.useMemo(() => {
     if (query.trim() === '') return options
     const q = query.toLowerCase()
-    return options.filter((o) => o.label.toLowerCase().includes(q))
+    // FR-5: match the localized label OR the English value, so a user can find
+    // an option by typing in either script.
+    return options.filter(
+      (o) => o.label.toLowerCase().includes(q) || o.value.toLowerCase().includes(q),
+    )
   }, [options, query])
 
   const closeDropdown = React.useCallback(() => {
