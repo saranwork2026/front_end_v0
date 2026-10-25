@@ -2,6 +2,12 @@
 dist/
 dist-ssr/
 
+# TypeScript incremental build cache (generated; must not be committed)
+*.tsbuildinfo
+
+# Local git worktrees (used for parallel feature work; never shipped)
+.worktrees/
+
 # Environment variables (local overrides only; committed defaults are .env.development etc.)
 .env*.local
 
