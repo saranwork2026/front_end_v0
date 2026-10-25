@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { StatusBadge } from '@/components/ui/status-badge'
 import { Toaster, type ToastItem } from '@/components/ui/toast'
 import { adBannerApi } from '@/src/lib/api'
+import { compressImageIfNeeded } from '@/src/lib/imageCompression'
 
 const TABS: { status: AdBannerStatus; label: string }[] = [
   { status: 'PENDING', label: 'Pending' },
@@ -19,7 +20,13 @@ const TABS: { status: AdBannerStatus; label: string }[] = [
 ]
 
 const ACCEPT = 'image/jpeg,image/png,image/webp'
-const MAX_SIZE = 5 * 1024 * 1024
+// Compression target: images larger than this are auto-downscaled/re-encoded in
+// the browser before upload (kept under the backend's 5 MB limit with margin)
+// rather than rejected outright.
+const COMPRESS_TARGET_BYTES = 4.5 * 1024 * 1024
+// Hard ceiling at selection time — extremely large files are rejected outright;
+// anything under is compressed down to the target before upload.
+const MAX_SELECT_BYTES = 25 * 1024 * 1024
 
 interface AdminAdBannersViewProps {
   /** Approver role unlocks delete (spec: delete is approver-only). */
@@ -68,14 +75,21 @@ export function AdminAdBannersView({ isApprover = false }: AdminAdBannersViewPro
       pushToast('Only JPEG, PNG, or WEBP images are allowed.', 'error')
       return
     }
-    if (file.size > MAX_SIZE) {
-      pushToast('Image is too large (max 5 MB).', 'error')
+    // Only reject absurdly large originals; everything else is compressed down
+    // to COMPRESS_TARGET_BYTES before upload instead of being rejected.
+    if (file.size > MAX_SELECT_BYTES) {
+      pushToast('Image is too large (max 25 MB).', 'error')
       return
     }
     setUploading(true)
     try {
+      // Auto-reduce an oversized banner in the browser before upload.
+      const image = await compressImageIfNeeded(file, COMPRESS_TARGET_BYTES)
+      if (image.size !== file.size) {
+        console.info(`[ad-banner] compressed banner ${file.size} -> ${image.size} bytes before upload`)
+      }
       await adBannerApi.uploadBanner({
-        image: file,
+        image,
         title: title.trim() || undefined,
         linkUrl: linkUrl.trim() || undefined,
         displayOrder: Number(displayOrder) || 0,
@@ -86,7 +100,8 @@ export function AdminAdBannersView({ isApprover = false }: AdminAdBannersViewPro
       setDisplayOrder('0')
       if (fileRef.current) fileRef.current.value = ''
       if (tab === 'PENDING') void load()
-    } catch {
+    } catch (err) {
+      console.error('[ad-banner] upload failed', err)
       pushToast('Upload failed. Please try again.', 'error')
     } finally {
       setUploading(false)
@@ -155,7 +170,7 @@ export function AdminAdBannersView({ isApprover = false }: AdminAdBannersViewPro
             <Icon name="upload" size={18} />
             Choose image &amp; upload
           </Button>
-          <p className="mt-2 text-xs text-muted-foreground">JPEG, PNG, or WEBP. Up to 5 MB. Wide (4:1) images look best.</p>
+          <p className="mt-2 text-xs text-muted-foreground">JPEG, PNG, or WEBP. Large images are auto-compressed. Wide (4:1) images look best.</p>
         </div>
       </section>
 

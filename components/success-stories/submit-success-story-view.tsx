@@ -9,9 +9,16 @@ import { Icon } from '@/components/ui/icon'
 import { Input } from '@/components/ui/input'
 import { Toaster, type ToastItem } from '@/components/ui/toast'
 import { successStoryApi } from '@/src/lib/api'
+import { compressImageIfNeeded } from '@/src/lib/imageCompression'
 
 const STORY_MAX = 4000
-const MAX_FILE_SIZE = 5 * 1024 * 1024
+// Compression target: images larger than this are auto-downscaled/re-encoded in
+// the browser before upload (kept under the backend's 5 MB limit with margin)
+// rather than rejected outright.
+const COMPRESS_TARGET_BYTES = 4.5 * 1024 * 1024
+// Hard ceiling at selection time — extremely large files are rejected outright;
+// anything under is compressed down to the target on submit.
+const MAX_SELECT_BYTES = 25 * 1024 * 1024
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
 /**
@@ -45,7 +52,9 @@ export function SubmitSuccessStoryView() {
       setFileError(t('page.successStories.fileTypeError'))
       return
     }
-    if (file.size > MAX_FILE_SIZE) {
+    // Only reject absurdly large originals; everything else is compressed down
+    // to COMPRESS_TARGET_BYTES on submit instead of being rejected.
+    if (file.size > MAX_SELECT_BYTES) {
       setFileError(t('page.successStories.fileSizeError'))
       return
     }
@@ -62,17 +71,29 @@ export function SubmitSuccessStoryView() {
     if (fileError) return
     setSubmitting(true)
     try {
+      // Auto-reduce an oversized couple photo in the browser before upload so
+      // members don't have to shrink files themselves.
+      let photoToUpload = photo ?? undefined
+      if (photo) {
+        photoToUpload = await compressImageIfNeeded(photo, COMPRESS_TARGET_BYTES)
+        if (photoToUpload.size !== photo.size) {
+          console.info(
+            `[success-story] compressed couple photo ${photo.size} -> ${photoToUpload.size} bytes before upload`,
+          )
+        }
+      }
       await successStoryApi.submit({
         brideName: brideName.trim(),
         groomName: groomName.trim(),
         story: story.trim(),
         marriageDate: marriageDate || undefined,
         partnerProfileId: partnerProfileId.trim() || undefined,
-        photo: photo ?? undefined,
+        photo: photoToUpload,
       })
       pushToast(t('page.successStories.submittedToast'), 'success')
       setTimeout(() => navigate('/'), 700)
     } catch (err) {
+      console.error('[success-story] submit failed', err)
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
         t('page.successStories.submitError')

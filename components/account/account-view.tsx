@@ -14,6 +14,13 @@ import { Select } from '@/components/ui/select'
 import { Toaster, type ToastItem } from '@/components/ui/toast'
 import { cn } from '@/lib/utils'
 import { accountApi, authStore, profileApi, verificationApi } from '@/src/lib/api'
+import { compressImageIfNeeded } from '@/src/lib/imageCompression'
+
+// Compression target for ID images: large phone photos of an ID are
+// auto-downscaled/re-encoded in the browser before upload (kept under the
+// backend's limit with margin). PDFs pass through untouched (the compressor is
+// a no-op for non-image files).
+const ID_COMPRESS_TARGET_BYTES = 4.5 * 1024 * 1024
 
 const DOCUMENT_TYPES: { value: DocumentType; label: string }[] = [
   { value: 'AADHAAR', label: 'Aadhaar' },
@@ -96,12 +103,22 @@ export function AccountView() {
     }
     setSubmittingDoc(true)
     try {
-      const res = await verificationApi.submit(docType, docFile)
+      // Auto-reduce an oversized ID image in the browser before upload. The
+      // compressor is a no-op for PDFs, so documents pass through untouched.
+      // Never log the document contents — only its (non-sensitive) size/type.
+      const toUpload = await compressImageIfNeeded(docFile, ID_COMPRESS_TARGET_BYTES)
+      if (toUpload.size !== docFile.size) {
+        console.info(
+          `[id-verification] compressed ${docFile.type} ${docFile.size} -> ${toUpload.size} bytes before upload`,
+        )
+      }
+      const res = await verificationApi.submit(docType, toUpload)
       setVerification(res.data ?? null)
       setDocFile(null)
       if (fileInputRef.current) fileInputRef.current.value = ''
       pushToast(t('page.account.verifyIdSubmittedToast'), 'success')
-    } catch {
+    } catch (err) {
+      console.error('[id-verification] submit failed', err)
       pushToast(t('page.account.verifyIdError'), 'error')
     } finally {
       setSubmittingDoc(false)
