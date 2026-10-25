@@ -29,10 +29,22 @@ export function BottomSheet({
 }: BottomSheetProps) {
   const panelRef = useRef<HTMLDivElement>(null)
 
+  // Keep the latest onClose in a ref so the open-effect below does NOT depend on
+  // it. Callers routinely pass an inline arrow (e.g. onClose={() => close()}),
+  // which is a new identity every render; if the effect depended on onClose it
+  // would re-run on every parent re-render (e.g. each keystroke in a free-text
+  // filter field inside the sheet) and call panelRef.focus(), stealing focus
+  // out of the field the user is typing in — forcing a re-tap per character on
+  // mobile. Scoping the effect to [open] alone fixes that. (Same fix as Dialog.)
+  const onCloseRef = useRef(onClose)
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
+
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') onCloseRef.current()
     }
     document.addEventListener('keydown', onKey)
     const prevOverflow = document.body.style.overflow
@@ -42,7 +54,7 @@ export function BottomSheet({
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = prevOverflow
     }
-  }, [open, onClose])
+  }, [open])
 
   if (!open || typeof document === 'undefined') return null
 
